@@ -9,12 +9,15 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../hooks/useAuth";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/types";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const { login, isLoading, error } = useAuth();
 
   const handleLogin = async () => {
@@ -27,7 +30,7 @@ export default function LoginScreen() {
   };
 
   const goToRegister = () => {
-    navigation.navigate("Register"); // asegurate de tener RegisterScreen
+    navigation.navigate("Register");
   };
 
   const continueWithoutLogin = () => {

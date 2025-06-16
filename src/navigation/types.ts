@@ -1,3 +1,5 @@
 export type RootStackParamList = {
-  Tabs: { screen: string };
+  Tabs: undefined;
+  Login: undefined;
+  Register: undefined;
 };
