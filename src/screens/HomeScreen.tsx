@@ -8,7 +8,12 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  Button,
 } from "react-native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/types";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const { width } = Dimensions.get("window");
 
@@ -30,20 +35,19 @@ const data = [
   },
 ];
 
-
 export default function HomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
       <Image source={{ uri: item.image }} style={styles.image} />
       <Text style={styles.name}>{item.name}</Text>
-    <TouchableOpacity
-  style={styles.button}
-  onPress={() => navigation.navigate("Adopción", { petName: item.name })}
->
-  <Text style={styles.buttonText}>Solicitar adopción</Text>
-</TouchableOpacity>
-</View>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Adoption", { petName: item.name })}
+      >
+        <Text style={styles.buttonText}>Solicitar adopción</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -54,6 +58,10 @@ export default function HomeScreen() {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+      />
+      <Button
+        title="publicar"
+        onPress={() => navigation.navigate("PetRegister")}
       />
     </View>
   );
