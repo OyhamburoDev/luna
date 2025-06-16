@@ -12,6 +12,7 @@ export default function AppNavigator() {
     <Stack.Navigator
       initialRouteName="Login" // 👈 Esto es lo clave
       screenOptions={{
+        headerShown: false,
         headerStyle: {
           backgroundColor: "black",
         },
