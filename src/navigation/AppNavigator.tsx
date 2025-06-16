@@ -4,6 +4,7 @@ import TabsNavigator from "./TabsNavigator";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import RedirectScreen from "../screens/RedirectScreen";
+import AdoptionFormScreen from "../screens/AdoptionFormScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Redirect" component={RedirectScreen} />
+       <Stack.Screen name="Adopción" component={AdoptionFormScreen} />
       <Stack.Screen
         name="Tabs"
         component={TabsNavigator}
