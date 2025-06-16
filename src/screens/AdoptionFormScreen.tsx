@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,33 +8,26 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { useAdoptionRequest } from "../hooks/useAdoptionRequest";
+import { useAuthStore } from "../store/auth";
 
 export default function AdoptionFormScreen({ route }: any) {
-  const { petName } = route.params;
+  const { form, setFormField, submitRequest } = useAdoptionRequest();
+  const { user } = useAuthStore();
+  const { petName, petId } = route.params;
 
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
-    hasPets: "",
-    petTypes: "",
-    housingType: "",
-    housingDetails: "",
-    hasYard: "",
-    hasChildren: "",
-    availableTime: "",
-    reason: "",
-    comments: "",
-  });
+  const handleSubmit = async () => {
+    try {
+      setFormField("userId", user.uid);
+      setFormField("petName", petName);
+      if (petId) setFormField("petId", petId);
 
-  const handleChange = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = () => {
-    Alert.alert("Solicitud enviada", `Gracias por postularte para adoptar a ${petName}`);
-    console.log("Formulario enviado:", form);
+      await submitRequest();
+      Alert.alert("Solicitud enviada", `Gracias por postularte para adoptar a ${petName}`);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Hubo un problema al enviar la solicitud");
+    }
   };
 
   return (
@@ -44,97 +37,97 @@ export default function AdoptionFormScreen({ route }: any) {
       <TextInput
         style={styles.input}
         placeholder="Nombre completo"
-        value={form.fullName}
-        onChangeText={(text) => handleChange("fullName", text)}
+        value={form.fullName || ""}
+        onChangeText={(text) => setFormField("fullName", text)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Correo electrónico"
-        value={form.email}
-        onChangeText={(text) => handleChange("email", text)}
+        value={form.email || ""}
+        onChangeText={(text) => setFormField("email", text)}
         keyboardType="email-address"
       />
 
       <TextInput
         style={styles.input}
         placeholder="Teléfono"
-        value={form.phone}
-        onChangeText={(text) => handleChange("phone", text)}
+        value={form.phone || ""}
+        onChangeText={(text) => setFormField("phone", text)}
         keyboardType="phone-pad"
       />
 
       <TextInput
         style={styles.input}
         placeholder="Dirección"
-        value={form.address}
-        onChangeText={(text) => handleChange("address", text)}
+        value={form.address || ""}
+        onChangeText={(text) => setFormField("address", text)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="¿Tenés otras mascotas? (sí / no)"
-        value={form.hasPets}
-        onChangeText={(text) => handleChange("hasPets", text)}
+        value={form.hasPets || ""}
+        onChangeText={(text) => setFormField("hasPets", text)}
       />
 
-      {form.hasPets.toLowerCase() === "sí" && (
+      {form.hasPets?.toLowerCase() === "sí" && (
         <TextInput
           style={styles.input}
           placeholder="¿Qué tipo de mascotas?"
-          value={form.petTypes}
-          onChangeText={(text) => handleChange("petTypes", text)}
+          value={form.petTypes || ""}
+          onChangeText={(text) => setFormField("petTypes", text)}
         />
       )}
 
       <TextInput
         style={styles.input}
         placeholder="¿Vivís en casa o departamento?"
-        value={form.housingType}
-        onChangeText={(text) => handleChange("housingType", text)}
+        value={form.housingType || ""}
+        onChangeText={(text) => setFormField("housingType", text)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Detalles (ej: casa con patio / dpto con balcón)"
-        value={form.housingDetails}
-        onChangeText={(text) => handleChange("housingDetails", text)}
+        value={form.housingDetails || ""}
+        onChangeText={(text) => setFormField("housingDetails", text)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="¿Tenés patio o espacio exterior?"
-        value={form.hasYard}
-        onChangeText={(text) => handleChange("hasYard", text)}
+        value={form.hasYard || ""}
+        onChangeText={(text) => setFormField("hasYard", text)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="¿Tenés hijos o niños en casa?"
-        value={form.hasChildren}
-        onChangeText={(text) => handleChange("hasChildren", text)}
+        value={form.hasChildren || ""}
+        onChangeText={(text) => setFormField("hasChildren", text)}
       />
 
       <TextInput
         style={styles.input}
         placeholder="¿Cuánto tiempo libre tenés por día para la mascota?"
-        value={form.availableTime}
-        onChangeText={(text) => handleChange("availableTime", text)}
+        value={form.availableTime || ""}
+        onChangeText={(text) => setFormField("availableTime", text)}
       />
 
       <TextInput
         style={[styles.input, { height: 100 }]}
         placeholder="¿Por qué querés adoptar?"
-        value={form.reason}
-        onChangeText={(text) => handleChange("reason", text)}
+        value={form.reason || ""}
+        onChangeText={(text) => setFormField("reason", text)}
         multiline
       />
 
       <TextInput
         style={[styles.input, { height: 80 }]}
         placeholder="Comentarios adicionales"
-        value={form.comments}
-        onChangeText={(text) => handleChange("comments", text)}
+        value={form.comments || ""}
+        onChangeText={(text) => setFormField("comments", text)}
         multiline
       />
 
