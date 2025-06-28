@@ -1,9 +1,12 @@
 import React from "react";
 import { Text, View, StyleSheet, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/types";
 
 export default function RedirectScreen() {
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const goToLogin = () => {
     navigation.navigate("Login");
