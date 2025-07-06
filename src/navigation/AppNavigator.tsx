@@ -6,13 +6,15 @@ import RegisterScreen from "../screens/RegisterScreen";
 import RedirectScreen from "../screens/RedirectScreen";
 import AdoptionFormScreen from "../screens/AdoptionFormScreen";
 import PetRegisterFormScreen from "../screens/PetRegisterFormScreen";
+import { useAuthStore } from "../store/auth";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return (
     <Stack.Navigator
-      initialRouteName="Login" // 👈 Esto es lo clave
+      initialRouteName={isAuthenticated ? "Tabs" : "Login"}
       screenOptions={{
         headerShown: false,
         headerStyle: {
