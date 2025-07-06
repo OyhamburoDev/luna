@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../hooks/useAuth";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
+import { useAuthStore } from "../store/auth";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -19,6 +20,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const navigation = useNavigation<NavigationProp>();
   const { login, isLoading, error } = useAuth();
+  const  {user,isAuthenticated} = useAuthStore()
+
+  console.log("MY USUARIO--->",user)
+  console.log("MY isAuthenticated--->",isAuthenticated)
 
   const handleLogin = async () => {
     const success = await login(email, password);

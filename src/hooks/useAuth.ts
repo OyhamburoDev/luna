@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import { authApi } from "../api/auth.api";
 import { useAuthStore } from "../store/auth";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/types";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
 export function useAuth() {
   const loginStore = useAuthStore((state) => state.login);
   const logoutStore = useAuthStore((state) => state.logout);
+  const navigation = useNavigation<NavigationProp>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +37,11 @@ export function useAuth() {
     setError(null);
 
     try {
-      const { user, token } = await authApi.register({ email, password });
-      loginStore(user, token);
+      console.log("Registering user with email:", email);
+      const user = await authApi.register( email, password );
+      const idToken = await user.getIdToken();
+      loginStore(user, idToken);
+      navigation.navigate("Tabs"); 
       return true;
     } catch (err: any) {
       console.error("Register error:", err);
