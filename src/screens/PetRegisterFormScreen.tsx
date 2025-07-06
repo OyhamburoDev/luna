@@ -1,233 +1,331 @@
-import React, { useState } from "react";
+"use client";
+
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   Alert,
+  StatusBar,
 } from "react-native";
+import { useState } from "react";
+import { usePetRegister } from "../hooks/usePetRegister";
+import { useAuthStore } from "../store/auth";
+import { useNavigation } from "@react-navigation/native";
+// @ts-ignore
+import Ionicons from "react-native-vector-icons/Ionicons";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/types";
+import StepPhotos from "../components/PetRegisterSteps/StepPhotos";
+import StepBasicInfo from "../components/PetRegisterSteps/StepBasicInfo";
+import StepHealthInfo from "../components/PetRegisterSteps/StepHealthInfo";
+import StepConductInfo from "../components/PetRegisterSteps/StepConductInfo";
+import StepAdditionalInfo from "../components/PetRegisterSteps/StepAdditionalInfo";
 
 export default function PetRegisterFormScreen() {
-  const [form, setForm] = useState({
-    petName: "",
-    species: "",
-    breed: "",
-    age: "",
-    size: "",
-    gender: "",
-    healthInfo: "",
-    isVaccinated: "",
-    isNeutered: "",
-    hasMedicalConditions: "",
-    medicalDetails: "",
-    goodWithKids: "",
-    goodWithOtherPets: "",
-    friendlyWithStrangers: "",
-    needsWalks: "",
-    energyLevel: "",
-    description: "",
-    ownerContact: "",
-    photoUrl: "",
-  });
+  const { form, setFormField, submitPet } = usePetRegister();
+  const { user } = useAuthStore();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const handleChange = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const [stepIndex, setStepIndex] = useState(0);
+  const [validationErrors, setValidationErrors] = useState({
+    petName: false,
+    species: false,
+    age: false,
+    gender: false,
+    size: false,
+  });
+  const [descriptionError, setDescriptionError] = useState(false);
+
+  const steps = [
+    <StepBasicInfo
+      key="basic"
+      validationErrors={validationErrors}
+      setValidationErrors={setValidationErrors}
+    />,
+    <StepHealthInfo key="health" />,
+    <StepConductInfo key="conduct" />,
+    <StepAdditionalInfo
+      key="additional"
+      descriptionError={descriptionError}
+      setDescriptionError={setDescriptionError}
+    />,
+    <StepPhotos key="photos" />,
+  ];
+
+  const validateBasicInfo = () => {
+    const errors = {
+      petName: !form.petName || form.petName.trim() === "",
+      species: !form.species || form.species.trim() === "",
+      age:
+        !form.age || (typeof form.age === "string" && form.age.trim() === ""),
+      gender: !form.gender || form.gender.trim() === "",
+      size: !form.size || form.size.trim() === "",
+    };
+
+    setValidationErrors(errors);
+    return !Object.values(errors).some((error) => error === true);
   };
 
-  const handleSubmit = () => {
+  const validateAdditionalInfo = () => {
+    const vacio = !form.description || form.description.trim() === "";
+
+    setDescriptionError(vacio);
+
+    if (vacio) {
+      Alert.alert("Debes hacer una descripción general para continuar");
+      return false;
+    }
+    return true;
+  };
+
+  const isStepValid = () => {
+    if (stepIndex === 0) {
+      return validateBasicInfo();
+    }
+    if (stepIndex === 3) {
+      return validateAdditionalInfo();
+    }
+    return true; // otros pasos no tienen validaciones por ahora
+  };
+
+  const handleNext = () => {
+    if (!isStepValid()) {
+      Alert.alert("Debes completar los campos faltantes!");
+      return;
+    }
+    if (stepIndex < steps.length - 1) setStepIndex(stepIndex + 1);
+  };
+
+  const handleBack = () => {
+    if (stepIndex > 0) setStepIndex(stepIndex - 1);
+  };
+
+  const handleGoBack = () => {
     Alert.alert(
-      "Mascota registrada",
-      `¡${form.petName} fue publicada para adopción!`
+      "¿Salir del registro?",
+      "Podés continuar más tarde con el registro de la mascota.",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Salir",
+          style: "destructive",
+          onPress: () => navigation.goBack(),
+        },
+      ]
     );
-    console.log("Mascota registrada:", form);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      //  Validar primero si hay al menos una foto
+      if (!form.photoUrls || form.photoUrls.length === 0) {
+        Alert.alert("Debes agregar al menos 1 foto.");
+        return;
+      }
+
+      //  Luego validar si hay usuario logueado
+      if (!user) {
+        Alert.alert("Error", "No se encontró el usuario.");
+        navigation.navigate("Login");
+        return;
+      }
+
+      //  Asignar userId antes de enviar
+      setFormField("userId", user.uid);
+
+      await submitPet(user.uid);
+      Alert.alert("¡Éxito!", "Mascota registrada correctamente");
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert(
+        "Error",
+        error.message || "Hubo un problema al registrar la mascota"
+      );
+    }
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 32 }}
-    >
-      <Text style={styles.title}>Registrar mascota para adopción</Text>
+    <View style={styles.container}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#FFFFFF"
+        translucent={false}
+      />
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header con padding suficiente */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={stepIndex === 0 ? handleGoBack : handleBack}
+            style={styles.backButton}
+          >
+            <Ionicons name="arrow-back" size={22} color="#374151" />
+          </TouchableOpacity>
 
-      {/* DATOS BÁSICOS */}
-      <Text style={styles.section}>Datos básicos</Text>
+          <View style={styles.headerContent}>
+            <Text style={styles.title}>Registro de Mascota</Text>
+            <Text style={styles.subtitle}>
+              Paso {stepIndex + 1} de {steps.length}
+            </Text>
+          </View>
+        </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre"
-        value={form.petName}
-        onChangeText={(text) => handleChange("petName", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Especie (ej: perro, gato)"
-        value={form.species}
-        onChangeText={(text) => handleChange("species", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Raza"
-        value={form.breed}
-        onChangeText={(text) => handleChange("breed", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Edad"
-        value={form.age}
-        onChangeText={(text) => handleChange("age", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Tamaño (chico, mediano, grande)"
-        value={form.size}
-        onChangeText={(text) => handleChange("size", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Sexo"
-        value={form.gender}
-        onChangeText={(text) => handleChange("gender", text)}
-      />
+        {/* Indicador de progreso */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressTrack}>
+            {Array.from({ length: steps.length }).map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.progressDot,
+                  index <= stepIndex
+                    ? styles.progressDotActive
+                    : styles.progressDotInactive,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
 
-      {/* SALUD */}
-      <Text style={styles.section}>Información de salud</Text>
+        {/* Contenido del paso */}
+        <View style={styles.stepContent}>{steps[stepIndex]}</View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Información médica (vacunas, castración...)"
-        value={form.healthInfo}
-        onChangeText={(text) => handleChange("healthInfo", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="¿Está vacunado? (sí/no)"
-        value={form.isVaccinated}
-        onChangeText={(text) => handleChange("isVaccinated", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="¿Está castrado/a? (sí/no)"
-        value={form.isNeutered}
-        onChangeText={(text) => handleChange("isNeutered", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="¿Tiene condiciones médicas? (sí/no)"
-        value={form.hasMedicalConditions}
-        onChangeText={(text) => handleChange("hasMedicalConditions", text)}
-      />
-      {form.hasMedicalConditions.toLowerCase() === "sí" && (
-        <TextInput
-          style={styles.input}
-          placeholder="Detalles médicos"
-          value={form.medicalDetails}
-          onChangeText={(text) => handleChange("medicalDetails", text)}
-        />
-      )}
-
-      {/* CONVIVENCIA */}
-      <Text style={styles.section}>Convivencia y comportamiento</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="¿Se lleva bien con niños? (sí/no)"
-        value={form.goodWithKids}
-        onChangeText={(text) => handleChange("goodWithKids", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="¿Se lleva bien con otras mascotas? (sí/no)"
-        value={form.goodWithOtherPets}
-        onChangeText={(text) => handleChange("goodWithOtherPets", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="¿Es sociable con extraños? (sí/no)"
-        value={form.friendlyWithStrangers}
-        onChangeText={(text) => handleChange("friendlyWithStrangers", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="¿Necesita paseos diarios? (sí/no)"
-        value={form.needsWalks}
-        onChangeText={(text) => handleChange("needsWalks", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Nivel de energía (bajo / medio / alto)"
-        value={form.energyLevel}
-        onChangeText={(text) => handleChange("energyLevel", text)}
-      />
-
-      {/* EXTRA */}
-      <Text style={styles.section}>Información adicional</Text>
-
-      <TextInput
-        style={[styles.input, { height: 100 }]}
-        placeholder="Descripción general"
-        value={form.description}
-        onChangeText={(text) => handleChange("description", text)}
-        multiline
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Teléfono o correo de contacto"
-        value={form.ownerContact}
-        onChangeText={(text) => handleChange("ownerContact", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="URL de foto (opcional)"
-        value={form.photoUrl}
-        onChangeText={(text) => handleChange("photoUrl", text)}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Publicar mascota</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Navegación */}
+        <View style={styles.navigation}>
+          {stepIndex < steps.length - 1 ? (
+            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+              <Text style={styles.nextButtonText}>Continuar</Text>
+              <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+            >
+              <Ionicons name="heart" size={18} color="#FFFFFF" />
+              <Text style={styles.submitButtonText}>Publicar Mascota</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#FFFFFF",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 60, // Aumentado significativamente para evitar el status bar
+    paddingBottom: 16,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  headerContent: {
+    flex: 1,
+    paddingLeft: 20,
   },
   title: {
     fontSize: 20,
     fontWeight: "700",
-    marginBottom: 16,
-    textAlign: "center",
+    color: "#1F2937",
+    marginBottom: 2,
   },
-  section: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 20,
-    marginBottom: 10,
-    color: "#333",
+  subtitle: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "500",
+    paddingLeft: 60,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#DDD",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    backgroundColor: "#FFF",
-  },
-  button: {
-    backgroundColor: "#2196F3",
-    padding: 14,
-    borderRadius: 8,
+  progressContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
     alignItems: "center",
-    marginTop: 20,
   },
-  buttonText: {
-    color: "#FFF",
-    fontWeight: "bold",
-    fontSize: 16,
+  progressTrack: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  progressDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  progressDotActive: {
+    backgroundColor: "#6366F1",
+  },
+  progressDotInactive: {
+    backgroundColor: "#E5E7EB",
+  },
+  stepContent: {
+    paddingHorizontal: 20,
+    marginBottom: 32,
+  },
+  navigation: {
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+  },
+  nextButton: {
+    backgroundColor: "#6366F1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+    shadowColor: "#6366F1",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  nextButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  submitButton: {
+    backgroundColor: "#10B981",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });

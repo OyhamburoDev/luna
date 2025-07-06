@@ -33,12 +33,18 @@ export default function AdoptionFormScreen({ route }: any) {
   };
 
   const handleSubmit = () => {
-    Alert.alert("Solicitud enviada", `Gracias por postularte para adoptar a ${petName}`);
+    Alert.alert(
+      "Solicitud enviada",
+      `Gracias por postularte para adoptar a ${petName}`
+    );
     console.log("Formulario enviado:", form);
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 32 }}
+    >
       <Text style={styles.title}>Formulario de adopción para {petName}</Text>
 
       <TextInput
