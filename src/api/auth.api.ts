@@ -1,3 +1,5 @@
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../config/firebase";
 import api from "./axiosInstance";
 
 type LoginPayload = {
@@ -23,14 +25,9 @@ export const authApi = {
     return response.data;
   },
 
-  register: async ({ email, password, nombre }: RegisterPayload) => {
-    const response = await api.post("/register", {
-      email,
-      password,
-      nombre,
-    });
-
-    return response.data;
+  register: async (email: string, password: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
   },
 
   logout: async () => {
@@ -39,3 +36,6 @@ export const authApi = {
     return response.data;
   },
 };
+
+
+

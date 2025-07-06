@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type User = {
@@ -8,13 +8,14 @@ type User = {
 };
 
 type AuthStore = {
-  user: User | null;
+  user: User | null | any;
   token: string | null;
   isAuthenticated: boolean;
-  login: (userData: User, token: string) => void;
+  login: (userData: User | any, token: string) => void;
   logout: () => void;
   setToken: (token: string) => void;
 };
+
 
 export const useAuthStore = create<AuthStore>()(
   persist(
@@ -23,14 +24,14 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       isAuthenticated: false,
 
-      login: (userData, token) =>
+      login: (userData: User, token: string) =>
         set({
           user: userData,
           token,
           isAuthenticated: true,
         }),
 
-      setToken: (token) => set({ token }),
+      setToken: (token: string) => set({ token }),
 
       logout: () =>
         set({
@@ -41,12 +42,8 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: "auth-storage",
-      storage: AsyncStorage,
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );
+
