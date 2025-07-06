@@ -21,13 +21,22 @@ export type PetRegisterFormData = {
   energyLevel: string;
   description: string;
   ownerContact: string;
-  photoUrl: string;
+  photoUrls: {
+    uri: string;
+    offsetY: number; // valor entre 0 (arriba) y 1 (abajo)
+  }[];
+};
+
+// Nuevo tipo para la API (lo agregamos aquí para centralizar los tipos relacionados)
+export type PetRegisterApiData = Omit<PetRegisterFormData, "age" | "userId"> & {
+  age: number; // Para la API convertimos a number
+  userId: string; // Lo mantenemos pero lo hacemos obligatorio
 };
 
 // Tipar las funciones o todo lo que va a tener petRegister
 interface PetRegisterState {
   form: Partial<PetRegisterFormData>;
-  setFormField: (key: keyof PetRegisterFormData, value: string) => void;
+  setFormField: (key: keyof PetRegisterFormData, value: any) => void;
   resetForm: () => void;
 }
 
