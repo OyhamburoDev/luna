@@ -1,0 +1,102 @@
+import { PetPost } from "../types/petPots";
+
+export const mockPets: PetPost[] = [
+  {
+    id: "1",
+    petName: "Salchi",
+    description:
+      "Un perro salchicha muy simpático que ama correr por el parque, esconderse debajo de la manta y recibir muchos mimos. Siempre mueve la cola cuando escucha la palabra 'galletita'.",
+    createdAt: "2025-07-01T10:00:00Z",
+    videoUri: require("../../assets/media/reels/perro-salchicha.mp4"),
+  },
+  {
+    id: "2",
+    petName: "Frenchie",
+    description: "Un bulldog francés juguetón.",
+    createdAt: "2025-07-01T11:00:00Z",
+    videoUri: require("../../assets/media/reels/bulldog-frances.mp4"),
+  },
+  {
+    id: "3",
+    petName: "Bruno",
+    description:
+      "Un pitbull protector y cariñoso. Siempre está atento a los sonidos de la casa y no duda en acompañarte en todo momento. Le encanta jugar con la pelota y descansar al sol después de un largo paseo.",
+    createdAt: "2025-07-01T12:00:00Z",
+    videoUri: require("../../assets/media/reels/pitbull.mp4"),
+  },
+  {
+    id: "4",
+    petName: "Michi",
+    description: "El más tierno de todos.",
+    createdAt: "2025-07-01T13:00:00Z",
+    imageUris: [
+      require("../../assets/media/images/gatito-tierno-1.png"),
+      require("../../assets/media/images/gatito-tierno-2.png"),
+      require("../../assets/media/images/gatito-tierno-3.png"),
+      require("../../assets/media/images/gatito-tierno-4.png"),
+    ],
+  },
+  {
+    id: "5",
+    petName: "MiniMiau",
+    description:
+      "Gatito bebé recién adoptado. Tiene una personalidad muy curiosa y juguetona. Le encanta explorar cada rincón de la casa, perseguir sombras y dormir la siesta en lugares extraños como cajones y mochilas.",
+    createdAt: "2025-07-01T14:00:00Z",
+    videoUri: require("../../assets/media/reels/gatito-bebe.mp4"),
+  },
+  {
+    id: "6",
+    petName: "Naranjito",
+    description: "Un pequeño explorador naranja.",
+    createdAt: "2025-07-01T15:00:00Z",
+    videoUri: require("../../assets/media/reels/gatito-naranja.mp4"),
+  },
+  {
+    id: "7",
+    petName: "Caminador",
+    description:
+      "Aprendiendo a caminar con ternura y torpeza. Este pequeño gato está dando sus primeros pasos y cada movimiento es una aventura. Ideal para alguien que busca ver crecer a su mascota desde el inicio.",
+    createdAt: "2025-07-01T16:00:00Z",
+    videoUri: require("../../assets/media/reels/gatito-caminando.mp4"),
+  },
+  {
+    id: "8",
+    petName: "Coby",
+    description: "Cobayo curioso.",
+    createdAt: "2025-07-01T17:00:00Z",
+    videoUri: require("../../assets/media/reels/cobayo.mp4"),
+  },
+  {
+    id: "9",
+    petName: "Pico",
+    description:
+      "Un ganso muy elegante. Camina con estilo por el jardín, cuida el lugar como si fuera suyo y siempre saluda con su peculiar sonido a quienes se acercan. Es la mascota ideal para una casa con espacio al aire libre.",
+    createdAt: "2025-07-01T18:00:00Z",
+    videoUri: require("../../assets/media/reels/ganzo.mp4"),
+  },
+  {
+    id: "10",
+    petName: "Copito",
+    description:
+      "Día de spa para el caniche. Disfruta de baños, masajes y ser peinado. Es una mascota coqueta y alegre, ideal para quien quiera mimar a un compañero peludo todos los días.",
+    createdAt: "2025-07-01T19:00:00Z",
+    imageUris: [
+      require("../../assets/media/images/perro-caniche-1.png"),
+      require("../../assets/media/images/perro-caniche-2.png"),
+      require("../../assets/media/images/perro-caniche-3.png"),
+      require("../../assets/media/images/perro-caniche-4.png"),
+    ],
+  },
+  {
+    id: "11",
+    petName: "Luna",
+    description:
+      "Una publicación con video y fotos. Luna es muy especial: le gusta observar el atardecer, tomar agua de fuentes y acompañarte mientras leés un libro. Tiene una mirada que transmite paz y una energía muy tranquila.",
+    createdAt: "2025-07-01T20:00:00Z",
+    videoUri: require("../../assets/media/reels/perro-salchicha.mp4"),
+    imageUris: [
+      require("../../assets/media/images/gatito-tierno-1.png"),
+      require("../../assets/media/images/gatito-tierno-2.png"),
+    ],
+  },
+];
