@@ -1,8 +1,14 @@
 "use client";
-
-import { useRef } from "react";
-import { useState } from "react";
-import { View, FlatList, Dimensions, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRef, useState } from "react";
+import {
+  View,
+  FlatList,
+  Dimensions,
+  StyleSheet,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from "react-native";
 import type { PetPost } from "../types/petPots";
 import PetCardFullScreen from "../components/PetCardFullScreen";
 import PetDetailInfo from "../components/PetDetailInfo";
@@ -12,18 +18,44 @@ const { width, height } = Dimensions.get("window");
 type Props = {
   pet: PetPost;
   isActive: boolean;
+  onDetailToggle?: (isVisible: boolean) => void;
+  setShowTabs: (value: boolean) => void;
 };
 
-export default function PetSwipeScreen({ pet, isActive }: Props) {
-  const [visibleItemIndex, setVisibleItemIndex] = useState(0);
+export default function PetSwipeScreen({
+  pet,
+  isActive,
+  onDetailToggle,
+  setShowTabs,
+}: Props) {
   const flatListRef = useRef<FlatList>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Control manual del scroll
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const scrollPosition = e.nativeEvent.contentOffset.x;
+    const threshold = width * 0.0; // Ajusta este valor (0.3 = 30% del ancho)
+
+    // Lógica para tabs
+    if (scrollPosition > threshold) {
+      setShowTabs(false);
+      onDetailToggle?.(true);
+      setCurrentIndex(1);
+    } else {
+      setShowTabs(true);
+      onDetailToggle?.(false);
+      setCurrentIndex(0);
+    }
+  };
 
   const goToDetail = () => {
     flatListRef.current?.scrollToIndex({ index: 1 });
+    setShowTabs(false);
   };
 
   const goBackToCard = () => {
     flatListRef.current?.scrollToIndex({ index: 0 });
+    setShowTabs(true);
   };
 
   const renderItem = ({ item }: { item: { key: string } }) => {
@@ -33,32 +65,20 @@ export default function PetSwipeScreen({ pet, isActive }: Props) {
           <PetCardFullScreen
             pet={pet}
             onPressArrow={goToDetail}
-            // ✅ Combinar ambas condiciones: debe estar activo Y en la primera página
-            isActive={isActive && visibleItemIndex === 0}
+            isActive={isActive && currentIndex === 0}
           />
         </View>
       );
-    } else {
-      return (
-        <View style={styles.page}>
-          <PetDetailInfo pet={pet} onBack={goBackToCard} />
-        </View>
-      );
     }
+    return (
+      <View style={styles.page}>
+        <PetDetailInfo pet={pet} onBack={goBackToCard} />
+      </View>
+    );
   };
 
-  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
-      setVisibleItemIndex(viewableItems[0].index);
-    }
-  }).current;
-
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 80,
-  }).current;
-
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <FlatList
         ref={flatListRef}
         data={[{ key: "card" }, { key: "detail" }]}
@@ -67,20 +87,27 @@ export default function PetSwipeScreen({ pet, isActive }: Props) {
         pagingEnabled
         renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
+        onScroll={handleScroll} // Usamos onScroll en lugar de onViewableItemsChanged
+        scrollEventThrottle={16} // Para mayor precisión (16ms)
+        getItemLayout={(_, index) => ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
+// Tus estilos permanecen igual
 const styles = StyleSheet.create({
   container: {
-    width,
-    height,
+    flex: 1,
+    backgroundColor: "blue",
   },
   page: {
     width,
     height,
+    overflow: "hidden",
   },
 });

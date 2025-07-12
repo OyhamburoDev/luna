@@ -250,12 +250,9 @@ const styles = StyleSheet.create({
   container: {
     height: height,
     width: width,
-    backgroundColor: "black",
-    justifyContent: "center",
   },
   media: {
     width: width,
-    backgroundColor: "black",
   },
   videoMedia: {
     width: width,
@@ -269,8 +266,8 @@ const styles = StyleSheet.create({
   },
   discoverMoreContainer: {
     position: "absolute",
-    top: 60,
-    right: 20,
+    top: 35,
+    right: 25,
     zIndex: 10,
   },
   mediaContainer: {
@@ -314,7 +311,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: "absolute",
-    bottom: 40,
+    bottom: 65,
     left: 0,
     right: 0,
     paddingHorizontal: 20,

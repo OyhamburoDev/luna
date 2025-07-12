@@ -1,4 +1,5 @@
 import React from "react";
+import { StatusBar } from "react-native";
 import {
   View,
   Text,
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
   container: {
     width,
     height,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
   },
   media: {
     width,

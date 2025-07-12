@@ -1,19 +1,25 @@
 "use client";
-
 import { useNavigation } from "@react-navigation/native";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { View, FlatList, StatusBar } from "react-native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
 import { mockPets } from "../data/mockPetsData";
 import PetSwipeScreen from "./PetSwipeScreen";
 import type { ViewToken } from "react-native";
+import type { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function HomeScreen() {
+type Props = {
+  setShowTabs: (value: boolean) => void;
+};
+
+export default function HomeScreen({ setShowTabs }: Props) {
   const navigation = useNavigation<NavigationProp>();
   const [visibleIndex, setVisibleIndex] = useState(0);
+  const [isDetailVisible, setIsDetailVisible] = useState(false);
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: Array<ViewToken> }) => {
@@ -28,7 +34,7 @@ export default function HomeScreen() {
   }).current;
 
   return (
-    <View style={{ flex: 1, backgroundColor: "black" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
@@ -38,7 +44,12 @@ export default function HomeScreen() {
         data={mockPets}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
-          <PetSwipeScreen pet={item} isActive={index === visibleIndex} />
+          <PetSwipeScreen
+            pet={item}
+            isActive={index === visibleIndex}
+            onDetailToggle={setIsDetailVisible}
+            setShowTabs={setShowTabs}
+          />
         )}
         pagingEnabled
         showsVerticalScrollIndicator={false}
@@ -46,7 +57,8 @@ export default function HomeScreen() {
         decelerationRate="fast"
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
+        scrollEnabled={!isDetailVisible}
       />
-    </View>
+    </SafeAreaView>
   );
 }
