@@ -3,11 +3,19 @@ import { Text, View, StyleSheet, TouchableOpacity, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
+import { useCallback } from "react";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ route }: any) {
   const navigation = useNavigation<NavigationProp>();
+  useFocusEffect(
+    useCallback(() => {
+      route.params?.onTabChange?.("Perfil");
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
       <Text>ProfileScreen</Text>

@@ -1,7 +1,7 @@
 import { PetPost } from "../types/petPots";
 
 export type RootStackParamList = {
-  Tabs: undefined;
+  Home: undefined;
   Login: undefined;
   Register: undefined;
   PetRegister: undefined;
