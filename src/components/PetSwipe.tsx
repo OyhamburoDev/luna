@@ -27,6 +27,10 @@ export default function PetSwipe() {
     }
   }, [activeTab]);
 
+  const goToDetailScreen = () => {
+    flatListRef.current?.scrollToIndex({ index: 1, animated: true });
+  };
+
   const screens = [
     {
       key: "tabs",
@@ -36,6 +40,7 @@ export default function PetSwipe() {
           pets={mockPets}
           onSelectPet={setSelectedPetIndex}
           isScreenActive={currentIndex === 0 && activeTab === "Inicio"}
+          onPressDiscoverMore={goToDetailScreen}
         />
       ),
     },

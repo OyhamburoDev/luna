@@ -20,6 +20,7 @@ type Props = {
   route: any;
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
   isScreenActive?: boolean;
+  onPressDiscoverMore: () => void;
 };
 
 const { width, height } = Dimensions.get("window");
@@ -30,6 +31,7 @@ export default function FeedTabScreen({
   route,
   onTabChange,
   isScreenActive,
+  onPressDiscoverMore,
 }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   useFocusEffect(
@@ -60,7 +62,7 @@ export default function FeedTabScreen({
 
   return (
     <>
-      <CustomHeaderTop />
+      <CustomHeaderTop currentPage={0} onPressArrow={onPressDiscoverMore} />
       <FlatList
         style={{ flex: 1 }}
         data={pets}

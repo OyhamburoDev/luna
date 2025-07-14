@@ -12,6 +12,7 @@ type Props = {
   pets: PetPost[];
   onSelectPet: (index: number) => void;
   isScreenActive?: boolean;
+  onPressDiscoverMore: () => void;
 };
 
 export default function FeedTabs({
@@ -19,6 +20,7 @@ export default function FeedTabs({
   pets,
   onSelectPet,
   isScreenActive,
+  onPressDiscoverMore,
 }: Props) {
   return (
     <Tab.Navigator
@@ -57,6 +59,7 @@ export default function FeedTabs({
             onSelectPet={onSelectPet}
             route={route}
             isScreenActive={isScreenActive}
+            onPressDiscoverMore={onPressDiscoverMore}
           />
         )}
         initialParams={{ onTabChange }}
