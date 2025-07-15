@@ -27,6 +27,10 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
   const [showMore, setShowMore] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null); // Crear una referencia para el ScrollView
 
+  const [showFullText, setShowFullText] = useState(false);
+  const [textWasTruncated, setTextWasTruncated] = useState(false);
+  const [textLineCount, setTextLineCount] = useState(0);
+
   useEffect(() => {
     console.log("🔎 PetDetailScreen: Mascota recibida:", pet);
   }, [pet]);
@@ -90,6 +94,22 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
     }
     setShowMore((prev) => !prev);
   };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setTextLineCount(0);
+      setTextWasTruncated(false);
+      setShowFullText(false);
+    }, 50); // Le da margen para montarse bien el texto
+
+    return () => clearTimeout(timeout);
+  }, [pet.id]);
+
+  useEffect(() => {
+    if (textLineCount > 2) {
+      setTextWasTruncated(true);
+    }
+  }, [textLineCount]);
 
   return (
     <View style={styles.container}>
@@ -249,7 +269,30 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
           {/* Description con mejor formato */}
           <View style={styles.descriptionSection}>
             <Text style={styles.descriptionTitle}>Sobre {pet.petName}</Text>
-            <Text style={styles.description}>{pet.description}</Text>
+            <Text
+              key={pet.id + "-" + textLineCount}
+              style={styles.description}
+              numberOfLines={showFullText ? undefined : 2}
+              onTextLayout={(e) => {
+                const lines = e.nativeEvent.lines.length;
+                console.log("Líneas reales de descripción:", lines); // 👈 Acá va el log
+                setTextLineCount(lines);
+                setTextWasTruncated(lines > 2);
+              }}
+            >
+              {pet.description}
+            </Text>
+
+            {textWasTruncated && (
+              <TouchableOpacity
+                onPress={() => setShowFullText((prev) => !prev)}
+                style={{ marginTop: 4 }}
+              >
+                <Text style={styles.readMoreButton}>
+                  {showFullText ? "Ver menos" : "Leer más"}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
           {/* Action Button mejorado */}
           <View style={styles.actionSection}>
@@ -470,13 +513,14 @@ const styles = StyleSheet.create({
   },
   toggleMoreButton: {
     alignSelf: "center",
-    marginTop: 8,
+    marginTop: 5,
     marginBottom: 15,
   },
   toggleMoreButtonText: {
-    color: "#667eea",
+    color: "#999",
     fontWeight: "bold",
     fontSize: 14,
+    textDecorationLine: "underline",
   },
   toggleMoreButtonTextUnderlined: {
     textDecorationLine: "underline",
@@ -563,6 +607,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 20,
     color: "#636e72",
+  },
+
+  readMoreButton: {
+    fontSize: 14,
+    color: "#888",
+    marginTop: 4,
+    textDecorationLine: "underline",
   },
   actionSection: {
     paddingBottom: 20,
