@@ -77,7 +77,6 @@ export default function FeedTabScreen({
         decelerationRate="fast"
         showsVerticalScrollIndicator={false}
         pagingEnabled
-        contentContainerStyle={{ paddingBottom: 90 }}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
       />

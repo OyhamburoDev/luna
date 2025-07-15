@@ -31,6 +31,10 @@ export default function PetSwipe() {
     flatListRef.current?.scrollToIndex({ index: 1, animated: true });
   };
 
+  const goToPage0 = () => {
+    flatListRef.current?.scrollToIndex({ index: 0, animated: true });
+  };
+
   const screens = [
     {
       key: "tabs",
@@ -48,7 +52,10 @@ export default function PetSwipe() {
       key: "detail",
       render: () =>
         activeTab === "Inicio" && selectedPetIndex !== null ? (
-          <PetDetailScreen pet={mockPets[selectedPetIndex]} />
+          <PetDetailScreen
+            pet={mockPets[selectedPetIndex]}
+            onGoBackToFeed={goToPage0}
+          />
         ) : (
           <View style={{ flex: 1 }} />
         ),
