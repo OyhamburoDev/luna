@@ -13,6 +13,7 @@ import { useCallback, useState, useRef, useEffect } from "react";
 import { PetPost } from "../types/petPots";
 import PetCardVertical from "../components/PetCardVertical";
 import CustomHeaderTop from "../components/CustomHeaderTop";
+import { ActivityIndicator } from "react-native";
 
 type Props = {
   pets: PetPost[];
@@ -34,11 +35,26 @@ export default function FeedTabScreen({
   onPressDiscoverMore,
 }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [displayedPets, setDisplayedPets] = useState<PetPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
   useFocusEffect(
     useCallback(() => {
       route.params?.onTabChange?.("Inicio");
     }, [])
   );
+
+  useEffect(() => {
+    //Simulamos una carga inicial
+    setTimeout(() => {
+      const initialPets = pets.slice(0, pageSize);
+      setDisplayedPets(initialPets);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     if (isScreenActive) {
@@ -60,12 +76,34 @@ export default function FeedTabScreen({
     itemVisiblePercentThreshold: 80,
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#667eea" />
+      </View>
+    );
+  }
+
+  const loadMorePets = () => {
+    if (isLoadingMore) return;
+
+    setIsLoadingMore(true);
+
+    setTimeout(() => {
+      const nextPage = page + 1;
+      const newPets = pets.slice(0, nextPage * pageSize);
+      setDisplayedPets(newPets);
+      setPage(nextPage);
+      setIsLoadingMore(false);
+    }, 1000);
+  };
+
   return (
     <>
       <CustomHeaderTop currentPage={0} onPressArrow={onPressDiscoverMore} />
       <FlatList
         style={{ flex: 1 }}
-        data={pets}
+        data={displayedPets}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <PetCardVertical
@@ -79,7 +117,32 @@ export default function FeedTabScreen({
         pagingEnabled
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
+        onEndReached={loadMorePets}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isLoadingMore ? (
+            <View
+              style={{
+                paddingVertical: 20,
+                backgroundColor: "black",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ActivityIndicator size="small" color="#f093fb" />
+            </View>
+          ) : null
+        }
       />
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black",
+  },
+});

@@ -2,6 +2,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import PetMediaCarousel from "../components/PetMediaCarousel";
 
 export default function FavoritesTabScreen({ route }: any) {
   useFocusEffect(

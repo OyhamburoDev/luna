@@ -15,6 +15,7 @@ import type { PetPost } from "../types/petPots";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState, useRef } from "react"; // Importar useRef
 import Ionicons from "react-native-vector-icons/Ionicons";
+import PetMediaCarousel from "../components/PetMediaCarousel";
 
 const { width, height } = Dimensions.get("window");
 
@@ -125,7 +126,7 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
       </View>
 
       {/* Media Container */}
-      <View style={styles.mediaContainer}>
+      {/* <View style={styles.mediaContainer}>
         {pet.videoUri ? (
           <Video
             source={pet.videoUri}
@@ -140,8 +141,9 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
           <Image source={pet.imageUris[0]} style={styles.media} />
         ) : null}
         {/* Overlay en la parte inferior del media */}
-        <View style={styles.mediaOverlay} />
-      </View>
+      <PetMediaCarousel pet={pet} />
+      <View style={styles.mediaOverlay} />
+      {/* </View> */}
 
       {/* Content Container - Ahora posicionado absolutamente */}
       <Animated.View
@@ -294,6 +296,7 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
               </TouchableOpacity>
             )}
           </View>
+
           {/* Action Button mejorado */}
           <View style={styles.actionSection}>
             <TouchableOpacity style={styles.adoptButton}>
@@ -326,12 +329,11 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: 62,
     zIndex: 100,
-    backgroundColor: "rgba(0,0,0,0.3)",
   },
   backButton: {
-    marginTop: 10,
+    marginTop: 0,
     marginLeft: 20,
   },
   backButtonCircle: {
