@@ -43,7 +43,7 @@ export default function HomeScreen() {
       <Text style={styles.name}>{item.name}</Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("Adoption", { petName: item.name })}
+        onPress={() => navigation.navigate("Adoption", { name: item.name })}
       >
         <Text style={styles.buttonText}>Solicitar adopción</Text>
       </TouchableOpacity>

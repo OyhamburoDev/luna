@@ -1,27 +1,20 @@
-import { petRegisterApi } from "../api/petRegisterApi"; // tu servicio que hace el POST
-import {
-  PetRegisterApiData,
-  usePetRegisterStore,
-} from "../store/petRegisterStore";
+import { petRegisterApi } from "../api/petRegisterApi";
+import { usePetRegisterStore } from "../store/petRegisterStore";
 
 export const usePetRegister = () => {
   const { form, setFormField, resetForm } = usePetRegisterStore();
 
-  const submitPet = async (userId: string) => {
-    const { form, setFormField, resetForm } = usePetRegisterStore.getState();
-
-    setFormField("userId", userId);
-
-    const apiData: PetRegisterApiData = {
+  const submitPet = async () => {
+    const { form, resetForm } = usePetRegisterStore.getState();
+    console.log("Enviando datos del formulario:", form);
+    const apiData = {
       ...form,
-      userId,
-      age: form.age ? parseInt(form.age) : 0,
-    } as PetRegisterApiData;
+      age: form.age ? form.age : 0,
+    };
 
-    // ✅ Lista de campos obligatorios
+    // ✅ Lista de campos obligatorios que coinciden con schema Zod
     const requiredFields = [
-      "petName",
-      "userId",
+      "name",
       "species",
       "age",
       "gender",
@@ -42,6 +35,7 @@ export const usePetRegister = () => {
         throw new Error(`Falta el campo obligatorio: ${field}`);
       }
     }
+    console.log("----------------------:", form);
 
     const result = await petRegisterApi.submit(apiData);
     resetForm();

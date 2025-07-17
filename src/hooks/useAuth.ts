@@ -14,7 +14,6 @@ export function useAuth() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
@@ -32,16 +31,17 @@ export function useAuth() {
     }
   };
 
+
   const register = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
       console.log("Registering user with email:", email);
-      const user = await authApi.register( email, password );
+      const user = await authApi.register(email, password);
       const idToken = await user.getIdToken();
       loginStore(user, idToken);
-      navigation.navigate("Tabs"); 
+      navigation.navigate("Tabs");
       return true;
     } catch (err: any) {
       console.error("Register error:", err);

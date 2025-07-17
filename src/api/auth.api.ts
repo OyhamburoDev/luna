@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 import api from "./axiosInstance";
 
@@ -14,15 +14,20 @@ type RegisterPayload = {
 };
 
 export const authApi = {
-  login: async ({ email, password }: LoginPayload) => {
-    const response = await api.post("/login", {
-      email,
-      password,
-    });
+ login: async ({ email, password }: LoginPayload) => {
+    // Login en Firebase Auth cliente
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-    // Esperamos que el backend devuelva algo como:
-    // { token: string, user: { uid: string, email: string } }
-    return response.data;
+    // Obtener idToken de Firebase Auth
+    const idToken = await user.getIdToken();
+
+    // Opcional: enviar idToken a tu backend para validar sesión
+    // const res = await api.post("/auth/login", { idToken });
+    // return res.data;
+
+    // Devuelve user y token para Zustand
+    return { user: { uid: user.uid, email: user.email }, token: idToken };
   },
 
   register: async (email: string, password: string) => {

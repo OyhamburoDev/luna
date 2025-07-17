@@ -14,7 +14,7 @@ import { useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 type ValidationErrors = {
-  petName: boolean;
+  name: boolean;
   species: boolean;
   age: boolean;
   gender: boolean;
@@ -166,19 +166,19 @@ export default function StepBasicInfo({
             <TextInput
               style={[
                 styles.input,
-                validationErrors.petName && {
+                validationErrors.name && {
                   borderColor: "red",
                   borderWidth: 1,
                 },
               ]}
               placeholder="Ej: Max, Luna, Toby..."
-              value={form.petName}
+              value={form.name}
               onChangeText={(text) => {
-                setFormField("petName", text);
-                if (validationErrors.petName && text.trim() !== "") {
+                setFormField("name", text);
+                if (validationErrors.name && text.trim() !== "") {
                   setValidationErrors((prev) => ({
                     ...prev,
-                    petName: false,
+                    name: false,
                   }));
                 }
               }}

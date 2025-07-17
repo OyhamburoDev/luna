@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 export default function AdoptionFormScreen({ route }: any) {
-  const { petName } = route.params;
+  const { name } = route.params;
 
   const [form, setForm] = useState({
     fullName: "",
@@ -35,7 +35,7 @@ export default function AdoptionFormScreen({ route }: any) {
   const handleSubmit = () => {
     Alert.alert(
       "Solicitud enviada",
-      `Gracias por postularte para adoptar a ${petName}`
+      `Gracias por postularte para adoptar a ${name}`
     );
     console.log("Formulario enviado:", form);
   };
@@ -45,7 +45,7 @@ export default function AdoptionFormScreen({ route }: any) {
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 32 }}
     >
-      <Text style={styles.title}>Formulario de adopción para {petName}</Text>
+      <Text style={styles.title}>Formulario de adopción para {name}</Text>
 
       <TextInput
         style={styles.input}
