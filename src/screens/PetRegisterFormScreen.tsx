@@ -24,7 +24,7 @@ import StepConductInfo from "../components/PetRegisterSteps/StepConductInfo";
 import StepAdditionalInfo from "../components/PetRegisterSteps/StepAdditionalInfo";
 
 export default function PetRegisterFormScreen() {
-  const { form, setFormField, submitPet } = usePetRegister();
+  const { form, submitPet } = usePetRegister();
   const { user } = useAuthStore();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -136,10 +136,7 @@ export default function PetRegisterFormScreen() {
         return;
       }
 
-      //  Asignar userId antes de enviar
-      setFormField("userId", user.uid);
-
-      await submitPet(user.uid);
+      await submitPet();
       Alert.alert("¡Éxito!", "Mascota registrada correctamente");
     } catch (error: any) {
       console.error(error);

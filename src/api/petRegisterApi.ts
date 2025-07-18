@@ -3,10 +3,14 @@ import { PetRegisterApiData } from "../store/petRegisterStore";
 
 export const petRegisterApi = {
   submit: async (data: Partial<PetRegisterApiData>) => {
-    const response = await api.post("/pets", {
-      ...data,
-      createdAt: new Date().toISOString(),
-    });
-    return response.data;
-  },
+    try {
+      const response = await api.post("/pets",
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.debug("ERROR JERE PET REGISTER API")
+      console.error(error)  
+    }
+    },
 };
