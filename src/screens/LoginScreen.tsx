@@ -20,15 +20,15 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const navigation = useNavigation<NavigationProp>();
   const { login, isLoading, error } = useAuth();
-  const  {user,isAuthenticated} = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore();
 
-  console.log("MY USUARIO--->",user)
-  console.log("MY isAuthenticated--->",isAuthenticated)
+  console.log("MY USUARIO--->", user);
+  console.log("MY isAuthenticated--->", isAuthenticated);
 
   const handleLogin = async () => {
     const success = await login(email, password);
     if (success) {
-      navigation.navigate("Tabs");
+      navigation.navigate("Home");
     } else {
       Alert.alert("Error", "No se pudo iniciar sesión");
     }
@@ -39,7 +39,7 @@ export default function LoginScreen() {
   };
 
   const continueWithoutLogin = () => {
-    navigation.navigate("Tabs");
+    navigation.navigate("Home");
   };
 
   return (

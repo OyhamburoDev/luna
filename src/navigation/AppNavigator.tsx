@@ -6,6 +6,8 @@ import RegisterScreen from "../screens/RegisterScreen";
 import RedirectScreen from "../screens/RedirectScreen";
 import AdoptionFormScreen from "../screens/AdoptionFormScreen";
 import PetRegisterFormScreen from "../screens/PetRegisterFormScreen";
+import PetSwipeScreen from "../screens/PetSwipeScreen";
+
 import { useAuthStore } from "../store/auth";
 
 const Stack = createNativeStackNavigator();
@@ -31,6 +33,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Redirect" component={RedirectScreen} />
       <Stack.Screen name="Adoption" component={AdoptionFormScreen} />
       <Stack.Screen name="PetRegister" component={PetRegisterFormScreen} />
+
       <Stack.Screen
         name="Tabs"
         component={TabsNavigator}
