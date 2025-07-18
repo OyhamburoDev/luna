@@ -28,9 +28,14 @@ export type PetRegisterFormData = {
 };
 
 // Nuevo tipo para la API (lo agregamos aquí para centralizar los tipos relacionados)
-export type PetRegisterApiData = Omit<PetRegisterFormData, "age" | "userId"> & {
-  age: number; // Para la API convertimos a number
-  userId: string; // Lo mantenemos pero lo hacemos obligatorio
+export type PetRegisterApiData = Omit<PetRegisterFormData, "age" | "petName"> & {
+  age: number;
+  isVaccinated: boolean;
+  isNeutrered: boolean;
+  goodWithKids:boolean;
+  goodWithOtherPets:boolean;
+  hasMedicalConditions:boolean;
+  name:string
 };
 
 // Tipar las funciones o todo lo que va a tener petRegister

@@ -2,7 +2,7 @@ import axios from "axios";
 import { useAuthStore } from "../store/auth";
 
 const axiosInstance = axios.create({
-  baseURL: "https://tuservidor.com/api", // Cambiá esto por tu API real
+  baseURL: "https://22tsqp5r-3000.brs.devtunnels.ms/api", 
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,6 +13,7 @@ axiosInstance.interceptors.request.use(
   async (config) => {
     const token = useAuthStore.getState().token;
     if (token) {
+      console.debug("token existe")
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
