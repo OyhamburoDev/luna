@@ -17,44 +17,20 @@ type Props = {
 
 export default function PetMediaCarousel({ pet }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
+  const [videoThumbnail, setVideoThumbnail] = useState(null);
   const [isLoadingMedia, setIsLoadingMedia] = useState(true);
 
   if (!pet) return null;
 
+  console.log("esteee", pet.thumbnailUri);
+
   useEffect(() => {
-    setVideoThumbnail(null);
     setIsLoadingMedia(true);
-    const generateThumbnail = async () => {
-      if (pet.videoUri) {
-        try {
-          let uri = "";
-
-          if (typeof pet.videoUri === "string") {
-            uri = pet.videoUri; // ya es un link real
-          } else {
-            const asset = Asset.fromModule(pet.videoUri);
-            await asset.downloadAsync();
-            uri = asset.localUri || asset.uri;
-          }
-
-          const { uri: thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
-            uri,
-            {
-              time: 2000,
-            }
-          );
-
-          setVideoThumbnail(thumbnailUri);
-          console.log("✅ Thumbnail generado:", thumbnailUri);
-        } catch (e) {
-          console.warn("Error generando thumbnail:", e);
-        }
-      }
-      setIsLoadingMedia(false);
-    };
-
-    generateThumbnail();
+    setVideoThumbnail(null); // Limpiamos el estado anterior
+    if (pet.thumbnailUri) {
+      setVideoThumbnail(pet.thumbnailUri);
+    }
+    setIsLoadingMedia(false);
   }, [pet.id]);
 
   useEffect(() => {

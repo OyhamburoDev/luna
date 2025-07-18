@@ -48,13 +48,12 @@ export default function FeedTabScreen({
   );
 
   useEffect(() => {
-    //Simulamos una carga inicial
-    setTimeout(() => {
+    if (pets.length > 0) {
       const initialPets = pets.slice(0, pageSize);
       setDisplayedPets(initialPets);
       setIsLoading(false);
-    }, 1000);
-  }, []);
+    }
+  }, [pets]);
 
   useEffect(() => {
     if (isScreenActive) {
@@ -76,7 +75,7 @@ export default function FeedTabScreen({
     itemVisiblePercentThreshold: 80,
   };
 
-  if (isLoading) {
+  if (isLoading || displayedPets.length === 0) {
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#667eea" />
@@ -119,6 +118,10 @@ export default function FeedTabScreen({
         viewabilityConfig={viewabilityConfig}
         onEndReached={loadMorePets}
         onEndReachedThreshold={0.5}
+        initialNumToRender={3} // Cuántas cards se renderizan inicialmente
+        maxToRenderPerBatch={5} // Cuántas se renderizan por batch
+        windowSize={5} // Cuántas quedan "vivas" (alrededor del viewport)
+        removeClippedSubviews={true} // Limpia las cards fuera de la pantalla (solo Android)
         ListFooterComponent={
           isLoadingMore ? (
             <View

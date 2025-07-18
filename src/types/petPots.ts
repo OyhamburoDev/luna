@@ -5,6 +5,7 @@ export type PetPost = {
   createdAt: string;
   videoUri?: any;
   imageUris?: any[];
+  thumbnailUri?: any;
   age: number;
   gender: string;
   size: string;

@@ -7,7 +7,7 @@ import RedirectScreen from "../screens/RedirectScreen";
 import AdoptionFormScreen from "../screens/AdoptionFormScreen";
 import PetRegisterFormScreen from "../screens/PetRegisterFormScreen";
 import PetSwipeScreen from "../screens/PetSwipeScreen";
-import HomeScreen2 from "../screens/HomeScreen2";
+import HomeScreen from "../screens/HomeScreen";
 
 import { useAuthStore } from "../store/auth";
 
@@ -46,7 +46,7 @@ export default function RootNavigator() {
       <Stack.Screen name="PetRegister" component={PetRegisterFormScreen} />
       <Stack.Screen
         name="Home"
-        component={HomeScreen2}
+        component={HomeScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
