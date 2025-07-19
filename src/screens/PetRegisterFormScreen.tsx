@@ -29,7 +29,7 @@ export default function PetRegisterFormScreen() {
   const { user } = useAuthStore();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+  const [loading, setLoading] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState({
     petName: false,
@@ -124,6 +124,7 @@ export default function PetRegisterFormScreen() {
   };
 
 
+
   const handleSubmit = async () => {
     try {
       if (!user) {
@@ -137,7 +138,14 @@ export default function PetRegisterFormScreen() {
         return;
       }
 
-      // ✅ Subir imágenes
+      if (!form.videoUri) {
+        Alert.alert("Debes agregar un video.");
+        return;
+      }
+
+      setLoading(true); // 🔹 MOSTRAR LOADER
+
+      // 🔹 Subir imágenes
       const uploadedImages = await Promise.all(
         form.photoUrls.map(async (item) => {
           const url = await uploadPetImage(item.uri);
@@ -145,32 +153,66 @@ export default function PetRegisterFormScreen() {
         })
       );
 
-      // ✅ Subir video (si hay)
-      let videoUrl: string | null = null;
-      if (form.videoUri) {
-        videoUrl = await uploadPetVideo(form.videoUri);
-      }
+      // 🔹 Subir video
+      const uploadedVideoUrl = await uploadPetVideo(form.videoUri);
 
-      // ✅ Guardar URLs subidas en el store antes de enviar
-      setFormField("photoUrls", uploadedImages);
-      if (videoUrl) {
-        setFormField("videoUrl", videoUrl);
-      }
+      // 🔹 Crear objeto actualizado del form
+      const updatedForm = {
+        ...form,
+        photoUrls: uploadedImages,
+        videoUri: uploadedVideoUrl,
+      };
 
-      // ✅ Enviar el form completo
-      await submitPet();
+      // 🔹 Enviar formulario actualizado
+      await submitPet(updatedForm);
 
       Alert.alert("¡Éxito!", "Mascota registrada correctamente");
       navigation.goBack();
     } catch (error: any) {
       console.error("Error en handleSubmit:", error);
-      Alert.alert("Error", error.message || "Hubo un problema al registrar la mascota");
+      Alert.alert(
+        "Error",
+        error.message || "Hubo un problema al registrar la mascota"
+      );
+    } finally {
+      setLoading(false); // 🔹 OCULTAR LOADER
     }
   };
 
 
   return (
     <View style={styles.container}>
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.3)",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 99,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#FFF",
+              padding: 20,
+              borderRadius: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <Ionicons name="cloud-upload" size={24} color="#6366F1" />
+            <Text style={{ fontSize: 16, color: "#374151" }}>
+              Subiendo archivos...
+            </Text>
+          </View>
+        </View>
+      )}
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#FFFFFF"
