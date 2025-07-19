@@ -22,13 +22,14 @@ import StepBasicInfo from "../components/PetRegisterSteps/StepBasicInfo";
 import StepHealthInfo from "../components/PetRegisterSteps/StepHealthInfo";
 import StepConductInfo from "../components/PetRegisterSteps/StepConductInfo";
 import StepAdditionalInfo from "../components/PetRegisterSteps/StepAdditionalInfo";
+import { useUploadFiles } from "../hooks/useUploadFiles";
 
 export default function PetRegisterFormScreen() {
-  const { form, submitPet } = usePetRegister();
+  const { form, submitPet, setFormField } = usePetRegister();
   const { user } = useAuthStore();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+  const [loading, setLoading] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState({
     petName: false,
@@ -38,8 +39,9 @@ export default function PetRegisterFormScreen() {
     size: false,
   });
   const [descriptionError, setDescriptionError] = useState(false);
-
+  const { uploadPetImage, uploadPetVideo } = useUploadFiles()
   const steps = [
+
     <StepBasicInfo
       key="basic"
       validationErrors={validationErrors}
@@ -121,34 +123,96 @@ export default function PetRegisterFormScreen() {
     );
   };
 
+
+
   const handleSubmit = async () => {
     try {
-      //  Validar primero si hay al menos una foto
-      if (!form.photoUrls || form.photoUrls.length === 0) {
-        Alert.alert("Debes agregar al menos 1 foto.");
-        return;
-      }
-
-      //  Luego validar si hay usuario logueado
       if (!user) {
         Alert.alert("Error", "No se encontró el usuario.");
         navigation.navigate("Login");
         return;
       }
 
-      await submitPet();
+      if (!form.photoUrls || form.photoUrls.length === 0) {
+        Alert.alert("Debes agregar al menos 1 foto.");
+        return;
+      }
+
+      if (!form.videoUri) {
+        Alert.alert("Debes agregar un video.");
+        return;
+      }
+
+      setLoading(true); // 🔹 MOSTRAR LOADER
+
+      // 🔹 Subir imágenes
+      const uploadedImages = await Promise.all(
+        form.photoUrls.map(async (item) => {
+          const url = await uploadPetImage(item.uri);
+          return { uri: url, offsetY: item.offsetY ?? 0.5 };
+        })
+      );
+
+      // 🔹 Subir video
+      const uploadedVideoUrl = await uploadPetVideo(form.videoUri);
+
+      // 🔹 Crear objeto actualizado del form
+      const updatedForm = {
+        ...form,
+        photoUrls: uploadedImages,
+        videoUri: uploadedVideoUrl,
+      };
+
+      // 🔹 Enviar formulario actualizado
+      await submitPet(updatedForm);
+
       Alert.alert("¡Éxito!", "Mascota registrada correctamente");
+      navigation.goBack();
     } catch (error: any) {
-      console.error(error);
+      console.error("Error en handleSubmit:", error);
       Alert.alert(
         "Error",
         error.message || "Hubo un problema al registrar la mascota"
       );
+    } finally {
+      setLoading(false); // 🔹 OCULTAR LOADER
     }
   };
 
+
   return (
     <View style={styles.container}>
+      {loading && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.3)",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 99,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#FFF",
+              padding: 20,
+              borderRadius: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <Ionicons name="cloud-upload" size={24} color="#6366F1" />
+            <Text style={{ fontSize: 16, color: "#374151" }}>
+              Subiendo archivos...
+            </Text>
+          </View>
+        </View>
+      )}
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#FFFFFF"

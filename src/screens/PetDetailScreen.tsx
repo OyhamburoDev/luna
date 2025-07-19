@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState, useRef } from "react"; // Importar useRef
 import Ionicons from "react-native-vector-icons/Ionicons";
 import PetMediaCarousel from "../components/PetMediaCarousel";
+import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -27,7 +28,7 @@ type Props = {
 export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
   const [showMore, setShowMore] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null); // Crear una referencia para el ScrollView
-
+  const naviagtion = useNavigation()
   const [showFullText, setShowFullText] = useState(false);
   const [textWasTruncated, setTextWasTruncated] = useState(false);
   const [textLineCount, setTextLineCount] = useState(0);
@@ -87,6 +88,10 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
     "#ffeaa7",
     "#fab1a0",
   ];
+
+  const goToFormAdoption = () =>{
+    naviagtion.navigate("PetRegister")
+  }
 
   const handleToggleMore = () => {
     if (showMore) {
@@ -299,7 +304,7 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
 
           {/* Action Button mejorado */}
           <View style={styles.actionSection}>
-            <TouchableOpacity style={styles.adoptButton}>
+            <TouchableOpacity style={styles.adoptButton} onPress={goToFormAdoption}>
               <View style={styles.adoptButtonGradient}>
                 <Ionicons
                   name="heart"

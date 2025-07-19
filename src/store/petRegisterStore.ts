@@ -21,6 +21,7 @@ export type PetRegisterFormData = {
   energyLevel: string;
   description: string;
   ownerContact: string;
+  videoUri:string;
   photoUrls: {
     uri: string;
     offsetY: number; // valor entre 0 (arriba) y 1 (abajo)
