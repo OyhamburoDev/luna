@@ -4,6 +4,7 @@ import FavoritesTabScreen from "../screens/FavoritesTabScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { PetPost } from "../types/petPots";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 
@@ -22,7 +23,10 @@ export default function FeedTabs({
   isScreenActive,
   onPressDiscoverMore,
 }: Props) {
+  const inssets = useSafeAreaInsets()
+  console.log("inssets", inssets)
   return (
+
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarStyle: {
@@ -54,6 +58,7 @@ export default function FeedTabs({
       <Tab.Screen
         name="Inicio"
         children={({ route }) => (
+
           <FeedTabScreen
             pets={pets}
             onSelectPet={onSelectPet}
@@ -75,5 +80,6 @@ export default function FeedTabs({
         initialParams={{ onTabChange }}
       />
     </Tab.Navigator>
+
   );
 }

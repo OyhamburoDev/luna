@@ -20,25 +20,6 @@ export default function TabsNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarStyle: showTabs
-          ? {
-              backgroundColor: "black",
-              borderTopWidth: 0,
-              height: 65,
-            }
-          : { display: "none" },
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName = "help";
-
-          if (route.name === "Inicio")
-            iconName = focused ? "home" : "home-outline";
-          else if (route.name === "Mapa")
-            iconName = focused ? "map" : "map-outline";
-          else if (route.name === "Perfil")
-            iconName = focused ? "person" : "person-outline";
-
-          return <Ionicons name={iconName as any} size={size} color={color} />;
-        },
         tabBarActiveTintColor: "white",
         tabBarInactiveTintColor: "#999",
         tabBarLabelStyle: {
@@ -50,7 +31,8 @@ export default function TabsNavigator() {
     >
       <Tab.Screen
         name="Inicio"
-        children={() => <HomeScreen setShowTabs={setShowTabs} />}
+        children={() => <HomeScreen  />}
+        options={{ headerShown: false, tabBarStyle: { display: "none" } }}
       />
       <Tab.Screen
         name="Mapa"

@@ -78,24 +78,22 @@ export default function PetSwipeScreen({
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <FlatList
-        ref={flatListRef}
-        data={[{ key: "card" }, { key: "detail" }]}
-        keyExtractor={(item) => item.key}
-        horizontal
-        pagingEnabled
-        renderItem={renderItem}
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll} // Usamos onScroll en lugar de onViewableItemsChanged
-        scrollEventThrottle={16} // Para mayor precisión (16ms)
-        getItemLayout={(_, index) => ({
-          length: width,
-          offset: width * index,
-          index,
-        })}
-      />
-    </SafeAreaView>
+    <FlatList
+      ref={flatListRef}
+      data={[{ key: "card" }, { key: "detail" }]}
+      keyExtractor={(item) => item.key}
+      horizontal
+      pagingEnabled
+      renderItem={renderItem}
+      showsHorizontalScrollIndicator={false}
+      onScroll={handleScroll} // Usamos onScroll en lugar de onViewableItemsChanged
+      scrollEventThrottle={16} // Para mayor precisión (16ms)
+      getItemLayout={(_, index) => ({
+        length: width,
+        offset: width * index,
+        index,
+      })}
+    />
   );
 }
 

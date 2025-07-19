@@ -116,13 +116,11 @@ export default function PetDetailScreen({ pet, onGoBackToFeed }: Props) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerGradient}>
-        <SafeAreaView>
-          <TouchableOpacity onPress={onGoBackToFeed} style={styles.backButton}>
-            <View style={styles.backButtonCircle}>
-              <Ionicons name="arrow-back" size={24} color="white" />
-            </View>
-          </TouchableOpacity>
-        </SafeAreaView>
+        <TouchableOpacity onPress={onGoBackToFeed} style={styles.backButton}>
+          <View style={styles.backButtonCircle}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </View>
+        </TouchableOpacity>
       </View>
 
       {/* Media Container */}

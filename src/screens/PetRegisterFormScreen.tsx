@@ -129,12 +129,12 @@ export default function PetRegisterFormScreen() {
         return;
       }
 
-      //  Luego validar si hay usuario logueado
-      if (!user) {
-        Alert.alert("Error", "No se encontró el usuario.");
-        navigation.navigate("Login");
-        return;
-      }
+      // //  Luego validar si hay usuario logueado
+      // if (!user) {
+      //   Alert.alert("Error", "No se encontró el usuario.");
+      //   navigation.navigate("Login");
+      //   return;
+      // }
 
       await submitPet();
       Alert.alert("¡Éxito!", "Mascota registrada correctamente");
