@@ -15,6 +15,7 @@ import { usePetRegisterStore } from "../../store/petRegisterStore";
 import * as ImagePicker from "expo-image-picker";
 // @ts-ignore
 import Ionicons from "react-native-vector-icons/Ionicons";
+import StepVideo from "./StepVideo";
 
 export default function StepPhotos() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -159,7 +160,7 @@ export default function StepPhotos() {
               })}
             </View>
           </View>
-
+          {photoUrls.length > 0 && <StepVideo />}
           {/* Consejos */}
           <View style={styles.tipsSection}>
             <Text style={styles.tipsTitle}>

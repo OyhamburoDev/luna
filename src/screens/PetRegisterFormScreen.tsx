@@ -25,7 +25,7 @@ import StepAdditionalInfo from "../components/PetRegisterSteps/StepAdditionalInf
 import { useUploadFiles } from "../hooks/useUploadFiles";
 
 export default function PetRegisterFormScreen() {
-  const { form, submitPet,setFormField } = usePetRegister();
+  const { form, submitPet, setFormField } = usePetRegister();
   const { user } = useAuthStore();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -39,8 +39,9 @@ export default function PetRegisterFormScreen() {
     size: false,
   });
   const [descriptionError, setDescriptionError] = useState(false);
-  const { uploadFile } = useUploadFiles()
+  const { uploadPetImage, uploadPetVideo } = useUploadFiles()
   const steps = [
+
     <StepBasicInfo
       key="basic"
       validationErrors={validationErrors}
@@ -122,31 +123,41 @@ export default function PetRegisterFormScreen() {
     );
   };
 
+
   const handleSubmit = async () => {
     try {
-      if (!form.photoUrls || form.photoUrls.length === 0) {
-        Alert.alert("Debes agregar al menos 1 foto.");
-        return;
-      }
-
       if (!user) {
         Alert.alert("Error", "No se encontró el usuario.");
         navigation.navigate("Login");
         return;
       }
 
-      // ✅ Subir cada imagen al bucket (ya no pasamos folder ni UID)
-      const uploadedUrls = await Promise.all(
+      if (!form.photoUrls || form.photoUrls.length === 0) {
+        Alert.alert("Debes agregar al menos 1 foto.");
+        return;
+      }
+
+      // ✅ Subir imágenes
+      const uploadedImages = await Promise.all(
         form.photoUrls.map(async (item) => {
-          const url = await uploadFile(item.uri);
+          const url = await uploadPetImage(item.uri);
           return { uri: url, offsetY: item.offsetY ?? 0.5 };
         })
       );
 
-      // ✅ Guardar URLs subidas en el store antes de enviar
-      setFormField("photoUrls", uploadedUrls);
+      // ✅ Subir video (si hay)
+      let videoUrl: string | null = null;
+      if (form.videoUri) {
+        videoUrl = await uploadPetVideo(form.videoUri);
+      }
 
-      // ✅ Llamar submitPet (ahora ya tiene URLs reales)
+      // ✅ Guardar URLs subidas en el store antes de enviar
+      setFormField("photoUrls", uploadedImages);
+      if (videoUrl) {
+        setFormField("videoUrl", videoUrl);
+      }
+
+      // ✅ Enviar el form completo
       await submitPet();
 
       Alert.alert("¡Éxito!", "Mascota registrada correctamente");
