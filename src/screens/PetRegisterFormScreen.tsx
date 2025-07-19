@@ -22,9 +22,10 @@ import StepBasicInfo from "../components/PetRegisterSteps/StepBasicInfo";
 import StepHealthInfo from "../components/PetRegisterSteps/StepHealthInfo";
 import StepConductInfo from "../components/PetRegisterSteps/StepConductInfo";
 import StepAdditionalInfo from "../components/PetRegisterSteps/StepAdditionalInfo";
+import { useUploadFiles } from "../hooks/useUploadFiles";
 
 export default function PetRegisterFormScreen() {
-  const { form, submitPet } = usePetRegister();
+  const { form, submitPet,setFormField } = usePetRegister();
   const { user } = useAuthStore();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -38,7 +39,7 @@ export default function PetRegisterFormScreen() {
     size: false,
   });
   const [descriptionError, setDescriptionError] = useState(false);
-
+  const { uploadFile } = useUploadFiles()
   const steps = [
     <StepBasicInfo
       key="basic"
@@ -123,29 +124,39 @@ export default function PetRegisterFormScreen() {
 
   const handleSubmit = async () => {
     try {
-      //  Validar primero si hay al menos una foto
       if (!form.photoUrls || form.photoUrls.length === 0) {
         Alert.alert("Debes agregar al menos 1 foto.");
         return;
       }
 
-      //  Luego validar si hay usuario logueado
       if (!user) {
         Alert.alert("Error", "No se encontró el usuario.");
         navigation.navigate("Login");
         return;
       }
 
-      await submitPet();
-      Alert.alert("¡Éxito!", "Mascota registrada correctamente");
-    } catch (error: any) {
-      console.error(error);
-      Alert.alert(
-        "Error",
-        error.message || "Hubo un problema al registrar la mascota"
+      // ✅ Subir cada imagen al bucket (ya no pasamos folder ni UID)
+      const uploadedUrls = await Promise.all(
+        form.photoUrls.map(async (item) => {
+          const url = await uploadFile(item.uri);
+          return { uri: url, offsetY: item.offsetY ?? 0.5 };
+        })
       );
+
+      // ✅ Guardar URLs subidas en el store antes de enviar
+      setFormField("photoUrls", uploadedUrls);
+
+      // ✅ Llamar submitPet (ahora ya tiene URLs reales)
+      await submitPet();
+
+      Alert.alert("¡Éxito!", "Mascota registrada correctamente");
+      navigation.goBack();
+    } catch (error: any) {
+      console.error("Error en handleSubmit:", error);
+      Alert.alert("Error", error.message || "Hubo un problema al registrar la mascota");
     }
   };
+
 
   return (
     <View style={styles.container}>
