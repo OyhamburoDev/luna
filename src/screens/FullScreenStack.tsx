@@ -20,15 +20,21 @@ import { useNavigation } from "@react-navigation/native";
 import { StatusBar } from "react-native"; // 👈 importá StatusBar
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { navigate } from "../navigation/NavigationService";
+import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 
 const { width, height } = Dimensions.get("window");
 
 type Props = {
   pet: PetPost;
   onGoBackToFeed: () => void;
+  setModalVisible: (visible: boolean) => void;
 };
 
-export default function FullScreenStack({ pet, onGoBackToFeed }: Props) {
+export default function FullScreenStack({
+  pet,
+  onGoBackToFeed,
+  setModalVisible,
+}: Props) {
   const [showMore, setShowMore] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null); // Crear una referencia para el ScrollView
   const [showFullText, setShowFullText] = useState(false);
@@ -92,10 +98,6 @@ export default function FullScreenStack({ pet, onGoBackToFeed }: Props) {
     "#ffeaa7",
     "#fab1a0",
   ];
-
-  const goToFormAdoption = () => {
-    navigate("AdoptionFormPet", { petId: pet.id, petName: pet.petName });
-  };
 
   const handleToggleMore = () => {
     if (showMore) {
@@ -316,7 +318,7 @@ export default function FullScreenStack({ pet, onGoBackToFeed }: Props) {
               <TouchableOpacity
                 style={styles.adoptButton}
                 onPress={() => {
-                  goToFormAdoption();
+                  setModalVisible(true);
                 }}
               >
                 <View style={styles.adoptButtonGradient}>

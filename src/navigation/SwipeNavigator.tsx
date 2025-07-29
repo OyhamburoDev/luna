@@ -8,6 +8,7 @@ import TabsNavigator from "./TabsNavigator";
 import FullScreenStack from "../screens/FullScreenStack";
 import { mockPets } from "../data/mockPetsData";
 import { useState, useRef, useEffect } from "react";
+import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -21,6 +22,8 @@ export default function SwipeNavigator() {
   const flatListRef = useRef<FlatList>(null); // no se
 
   const [selectedPetIndex, setSelectedPetIndex] = useState<number | null>(null); // seleccionamos el index
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -48,44 +51,57 @@ export default function SwipeNavigator() {
   };
 
   return (
-    <FlatList
-      ref={flatListRef}
-      data={[0, 1]}
-      horizontal
-      pagingEnabled
-      scrollEnabled={scrollEnabled}
-      showsHorizontalScrollIndicator={false}
-      keyExtractor={(item) => item.toString()}
-      renderItem={({ item }) => (
-        <View style={{ width: SCREEN_WIDTH, flex: 1 }}>
-          <NavigationIndependentTree>
-            <NavigationContainer>
-              {item === 0 ? (
-                <TabsNavigator
-                  onTabChange={handleTabChange}
-                  pets={mockPets}
-                  onSelectPet={setSelectedPetIndex}
-                  isScreenActive={currentIndex === 0 && activeTab === "Inicio"}
-                  onPressDiscoverMore={goToDetailScreen}
-                />
-              ) : activeTab === "Inicio" && selectedPetIndex !== null ? (
-                <FullScreenStack
-                  pet={mockPets[selectedPetIndex]}
-                  onGoBackToFeed={goToPage0}
-                />
-              ) : (
-                <View style={{ flex: 1 }} />
-              )}
-            </NavigationContainer>
-          </NavigationIndependentTree>
-        </View>
-      )}
-      onMomentumScrollEnd={(e) => {
-        const newIndex = Math.round(
-          e.nativeEvent.contentOffset.x / SCREEN_WIDTH
-        );
-        setCurrentIndex(newIndex);
-      }}
-    />
+    <>
+      <FlatList
+        ref={flatListRef}
+        data={[0, 1]}
+        horizontal
+        pagingEnabled
+        scrollEnabled={scrollEnabled}
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(item) => item.toString()}
+        renderItem={({ item }) => (
+          <View style={{ width: SCREEN_WIDTH, flex: 1 }}>
+            <NavigationIndependentTree>
+              <NavigationContainer>
+                {item === 0 ? (
+                  <TabsNavigator
+                    onTabChange={handleTabChange}
+                    pets={mockPets}
+                    onSelectPet={setSelectedPetIndex}
+                    isScreenActive={
+                      currentIndex === 0 && activeTab === "Inicio"
+                    }
+                    onPressDiscoverMore={goToDetailScreen}
+                  />
+                ) : activeTab === "Inicio" && selectedPetIndex !== null ? (
+                  <FullScreenStack
+                    pet={mockPets[selectedPetIndex]}
+                    onGoBackToFeed={goToPage0}
+                    setModalVisible={setModalVisible}
+                  />
+                ) : (
+                  <View style={{ flex: 1 }} />
+                )}
+              </NavigationContainer>
+            </NavigationIndependentTree>
+          </View>
+        )}
+        onMomentumScrollEnd={(e) => {
+          const newIndex = Math.round(
+            e.nativeEvent.contentOffset.x / SCREEN_WIDTH
+          );
+          setCurrentIndex(newIndex);
+        }}
+      />
+      <AdoptionConfirmModal
+        onCancel={() => setModalVisible(false)}
+        visible={modalVisible}
+        pet={selectedPetIndex !== null ? mockPets[selectedPetIndex] : null}
+        onConfirm={() => {
+          setModalVisible(false);
+        }}
+      />
+    </>
   );
 }
