@@ -169,6 +169,8 @@ const styles = StyleSheet.create({
     width: "100%",
     // La altura se establece mediante la prop alturaCard
     backgroundColor: "black", // Para depuración, se puede eliminar
+
+    paddingTop: 33,
   },
   contentWrapper: {
     flex: 1,
