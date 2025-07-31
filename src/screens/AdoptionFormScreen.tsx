@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  StatusBar,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
@@ -19,6 +18,7 @@ import { RootStackParamList } from "../navigation/types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons"; // Asegurate de tenerlo instalado
 import { useNavigation } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
 
 type AdoptionFormRouteProp = RouteProp<RootStackParamList, "AdoptionFormPet">;
 
@@ -32,174 +32,159 @@ export default function AdoptionFormScreen() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView
-        style={styles.safe}
-        edges={["top", "left", "right", "bottom"]}
-      >
+      <StatusBar style="dark" />
+      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
+          style={styles.container}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 100} // Probar 100 o más
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // Probar 100 o más
         >
-          <View style={{ flex: 1 }}>
-            <View style={styles.header}>
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={styles.backButton}
-              >
-                <Ionicons name="arrow-back" size={24} color="#333" />
-              </TouchableOpacity>
-              <View style={styles.headerTextContainer}>
-                <Text style={styles.headerTitle}>
-                  Formulario para {petName}
-                </Text>
-                <Text style={styles.subtitle}>Completá la solicitud</Text>
-              </View>
-            </View>
-
-            <KeyboardAvoidingView
-              style={{ flex: 1 }}
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              style={styles.container}
+              contentContainerStyle={{ paddingBottom: 100 }}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
-              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <ScrollView
-                  style={styles.container}
-                  contentContainerStyle={{ paddingBottom: 100 }}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
+              <View style={styles.header}>
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  style={styles.backButton}
                 >
-                  {/* SECCIÓN 1 */}
-                  <View style={styles.sectionTitleRow}>
-                    <Ionicons
-                      name="person-circle-outline"
-                      size={22}
-                      color="#667eea"
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text style={styles.sectionTitle}>Datos personales</Text>
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Nombre completo"
-                    value={form.fullName}
-                    onChangeText={(text) => handleChange("fullName", text)}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Correo electrónico"
-                    value={form.email}
-                    onChangeText={(text) => handleChange("email", text)}
-                    keyboardType="email-address"
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Teléfono"
-                    value={form.phone}
-                    onChangeText={(text) => handleChange("phone", text)}
-                    keyboardType="phone-pad"
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Dirección"
-                    value={form.address}
-                    onChangeText={(text) => handleChange("address", text)}
-                  />
+                  <Ionicons name="arrow-back" size={24} color="#333" />
+                </TouchableOpacity>
+                <View style={styles.headerTextContainer}>
+                  <Text style={styles.headerTitle}>
+                    Formulario para {petName}
+                  </Text>
+                  <Text style={styles.subtitle}>Completá la solicitud</Text>
+                </View>
+              </View>
 
-                  {/* SECCIÓN 2 */}
-                  <View style={styles.sectionTitleRow}>
-                    <Ionicons
-                      name="home-outline"
-                      size={22}
-                      color="#43e97b"
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text style={styles.sectionTitle}>Sobre tu hogar</Text>
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="¿Tenés otras mascotas? (sí / no)"
-                    value={form.hasPets}
-                    onChangeText={(text) => handleChange("hasPets", text)}
-                  />
-                  {form.hasPets?.toLowerCase() === "sí" && (
-                    <TextInput
-                      style={styles.input}
-                      placeholder="¿Qué tipo de mascotas?"
-                      value={form.petTypes}
-                      onChangeText={(text) => handleChange("petTypes", text)}
-                    />
-                  )}
-                  <TextInput
-                    style={styles.input}
-                    placeholder="¿Vivís en casa o departamento?"
-                    value={form.housingType}
-                    onChangeText={(text) => handleChange("housingType", text)}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Detalles (ej: casa con patio)"
-                    value={form.housingDetails}
-                    onChangeText={(text) =>
-                      handleChange("housingDetails", text)
-                    }
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="¿Tenés patio o espacio exterior?"
-                    value={form.hasYard}
-                    onChangeText={(text) => handleChange("hasYard", text)}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="¿Tenés hijos o niños en casa?"
-                    value={form.hasChildren}
-                    onChangeText={(text) => handleChange("hasChildren", text)}
-                  />
+              {/* SECCIÓN 1 */}
+              <View style={styles.sectionTitleRow}>
+                <Ionicons
+                  name="person-circle-outline"
+                  size={22}
+                  color="#667eea"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.sectionTitle}>Datos personales</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Nombre completo"
+                value={form.fullName}
+                onChangeText={(text) => handleChange("fullName", text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Correo electrónico"
+                value={form.email}
+                onChangeText={(text) => handleChange("email", text)}
+                keyboardType="email-address"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Teléfono"
+                value={form.phone}
+                onChangeText={(text) => handleChange("phone", text)}
+                keyboardType="phone-pad"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Dirección"
+                value={form.address}
+                onChangeText={(text) => handleChange("address", text)}
+              />
 
-                  {/* SECCIÓN 3 */}
-                  <View style={styles.sectionTitleRow}>
-                    <Ionicons
-                      name="heart-outline"
-                      size={22}
-                      color="#ff6b6b"
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text style={styles.sectionTitle}>Motivaciones</Text>
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="¿Cuánto tiempo libre tenés por día para la mascota?"
-                    value={form.availableTime}
-                    onChangeText={(text) => handleChange("availableTime", text)}
-                  />
-                  <TextInput
-                    style={[styles.input, { height: 100 }]}
-                    placeholder="¿Por qué querés adoptar?"
-                    value={form.reason}
-                    onChangeText={(text) => handleChange("reason", text)}
-                    multiline
-                  />
-                  <TextInput
-                    style={[styles.input, { height: 80 }]}
-                    placeholder="Comentarios adicionales"
-                    value={form.comments}
-                    onChangeText={(text) => handleChange("comments", text)}
-                    multiline
-                  />
+              {/* SECCIÓN 2 */}
+              <View style={styles.sectionTitleRow}>
+                <Ionicons
+                  name="home-outline"
+                  size={22}
+                  color="#43e97b"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.sectionTitle}>Sobre tu hogar</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="¿Tenés otras mascotas? (sí / no)"
+                value={form.hasPets}
+                onChangeText={(text) => handleChange("hasPets", text)}
+              />
+              {form.hasPets?.toLowerCase() === "sí" && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="¿Qué tipo de mascotas?"
+                  value={form.petTypes}
+                  onChangeText={(text) => handleChange("petTypes", text)}
+                />
+              )}
+              <TextInput
+                style={styles.input}
+                placeholder="¿Vivís en casa o departamento?"
+                value={form.housingType}
+                onChangeText={(text) => handleChange("housingType", text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Detalles (ej: casa con patio)"
+                value={form.housingDetails}
+                onChangeText={(text) => handleChange("housingDetails", text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="¿Tenés patio o espacio exterior?"
+                value={form.hasYard}
+                onChangeText={(text) => handleChange("hasYard", text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="¿Tenés hijos o niños en casa?"
+                value={form.hasChildren}
+                onChangeText={(text) => handleChange("hasChildren", text)}
+              />
 
-                  <View style={styles.fixedButtonContainer}>
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={handleSubmit}
-                    >
-                      <Text style={styles.buttonText}>Enviar solicitud</Text>
-                    </TouchableOpacity>
-                  </View>
-                </ScrollView>
-              </TouchableWithoutFeedback>
-            </KeyboardAvoidingView>
-          </View>
+              {/* SECCIÓN 3 */}
+              <View style={styles.sectionTitleRow}>
+                <Ionicons
+                  name="heart-outline"
+                  size={22}
+                  color="#ff6b6b"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.sectionTitle}>Motivaciones</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="¿Cuánto tiempo libre tenés por día para la mascota?"
+                value={form.availableTime}
+                onChangeText={(text) => handleChange("availableTime", text)}
+              />
+              <TextInput
+                style={[styles.input, { height: 100 }]}
+                placeholder="¿Por qué querés adoptar?"
+                value={form.reason}
+                onChangeText={(text) => handleChange("reason", text)}
+                multiline
+              />
+              <TextInput
+                style={[styles.input, { height: 80 }]}
+                placeholder="Comentarios adicionales"
+                value={form.comments}
+                onChangeText={(text) => handleChange("comments", text)}
+                multiline
+              />
+
+              <View style={styles.fixedButtonContainer}>
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                  <Text style={styles.buttonText}>Enviar solicitud</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
