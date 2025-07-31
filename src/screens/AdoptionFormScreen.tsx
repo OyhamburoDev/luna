@@ -8,6 +8,10 @@ import {
   TouchableOpacity,
   Alert,
   StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useAdoptionRequest } from "../hooks/useAdoptionRequest";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -33,128 +37,170 @@ export default function AdoptionFormScreen() {
         style={styles.safe}
         edges={["top", "left", "right", "bottom"]}
       >
-        <View style={{ flex: 1 }}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.backButton}
-            >
-              <Ionicons name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>Formulario para {petName}</Text>
-              <Text style={styles.subtitle}>Completá la solicitud</Text>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 100} // Probar 100 o más
+        >
+          <View style={{ flex: 1 }}>
+            <View style={styles.header}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+              >
+                <Ionicons name="arrow-back" size={24} color="#333" />
+              </TouchableOpacity>
+              <View style={styles.headerTextContainer}>
+                <Text style={styles.headerTitle}>
+                  Formulario para {petName}
+                </Text>
+                <Text style={styles.subtitle}>Completá la solicitud</Text>
+              </View>
             </View>
+
+            <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <ScrollView
+                  style={styles.container}
+                  contentContainerStyle={{ paddingBottom: 100 }}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {/* SECCIÓN 1 */}
+                  <View style={styles.sectionTitleRow}>
+                    <Ionicons
+                      name="person-circle-outline"
+                      size={22}
+                      color="#667eea"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.sectionTitle}>Datos personales</Text>
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nombre completo"
+                    value={form.fullName}
+                    onChangeText={(text) => handleChange("fullName", text)}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Correo electrónico"
+                    value={form.email}
+                    onChangeText={(text) => handleChange("email", text)}
+                    keyboardType="email-address"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Teléfono"
+                    value={form.phone}
+                    onChangeText={(text) => handleChange("phone", text)}
+                    keyboardType="phone-pad"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Dirección"
+                    value={form.address}
+                    onChangeText={(text) => handleChange("address", text)}
+                  />
+
+                  {/* SECCIÓN 2 */}
+                  <View style={styles.sectionTitleRow}>
+                    <Ionicons
+                      name="home-outline"
+                      size={22}
+                      color="#43e97b"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.sectionTitle}>Sobre tu hogar</Text>
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="¿Tenés otras mascotas? (sí / no)"
+                    value={form.hasPets}
+                    onChangeText={(text) => handleChange("hasPets", text)}
+                  />
+                  {form.hasPets?.toLowerCase() === "sí" && (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="¿Qué tipo de mascotas?"
+                      value={form.petTypes}
+                      onChangeText={(text) => handleChange("petTypes", text)}
+                    />
+                  )}
+                  <TextInput
+                    style={styles.input}
+                    placeholder="¿Vivís en casa o departamento?"
+                    value={form.housingType}
+                    onChangeText={(text) => handleChange("housingType", text)}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Detalles (ej: casa con patio)"
+                    value={form.housingDetails}
+                    onChangeText={(text) =>
+                      handleChange("housingDetails", text)
+                    }
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="¿Tenés patio o espacio exterior?"
+                    value={form.hasYard}
+                    onChangeText={(text) => handleChange("hasYard", text)}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="¿Tenés hijos o niños en casa?"
+                    value={form.hasChildren}
+                    onChangeText={(text) => handleChange("hasChildren", text)}
+                  />
+
+                  {/* SECCIÓN 3 */}
+                  <View style={styles.sectionTitleRow}>
+                    <Ionicons
+                      name="heart-outline"
+                      size={22}
+                      color="#ff6b6b"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.sectionTitle}>Motivaciones</Text>
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="¿Cuánto tiempo libre tenés por día para la mascota?"
+                    value={form.availableTime}
+                    onChangeText={(text) => handleChange("availableTime", text)}
+                  />
+                  <TextInput
+                    style={[styles.input, { height: 100 }]}
+                    placeholder="¿Por qué querés adoptar?"
+                    value={form.reason}
+                    onChangeText={(text) => handleChange("reason", text)}
+                    multiline
+                  />
+                  <TextInput
+                    style={[styles.input, { height: 80 }]}
+                    placeholder="Comentarios adicionales"
+                    value={form.comments}
+                    onChangeText={(text) => handleChange("comments", text)}
+                    multiline
+                  />
+
+                  <View style={styles.fixedButtonContainer}>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={handleSubmit}
+                    >
+                      <Text style={styles.buttonText}>Enviar solicitud</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+              </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
           </View>
-
-          <ScrollView
-            style={styles.container}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* SECCIÓN 1 */}
-            <Text style={styles.sectionTitle}>Datos personales</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre completo"
-              value={form.fullName}
-              onChangeText={(text) => handleChange("fullName", text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Correo electrónico"
-              value={form.email}
-              onChangeText={(text) => handleChange("email", text)}
-              keyboardType="email-address"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Teléfono"
-              value={form.phone}
-              onChangeText={(text) => handleChange("phone", text)}
-              keyboardType="phone-pad"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Dirección"
-              value={form.address}
-              onChangeText={(text) => handleChange("address", text)}
-            />
-
-            {/* SECCIÓN 2 */}
-            <Text style={styles.sectionTitle}>Sobre tu hogar</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="¿Tenés otras mascotas? (sí / no)"
-              value={form.hasPets}
-              onChangeText={(text) => handleChange("hasPets", text)}
-            />
-            {form.hasPets?.toLowerCase() === "sí" && (
-              <TextInput
-                style={styles.input}
-                placeholder="¿Qué tipo de mascotas?"
-                value={form.petTypes}
-                onChangeText={(text) => handleChange("petTypes", text)}
-              />
-            )}
-            <TextInput
-              style={styles.input}
-              placeholder="¿Vivís en casa o departamento?"
-              value={form.housingType}
-              onChangeText={(text) => handleChange("housingType", text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Detalles (ej: casa con patio)"
-              value={form.housingDetails}
-              onChangeText={(text) => handleChange("housingDetails", text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="¿Tenés patio o espacio exterior?"
-              value={form.hasYard}
-              onChangeText={(text) => handleChange("hasYard", text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="¿Tenés hijos o niños en casa?"
-              value={form.hasChildren}
-              onChangeText={(text) => handleChange("hasChildren", text)}
-            />
-
-            {/* SECCIÓN 3 */}
-            <Text style={styles.sectionTitle}>Motivaciones</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="¿Cuánto tiempo libre tenés por día para la mascota?"
-              value={form.availableTime}
-              onChangeText={(text) => handleChange("availableTime", text)}
-            />
-            <TextInput
-              style={[styles.input, { height: 100 }]}
-              placeholder="¿Por qué querés adoptar?"
-              value={form.reason}
-              onChangeText={(text) => handleChange("reason", text)}
-              multiline
-            />
-            <TextInput
-              style={[styles.input, { height: 80 }]}
-              placeholder="Comentarios adicionales"
-              value={form.comments}
-              onChangeText={(text) => handleChange("comments", text)}
-              multiline
-            />
-
-            {/* <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Enviar solicitud</Text>
-          </TouchableOpacity> */}
-          </ScrollView>
-          <View style={styles.fixedButtonContainer}>
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Enviar solicitud</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </>
   );
@@ -201,12 +247,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 0,
   },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 24, // ahora lo aplicamos al contenedor
+    marginBottom: 12, // pequeño espacio entre título e input
+  },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18, // un pelín más grande para jerarquía visual
     fontWeight: "600",
     color: "#555",
-    marginBottom: 8,
-    marginTop: 20,
+    marginBottom: 0, // lo quitamos
+    marginTop: 0, // lo quitamos
   },
   title: {
     fontSize: 18,
@@ -231,20 +283,18 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   fixedButtonContainer: {
-    position: "absolute",
-    bottom: 0,
+    bottom: 5,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-    backgroundColor: "#ffffffff", // mismo fondo para que no se note corte
+    backgroundColor: "#ffffffc4", // mismo fondo para que no se note corte
     borderTopWidth: 1,
-    borderColor: "#e0e0e0",
-    paddingVertical: 10,
+    borderColor: "#ffffff75",
+    paddingVertical: 20,
   },
   button: {
     backgroundColor: "#667eea",
-    paddingVertical: 16,
-    borderRadius: 14,
+    paddingVertical: 18,
+    borderRadius: 18,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
