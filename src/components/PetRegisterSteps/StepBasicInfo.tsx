@@ -24,11 +24,13 @@ type ValidationErrors = {
 type Props = {
   validationErrors: ValidationErrors;
   setValidationErrors: React.Dispatch<React.SetStateAction<ValidationErrors>>;
+  handleInputFocus: (event: any) => any;
 };
 
 export default function StepBasicInfo({
   validationErrors,
   setValidationErrors,
+  handleInputFocus,
 }: Props) {
   const { form, setFormField } = usePetRegister();
   const [speciesModalVisible, setSpeciesModalVisible] = useState(false);
@@ -164,8 +166,10 @@ export default function StepBasicInfo({
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre de la mascota *</Text>
             <TextInput
+              onFocus={handleInputFocus}
               style={[
                 styles.input,
+
                 validationErrors.petName && {
                   borderColor: "red",
                   borderWidth: 1,
@@ -214,6 +218,7 @@ export default function StepBasicInfo({
             <View style={styles.halfInputGroup}>
               <Text style={styles.label}>Raza</Text>
               <TextInput
+                onFocus={handleInputFocus}
                 style={styles.input}
                 placeholder="Mestizo, Labrador..."
                 value={form.breed}
@@ -227,6 +232,7 @@ export default function StepBasicInfo({
             <View style={styles.halfInputGroup}>
               <Text style={styles.label}>Edad *</Text>
               <TextInput
+                onFocus={handleInputFocus}
                 keyboardType="numeric"
                 style={[
                   styles.input,

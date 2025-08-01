@@ -50,13 +50,31 @@ export default function PetRegisterFormScreen() {
 
   const scrollRef = useRef<ScrollView>(null);
 
+  const handleInputFocus = useCallback((event: any) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+    const target = event.target;
+    const inputNode = findNodeHandle(target);
+
+    setTimeout(() => {
+      if (scrollRef.current && inputNode) {
+        scrollRef.current.scrollResponderScrollNativeHandleToKeyboard(
+          inputNode,
+          100, // offset adicional
+          true
+        );
+      }
+    }, 100);
+  }, []);
+
   const steps = [
     <StepBasicInfo
       key="basic"
       validationErrors={validationErrors}
       setValidationErrors={setValidationErrors}
+      handleInputFocus={handleInputFocus}
     />,
-    <StepHealthInfo key="health" />,
+    <StepHealthInfo key="health" handleInputFocus={handleInputFocus} />,
     <StepConductInfo key="conduct" />,
     <StepAdditionalInfo
       key="additional"

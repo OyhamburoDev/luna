@@ -9,7 +9,11 @@ import {
 } from "react-native";
 import { usePetRegister } from "../../hooks/usePetRegister";
 
-export default function StepHealthInfo() {
+type Props = {
+  handleInputFocus: (event: any) => any;
+};
+
+export default function StepHealthInfo({ handleInputFocus }: Props) {
   const { form, setFormField, submitPet } = usePetRegister();
 
   const renderRadioGroup = (
@@ -92,6 +96,7 @@ export default function StepHealthInfo() {
               <Text style={styles.label}>Detalles médicos *</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
+                onFocus={handleInputFocus}
                 placeholder="Describe las condiciones médicas..."
                 value={form.medicalDetails}
                 onChangeText={(text) => setFormField("medicalDetails", text)}
@@ -105,7 +110,8 @@ export default function StepHealthInfo() {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Información médica adicional</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input2, styles.textArea]}
+              onFocus={handleInputFocus}
               placeholder="Vacunas, tratamientos, medicamentos..."
               value={form.healthInfo}
               onChangeText={(text) => setFormField("healthInfo", text)}
@@ -163,6 +169,16 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   input: {
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 15,
+    backgroundColor: "#FFFFFF",
+    color: "#1F2937",
+    minHeight: 48,
+  },
+  input2: {
     borderWidth: 1.5,
     borderColor: "#E5E7EB",
     borderRadius: 10,
