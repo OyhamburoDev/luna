@@ -8,8 +8,15 @@ import {
   TouchableOpacity,
   Alert,
   StatusBar,
+  LayoutAnimation,
+  findNodeHandle,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
+  Keyboard,
 } from "react-native";
-import { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState, useRef, useCallback } from "react";
 import { usePetRegister } from "../hooks/usePetRegister";
 import { useAuthStore } from "../store/auth";
 import { useNavigation } from "@react-navigation/native";
@@ -40,6 +47,9 @@ export default function PetRegisterFormScreen() {
   });
   const [descriptionError, setDescriptionError] = useState(false);
   const { uploadPetImage, uploadPetVideo } = useUploadFiles();
+
+  const scrollRef = useRef<ScrollView>(null);
+
   const steps = [
     <StepBasicInfo
       key="basic"
@@ -177,103 +187,127 @@ export default function PetRegisterFormScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {loading && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.3)",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 99,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#FFF",
-              padding: 20,
-              borderRadius: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <Ionicons name="cloud-upload" size={24} color="#6366F1" />
-            <Text style={{ fontSize: 16, color: "#374151" }}>
-              Subiendo archivos...
-            </Text>
-          </View>
-        </View>
-      )}
+    <>
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#FFFFFF"
         translucent={false}
       />
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+      <SafeAreaView
+        style={styles.container}
+        edges={["top", "left", "right", "bottom"]}
       >
-        {/* Header con padding suficiente */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={stepIndex === 0 ? handleGoBack : handleBack}
-            style={styles.backButton}
+        {loading && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.3)",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 99,
+            }}
           >
-            <Ionicons name="arrow-back" size={22} color="#374151" />
-          </TouchableOpacity>
-
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>Registro de Mascota</Text>
-            <Text style={styles.subtitle}>
-              Paso {stepIndex + 1} de {steps.length}
-            </Text>
-          </View>
-        </View>
-
-        {/* Indicador de progreso */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressTrack}>
-            {Array.from({ length: steps.length }).map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.progressDot,
-                  index <= stepIndex
-                    ? styles.progressDotActive
-                    : styles.progressDotInactive,
-                ]}
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* Contenido del paso */}
-        <View style={styles.stepContent}>{steps[stepIndex]}</View>
-
-        {/* Navegación */}
-        <View style={styles.navigation}>
-          {stepIndex < steps.length - 1 ? (
-            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-              <Text style={styles.nextButtonText}>Continuar</Text>
-              <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit}
+            <View
+              style={{
+                backgroundColor: "#FFF",
+                padding: 20,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+              }}
             >
-              <Ionicons name="heart" size={18} color="#FFFFFF" />
-              <Text style={styles.submitButtonText}>Publicar Mascota</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </ScrollView>
-    </View>
+              <Ionicons name="cloud-upload" size={24} color="#6366F1" />
+              <Text style={{ fontSize: 16, color: "#374151" }}>
+                Subiendo archivos...
+              </Text>
+            </View>
+          </View>
+        )}
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.select({
+            ios: 0,
+            android: 0,
+          })}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              ref={scrollRef}
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+            >
+              {/* Header con padding suficiente */}
+              <View style={styles.header}>
+                <TouchableOpacity
+                  onPress={stepIndex === 0 ? handleGoBack : handleBack}
+                  style={styles.backButton}
+                >
+                  <Ionicons name="arrow-back" size={22} color="#374151" />
+                </TouchableOpacity>
+
+                <View style={styles.headerContent}>
+                  <Text style={styles.title}>Registro de Mascota</Text>
+                  <Text style={styles.subtitle}>
+                    Paso {stepIndex + 1} de {steps.length}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Indicador de progreso */}
+              <View style={styles.progressContainer}>
+                <View style={styles.progressTrack}>
+                  {Array.from({ length: steps.length }).map((_, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.progressDot,
+                        index <= stepIndex
+                          ? styles.progressDotActive
+                          : styles.progressDotInactive,
+                      ]}
+                    />
+                  ))}
+                </View>
+              </View>
+
+              {/* Contenido del paso */}
+              <View style={styles.stepContent}>{steps[stepIndex]}</View>
+
+              {/* Navegación */}
+              <View style={styles.navigation}>
+                {stepIndex < steps.length - 1 ? (
+                  <TouchableOpacity
+                    style={styles.nextButton}
+                    onPress={handleNext}
+                  >
+                    <Text style={styles.nextButtonText}>Continuar</Text>
+                    <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={handleSubmit}
+                  >
+                    <Ionicons name="heart" size={18} color="#FFFFFF" />
+                    <Text style={styles.submitButtonText}>
+                      Publicar Mascota
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 }
 
