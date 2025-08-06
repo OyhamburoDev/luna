@@ -29,12 +29,14 @@ export default function AdoptionFormScreen() {
   const route = useRoute<AdoptionFormRouteProp>();
   const { petId, petName } = route.params;
 
-  const { form, handleChange, handleSubmit } = useAdoptionRequest(petId);
+  const { form, handleChange, handleSubmit, errors } =
+    useAdoptionRequest(petId);
 
   const navigation = useNavigation();
 
   const scrollRef = useRef<ScrollView>(null);
 
+  // Manejar la altura del teclado con respecto a los inputs
   const handleInputFocus = useCallback((event: any) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
@@ -101,14 +103,17 @@ export default function AdoptionFormScreen() {
                   <Text style={styles.sectionTitle}>Datos personales</Text>
                 </View>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    errors.fullName && { borderColor: "red" },
+                  ]}
                   placeholder="Nombre completo"
                   value={form.fullName}
                   onFocus={handleInputFocus}
                   onChangeText={(text) => handleChange("fullName", text)}
                 />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.email && { borderColor: "red" }]}
                   placeholder="Correo electrónico"
                   value={form.email}
                   onFocus={handleInputFocus}
@@ -116,7 +121,7 @@ export default function AdoptionFormScreen() {
                   keyboardType="email-address"
                 />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.phone && { borderColor: "red" }]}
                   placeholder="Teléfono"
                   value={form.phone}
                   onFocus={handleInputFocus}
@@ -124,7 +129,10 @@ export default function AdoptionFormScreen() {
                   keyboardType="phone-pad"
                 />
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    errors.address && { borderColor: "red" },
+                  ]}
                   placeholder="Dirección"
                   value={form.address}
                   onFocus={handleInputFocus}
@@ -142,23 +150,20 @@ export default function AdoptionFormScreen() {
                   <Text style={styles.sectionTitle}>Sobre tu hogar</Text>
                 </View>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    errors.hasPets && { borderColor: "red" },
+                  ]}
                   placeholder="¿Tenés otras mascotas? (sí / no)"
                   value={form.hasPets}
                   onFocus={handleInputFocus}
                   onChangeText={(text) => handleChange("hasPets", text)}
                 />
-                {form.hasPets?.toLowerCase() === "sí" && (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="¿Qué tipo de mascotas?"
-                    value={form.petTypes}
-                    onFocus={handleInputFocus}
-                    onChangeText={(text) => handleChange("petTypes", text)}
-                  />
-                )}
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    errors.housingType && { borderColor: "red" },
+                  ]}
                   placeholder="¿Vivís en casa o departamento?"
                   value={form.housingType}
                   onFocus={handleInputFocus}
@@ -204,7 +209,11 @@ export default function AdoptionFormScreen() {
                   onChangeText={(text) => handleChange("availableTime", text)}
                 />
                 <TextInput
-                  style={[styles.input, { height: 100 }]}
+                  style={[
+                    styles.input,
+                    { height: 100 },
+                    errors.reason && { borderColor: "red" },
+                  ]}
                   placeholder="¿Por qué querés adoptar?"
                   value={form.reason}
                   onFocus={handleInputFocus}

@@ -2,40 +2,91 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import type { AdoptionFormData } from "../types/forms";
 import { useAdoptionFormStore } from "../store/adoptionFormStore";
+import { useAuthStore } from "../store/auth";
+import { navigate } from "../navigation/NavigationService";
+
+type AdoptionFormErrors = {
+  fullName: boolean;
+  email: boolean;
+  phone: boolean;
+  address: boolean;
+  hasPets: boolean;
+  housingType: boolean;
+  reason: boolean;
+};
 
 export function useAdoptionRequest(petId: string) {
   const { form, setFormField, resetForm } = useAdoptionFormStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const [errors, setErrors] = useState<AdoptionFormErrors>({
+    fullName: false,
+    email: false,
+    phone: false,
+    address: false,
+    hasPets: false,
+    housingType: false,
+    reason: false,
+  });
 
   const handleChange = (field: keyof typeof form, value: string) => {
     setFormField(field, value); // ✅ usamos los dos argumentos correctamente
   };
 
+  // subir al servidor
   const handleSubmit = async () => {
-    if (!form.fullName || !form.email || !form.phone || !form.reason) {
+    const errors: AdoptionFormErrors = {
+      fullName: !form.fullName?.trim(),
+      email: !form.email?.trim(),
+      phone: !form.phone?.trim(),
+      address: !form.address?.trim(),
+      hasPets: !form.hasPets?.trim(),
+      housingType: !form.housingType?.trim(),
+      reason: !form.reason?.trim(),
+    };
+
+    setErrors(errors);
+
+    const hasErrors = Object.values(errors).some((e) => e);
+
+    // No continuar si faltan campos
+    if (hasErrors) {
       Alert.alert("Faltan campos", "Completá los obligatorios.");
       return;
     }
 
-    const payload: AdoptionFormData = {
-      ...(form as AdoptionFormData), // casteamos porque el form es Partial
-      petId,
-    };
+    // No continuar si el usuario no esta registrado. llevarlo a la screen register
 
-    try {
-      const response = await fetch("https://tu-api.com/adoptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    if (isAuthenticated) {
+      const payload: AdoptionFormData = {
+        ...(form as AdoptionFormData), // casteamos porque el form es Partial
+        petId,
+      };
 
-      if (!response.ok) throw new Error("Algo salió mal");
+      try {
+        const response = await fetch("https://tu-api.com/adoptions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      Alert.alert("Éxito", "Tu solicitud fue enviada");
-      resetForm();
-    } catch (error) {
-      Alert.alert("Error", "No se pudo enviar tu solicitud");
+        if (!response.ok) throw new Error("Algo salió mal");
+
+        Alert.alert("Éxito", "Tu solicitud fue enviada");
+        resetForm();
+      } catch (error) {
+        Alert.alert("Error", "No se pudo enviar tu solicitud");
+      }
+    } else {
+      Alert.alert(
+        "Iniciá sesión",
+        "Debés estar registrado para enviar la solicitud."
+      );
+      // Aca va la navegacion
+      navigate("Login");
+      return;
     }
   };
 
-  return { form, handleChange, handleSubmit };
+  return { form, handleChange, handleSubmit, errors };
 }
