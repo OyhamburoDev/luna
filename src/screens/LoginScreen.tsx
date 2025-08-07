@@ -29,7 +29,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     const success = await login(email, password);
     if (success) {
-      navigation.navigate("Home");
+      navigation.navigate("Swipe");
     } else {
       Alert.alert("Error", "No se pudo iniciar sesión");
     }

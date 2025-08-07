@@ -1,14 +1,20 @@
+import api from "./axiosInstance";
+
 import {
+  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { auth } from "../config/firebase"; // tu archivo donde inicializás Firebase
-import api from "./axiosInstance";
+import { initializeApp } from "firebase/app";
+import { firebaseConfig } from "../config/firebase";
 
 type LoginPayload = {
   email: string;
   password: string;
 };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export const authApi = {
   login: async ({ email, password }: LoginPayload) => {
