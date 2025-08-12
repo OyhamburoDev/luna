@@ -6,6 +6,9 @@ import RegisterScreen from "../screens/RegisterScreen";
 import SwipeNavigator from "./SwipeNavigator";
 import PetRegisterScreen from "../screens/PetRegisterFormScreen";
 import AdoptionFormScreen from "../screens/AdoptionFormScreen";
+
+import ChatsScreen from "../screens/ChatsScreen";
+
 import { useAuthStore } from "../store/auth";
 
 export type RootStackParamList = {
@@ -14,6 +17,7 @@ export type RootStackParamList = {
   Swipe: undefined;
   PetRegister: undefined;
   AdoptionFormPet: undefined;
+  ChatsList: undefined; // ← Agregar
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +34,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Swipe" component={SwipeNavigator} />
       <Stack.Screen name="PetRegister" component={PetRegisterScreen} />
       <Stack.Screen name="AdoptionFormPet" component={AdoptionFormScreen} />
+      <Stack.Screen name="ChatsList" component={ChatsScreen} />
     </Stack.Navigator>
   );
 }

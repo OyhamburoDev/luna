@@ -4,6 +4,7 @@ import type { AdoptionFormData } from "../types/forms";
 import { useAdoptionFormStore } from "../store/adoptionFormStore";
 import { useAuthStore } from "../store/auth";
 import { navigate } from "../navigation/NavigationService";
+import { AdoptionService } from "../api/adoptionServiceApplication";
 
 type AdoptionFormErrors = {
   fullName: boolean;
@@ -15,7 +16,13 @@ type AdoptionFormErrors = {
   reason: boolean;
 };
 
-export function useAdoptionRequest(petId: string) {
+export function useAdoptionRequest(
+  petId: string,
+  petName: string,
+  ownerId: string,
+  ownerName: string,
+  ownerEmail?: string
+) {
   const { form, setFormField, resetForm } = useAdoptionFormStore();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
@@ -58,19 +65,19 @@ export function useAdoptionRequest(petId: string) {
     // No continuar si el usuario no esta registrado. llevarlo a la screen register
 
     if (isAuthenticated) {
-      const payload: AdoptionFormData = {
-        ...(form as AdoptionFormData), // casteamos porque el form es Partial
-        petId,
-      };
-
       try {
-        const response = await fetch("https://tu-api.com/adoptions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const payload: AdoptionFormData = {
+          ...(form as AdoptionFormData),
+          petId,
+          petName,
+          ownerId,
+          ownerName,
+          ownerEmail,
+          applicantId: useAuthStore.getState().user?.uid!,
+        };
 
-        if (!response.ok) throw new Error("Algo salió mal");
+        // ✅ Reemplazar fetch por Firebase
+        await AdoptionService.submitAdoptionRequest(payload);
 
         Alert.alert("Éxito", "Tu solicitud fue enviada");
         resetForm();

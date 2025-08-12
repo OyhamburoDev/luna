@@ -31,6 +31,9 @@ export default function AdoptionConfirmModal({
     navigate("AdoptionFormPet", {
       petId: pet.id,
       petName: pet.petName,
+      ownerId: pet.ownerId,
+      ownerName: pet.ownerName,
+      ownerEmail: pet.ownerEmail,
     });
   };
 

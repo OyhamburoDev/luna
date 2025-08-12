@@ -1,5 +1,7 @@
-// import { initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 // import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
 export const firebaseConfig = {
   apiKey: "AIzaSyARU21WXe2PXo7oTLRbxK097QJpn-2Kj9Q",
   authDomain: "luna-18810.firebaseapp.com",
@@ -10,10 +12,12 @@ export const firebaseConfig = {
 };
 
 // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 // getAuth maneja la persistencia automáticamente en React Native
 // const auth = getAuth(app);
+
+export const db = getFirestore(app);
 
 // export { auth };
 // export default app;

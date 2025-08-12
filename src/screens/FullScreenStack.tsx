@@ -10,17 +10,15 @@ import {
   Animated,
   ScrollView,
 } from "react-native";
-import { Video, ResizeMode } from "expo-av";
+
 import type { PetPost } from "../types/petPots";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 import { useEffect, useState, useRef } from "react"; // Importar useRef
 import Ionicons from "react-native-vector-icons/Ionicons";
 import PetMediaCarousel from "../components/PetMediaCarousel";
-import { useNavigation } from "@react-navigation/native";
+
 import { StatusBar } from "react-native"; // 👈 importá StatusBar
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { navigate } from "../navigation/NavigationService";
-import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 
 const { width, height } = Dimensions.get("window");
 

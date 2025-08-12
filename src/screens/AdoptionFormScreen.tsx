@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -27,10 +27,15 @@ type AdoptionFormRouteProp = RouteProp<RootStackParamList, "AdoptionFormPet">;
 
 export default function AdoptionFormScreen() {
   const route = useRoute<AdoptionFormRouteProp>();
-  const { petId, petName } = route.params;
+  const { petId, petName, ownerId, ownerName, ownerEmail } = route.params;
 
-  const { form, handleChange, handleSubmit, errors } =
-    useAdoptionRequest(petId);
+  const { form, handleChange, handleSubmit, errors } = useAdoptionRequest(
+    petId,
+    petName,
+    ownerId,
+    ownerName,
+    ownerEmail
+  );
 
   const navigation = useNavigation();
 
