@@ -19,6 +19,7 @@ export const mockPets: PetPost[] = [
     ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Ramiro oyhamburo",
     ownerEmail: "Rami@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_nueve.jpg"),
   },
   {
     id: "2",
@@ -50,6 +51,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_maria_456",
     ownerName: "María García",
     ownerEmail: "maria@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_dos.jpg"),
   },
   {
     id: "3",
@@ -71,6 +73,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_ana_789",
     ownerName: "Ana López",
     ownerEmail: "ana@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_tres.jpg"),
   },
   {
     id: "4",
@@ -89,6 +92,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_juan_123",
     ownerName: "Juan Pérez",
     ownerEmail: "juan@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_siete.jpg"),
   },
   {
     id: "5",
@@ -120,6 +124,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_sofia_202",
     ownerName: "Sofía Martínez",
     ownerEmail: "sofia@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_cuatro.jpg"),
   },
   {
     id: "6",
@@ -138,6 +143,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_diego_303",
     ownerName: "Diego Fernández",
     ownerEmail: "diego@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_cinco.jpg"),
   },
   {
     id: "7",
@@ -159,6 +165,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_valentina_404",
     ownerName: "Valentina Torres",
     ownerEmail: "valentina@example.com",
+    ownerAvatar: null,
   },
   {
     id: "8",
@@ -176,6 +183,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_mateo_505",
     ownerName: "Mateo Silva",
     ownerEmail: "mateo@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_seis.jpg"),
   },
   {
     id: "9",
@@ -197,6 +205,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_isabella_606",
     ownerName: "Isabella Morales",
     ownerEmail: "isabella@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_siete.jpg"),
   },
   {
     id: "10",
@@ -219,6 +228,7 @@ export const mockPets: PetPost[] = [
     ownerId: "user_sebastian_707",
     ownerName: "Sebastián Vega",
     ownerEmail: "sebastian@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_ocho.jpg"),
   },
   {
     id: "11",
@@ -240,5 +250,6 @@ export const mockPets: PetPost[] = [
     ownerId: "user_camila_808",
     ownerName: "Camila Herrera",
     ownerEmail: "camila@example.com",
+    ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_uno.jpg"),
   },
 ];

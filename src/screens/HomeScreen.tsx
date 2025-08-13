@@ -15,16 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CustomHeaderTop from "../components/CustomHeaderTop"; // Asegúrate de que la ruta sea correcta
 import PetCardVertical from "../components/PetCardVertical"; // Asegúrate de que la ruta sea correcta
 import { setBackgroundColorAsync } from "expo-system-ui";
-
-// Define el tipo PetPost si no está en un archivo separado o si no se puede importar
-// Si está en un archivo separado, asegúrate de que la importación sea correcta.
-export type PetPost = {
-  id: string;
-  petName: string;
-  description: string;
-  videoUri?: any; // Ajusta el tipo según tu uso real (e.g., string para URI)
-  imageUris?: any[]; // Ajusta el tipo según tu uso real (e.g., string[] para URIs)
-};
+import { PetPost } from "../types/petPots";
 
 type Props = {
   pets: PetPost[];

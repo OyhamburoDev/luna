@@ -9,13 +9,14 @@ import FullScreenStack from "../screens/FullScreenStack";
 import { mockPets } from "../data/mockPetsData";
 import { useState, useRef, useEffect } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
+import { useInitializeMessages } from "../hooks/useInitializeMessages";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 export default function SwipeNavigator() {
-  const [activeTab, setActiveTab] = useState<"Inicio" | "Mapa" | "Perfil">(
-    "Inicio"
-  ); // para saber que tabs esta sellecionada?
+  const [activeTab, setActiveTab] = useState<
+    "Inicio" | "Mapa" | "Mensajes" | "Perfil"
+  >("Inicio"); // para saber que tabs esta sellecionada?
 
   const scrollEnabled = activeTab === "Inicio"; // si esta activa , hacer scroll horizontal
 
@@ -27,8 +28,12 @@ export default function SwipeNavigator() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  useInitializeMessages();
+
   // Para saber que tabbar esta activa
-  const handleTabChange = (tabName: "Inicio" | "Mapa" | "Perfil") => {
+  const handleTabChange = (
+    tabName: "Inicio" | "Mapa" | "Mensajes" | "Perfil"
+  ) => {
     console.log("🔥 Tab activa desde FeedTabs:", tabName);
     setActiveTab(tabName);
   };

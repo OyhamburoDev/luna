@@ -18,6 +18,7 @@ import { useAuthStore } from "../store/auth";
 import AdoptionModalMessage from "../components/AdoptionModalMessage";
 import { Pressable } from "react-native";
 import { useMessageStore } from "../store/messageStore";
+import { useInitializeMessages } from "../hooks/useInitializeMessages";
 
 const { width } = Dimensions.get("window");
 
@@ -25,68 +26,24 @@ const FILTERS = ["Todos", "Adopciones", "Perdidos", "Sistema"];
 
 export default function ChatsScreen() {
   const [selectedFilter, setSelectedFilter] = useState("Todos");
-  const [realRequests, setRealRequests] = useState<MessageType[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Para el modal
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
-  const [respAdoptionModal, setRespAdoptionModal] = useState<any[]>([]); // ← TIPAR
 
-  // Para contar mensajes no leídos
-  const setUnreadCount = useMessageStore((state) => state.setUnreadCount);
+  // 🔥 TODO desde el store
+  const realRequests = useMessageStore((state) => state.realRequests);
+  const originalData = useMessageStore((state) => state.originalData);
+  const loading = useMessageStore((state) => state.loading);
+  const markAsRead = useMessageStore((state) => state.markAsRead);
+  const getAllMessages = useMessageStore((state) => state.getAllMessages);
 
-  useEffect(() => {
-    const getObject = async () => {
-      try {
-        setLoading(true);
-        const adoptionResponse = await AdoptionService.getAdoptionRequests();
-
-        setRespAdoptionModal(adoptionResponse);
-
-        // ✅ CONVERTIR a formato de mensaje para tu UI
-        const adoptionMessages: MessageType[] = adoptionResponse.map(
-          (req: any) => ({
-            // ← AGREGAR TIPO
-            id: req.id,
-            title: `Solicitud para ${req.petName}`,
-            pet: req.petName,
-            date: "Hace 2h",
-            color: "#4CAF50",
-            icon: "heart",
-            isNew: true,
-            isRead: false,
-            type: "Adopciones",
-          })
-        );
-
-        console.log("Mensajes de adopción:", adoptionMessages); // ← AGREGAR ESTO
-
-        // Solo adopciones por ahora
-        setRealRequests(adoptionMessages);
-      } catch (error) {
-        console.error("Error al obtener datos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getObject();
-  }, []);
-
-  // ✅ Calcular mensajes no leídos
-  useEffect(() => {
-    const combined = [...realRequests, ...MOCK_MESSAGES];
-    const unread = combined.filter((msg) => !msg.isRead).length;
-    setUnreadCount(unread);
-    console.log("🔴 Mensajes no leídos:", unread); // ← Para ver si funciona
-  }, [realRequests]); // ← Se ejecuta cuando cambien los datos de Firebase
+  // 🔥 Usar el hook para inicializar (solo al entrar a la pantalla)
+  useInitializeMessages();
 
   const handleMessagePress = (item: MessageType) => {
     if (item.type === "Adopciones") {
-      const realData = respAdoptionModal.find((req: any) => req.id === item.id);
+      // Buscar datos originales en el store
+      const realData = originalData.find((req: any) => req.id === item.id);
 
-      // ✅ AGREGAR isRead a los datos del modal
       const dataWithReadStatus = {
         ...realData,
         isRead: item.isRead,
@@ -95,37 +52,28 @@ export default function ChatsScreen() {
       setSelectedMessage(dataWithReadStatus);
       setModalVisible(true);
     }
-    // Otros tipos comentados por ahora
   };
 
   const closeModal = () => {
     if (selectedMessage) {
-      // ✅ MOVER la lógica acá:
-      setRealRequests((prev) =>
-        prev.map((msg) =>
-          msg.id === selectedMessage.id
-            ? { ...msg, isRead: true, isNew: false }
-            : msg
-        )
-      );
+      // 🔥 Marcar como leído usando el store Y pasar MOCK_MESSAGES
+      markAsRead(selectedMessage.id, MOCK_MESSAGES);
     }
 
     setModalVisible(false);
     setSelectedMessage(null);
   };
 
-  // ✅ COMBINAR datos reales + mock
-  const allMessages = [...realRequests, ...MOCK_MESSAGES];
+  // 🔥 Obtener todos los mensajes del store
+  const allMessages = getAllMessages(MOCK_MESSAGES);
 
-  // ✅ FILTRAR usando la lista combinada
+  // Filtrar usando la lista combinada
   const filteredMessages =
     selectedFilter === "Todos"
       ? allMessages
       : allMessages.filter((msg) => msg.type === selectedFilter);
 
   const renderMessage = ({ item }: { item: MessageType }) => {
-    console.log("Debug:", item.title, "isNew:", item.isNew);
-
     return (
       <View style={{ backgroundColor: "white", margin: 2 }}>
         <Pressable
@@ -133,11 +81,9 @@ export default function ChatsScreen() {
             styles.messageCard,
             item.isNew && styles.messageCardNew,
             pressed && { opacity: 0.8 },
-            ,
           ]}
           onPress={() => handleMessagePress(item)}
         >
-          {/* Resto del render igual */}
           {item.isNew && <View style={styles.newIndicator} />}
 
           <View style={styles.messageHeader}>
@@ -173,7 +119,7 @@ export default function ChatsScreen() {
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffffff" />
       <SafeAreaView style={styles.container}>
-        {/* Header */}
+        {/* Header igual */}
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <View style={styles.titleIconContainer}>
@@ -183,7 +129,7 @@ export default function ChatsScreen() {
           </View>
         </View>
 
-        {/* Filtros */}
+        {/* Filtros igual */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
