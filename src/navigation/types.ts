@@ -4,7 +4,6 @@ export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   Register: undefined;
-  Swipe: undefined;
   PetRegister: undefined;
   AdoptionFormPet: {
     petId: string;
@@ -15,4 +14,6 @@ export type RootStackParamList = {
   };
   PetSwipe: { pet: PetPost };
   PetDetail: { pet: PetPost };
+  Perfil: undefined;
+  Swipe: { screen?: string } | undefined;
 };

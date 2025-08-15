@@ -13,6 +13,7 @@ interface MessageStore {
   setOriginalData: (data: any[]) => void;
   setUnreadCount: (count: number) => void;
   setLoading: (loading: boolean) => void;
+  removeMessage: (messageId: any) => void;
 
   // Acción para marcar como leído (ahora recibe mockMessages)
   markAsRead: (messageId: string, mockMessages: MessageType[]) => void;
@@ -68,5 +69,17 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
     const allMessages = [...state.realRequests, ...mockMessages];
     const unread = allMessages.filter((msg) => !msg.isRead).length;
     set({ unreadCount: unread });
+  },
+
+  removeMessage: (messageId: any) => {
+    set((state) => ({
+      realRequests: state.realRequests.filter((msg) => msg.id !== messageId),
+      originalData: state.originalData.filter((data) => data.id !== messageId),
+    }));
+
+    // Auto-actualizar contador
+    const state = get();
+    const mockMessages: MessageType[] = []; // Pasarás MOCK_MESSAGES desde el componente
+    state.updateUnreadCount(mockMessages);
   },
 }));

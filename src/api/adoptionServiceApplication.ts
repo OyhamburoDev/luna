@@ -7,6 +7,8 @@ import {
   orderBy,
   where,
   getDocs,
+  doc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { AdoptionFormDataWithId } from "../types/forms";
@@ -59,6 +61,18 @@ export class AdoptionService {
       return myRequests;
     } catch (error) {
       console.error("Error fetching adoption requests:", error);
+      throw error;
+    }
+  }
+
+  // Servicio para eliminar un mensaje
+  static async deleteAdoptionRequest(messageId: string): Promise<void> {
+    try {
+      const docRef = doc(db, "adoption_requests", messageId);
+      await deleteDoc(docRef);
+      console.log("✅ Documento eliminado de Firebase");
+    } catch (error) {
+      console.error("❌ Error eliminando de Firebase:", error);
       throw error;
     }
   }

@@ -48,7 +48,7 @@ export const mockPets: PetPost[] = [
     energyLevel: "Alto",
 
     // ✅ USUARIO 2: María (dueña de Dora)
-    ownerId: "user_maria_456",
+    ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "María García",
     ownerEmail: "maria@example.com",
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_dos.jpg"),
@@ -70,7 +70,7 @@ export const mockPets: PetPost[] = [
     species: "Gato",
 
     // ✅ USUARIO 3: Ana (dueña de Max)
-    ownerId: "user_ana_789",
+    ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Ana López",
     ownerEmail: "ana@example.com",
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_tres.jpg"),
@@ -89,7 +89,7 @@ export const mockPets: PetPost[] = [
     species: "Gato",
 
     // ✅ USUARIO 1: Juan (también dueño de fermin)
-    ownerId: "user_juan_123",
+    ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Juan Pérez",
     ownerEmail: "juan@example.com",
     ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_siete.jpg"),
@@ -121,7 +121,7 @@ export const mockPets: PetPost[] = [
     energyLevel: "Alto",
 
     // ✅ USUARIO 5: Sofía (dueña de Vitto)
-    ownerId: "user_sofia_202",
+    ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Sofía Martínez",
     ownerEmail: "sofia@example.com",
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_cuatro.jpg"),

@@ -2,16 +2,6 @@ import { MessageType } from "../types/messageType";
 
 export const MOCK_MESSAGES: MessageType[] = [
   {
-    id: "1",
-    type: "Adopciones",
-    title: "Juan te envió una solicitud de adopción",
-    date: "6 ago",
-    pet: "Firulais",
-    color: "#f093fb", // Rosa/púrpura
-    icon: "paw",
-    isNew: true,
-  },
-  {
     id: "2",
     type: "Perdidos",
     title: "Nueva alerta: mascota perdida cerca tuyo",
@@ -20,6 +10,7 @@ export const MOCK_MESSAGES: MessageType[] = [
     color: "#ff6b6b", // Rojo
     icon: "alert-circle",
     isNew: true,
+    isRead: false,
   },
   {
     id: "3",
@@ -30,6 +21,7 @@ export const MOCK_MESSAGES: MessageType[] = [
     color: "#667eea", // Azul
     icon: "chatbubble-ellipses",
     isNew: false,
+    isRead: false,
   },
   {
     id: "4",
@@ -40,6 +32,7 @@ export const MOCK_MESSAGES: MessageType[] = [
     color: "#43e97b", // Verde
     icon: "checkmark-done-circle",
     isNew: false,
+    isRead: false,
   },
   {
     id: "5",
@@ -50,5 +43,6 @@ export const MOCK_MESSAGES: MessageType[] = [
     color: "#4facfe", // Azul claro
     icon: "chatbubble-ellipses",
     isNew: false,
+    isRead: false,
   },
 ];

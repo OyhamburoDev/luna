@@ -1,4 +1,6 @@
 import React, { useRef, useState } from "react";
+import { useAuthStore } from "../store/auth";
+import { useAuthModalContext } from "../contexts/AuthModalContext";
 import {
   View,
   Text,
@@ -11,6 +13,8 @@ import {
   Platform,
   Keyboard,
   TouchableWithoutFeedback,
+  Modal,
+  Pressable,
 } from "react-native";
 import { useAdoptionRequest } from "../hooks/useAdoptionRequest";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -22,6 +26,10 @@ import { StatusBar } from "expo-status-bar";
 import { LayoutAnimation } from "react-native";
 import { useCallback } from "react";
 import { findNodeHandle } from "react-native";
+import { navigate } from "../navigation/NavigationService";
+import { LocalAuthModal } from "../components/LocalAuthModal";
+
+import { useAuth } from "../hooks/useAuth";
 
 type AdoptionFormRouteProp = RouteProp<RootStackParamList, "AdoptionFormPet">;
 
@@ -29,16 +37,20 @@ export default function AdoptionFormScreen() {
   const route = useRoute<AdoptionFormRouteProp>();
   const { petId, petName, ownerId, ownerName, ownerEmail } = route.params;
 
-  const { form, handleChange, handleSubmit, errors } = useAdoptionRequest(
-    petId,
-    petName,
-    ownerId,
-    ownerName,
-    ownerEmail
-  );
+  const {
+    form,
+    handleChange,
+    handleSubmit,
+    errors,
+    setShowLocalModal,
+    showLocalModal,
+  } = useAdoptionRequest(petId, petName, ownerId, ownerName, ownerEmail);
+
+  const handleSubmitWithAuth = () => {
+    handleSubmit();
+  };
 
   const navigation = useNavigation();
-
   const scrollRef = useRef<ScrollView>(null);
 
   // Manejar la altura del teclado con respecto a los inputs
@@ -143,7 +155,6 @@ export default function AdoptionFormScreen() {
                   onFocus={handleInputFocus}
                   onChangeText={(text) => handleChange("address", text)}
                 />
-
                 {/* SECCIÓN 2 */}
                 <View style={styles.sectionTitleRow}>
                   <Ionicons
@@ -233,11 +244,10 @@ export default function AdoptionFormScreen() {
                   onChangeText={(text) => handleChange("comments", text)}
                   multiline
                 />
-
                 <View style={styles.fixedButtonContainer}>
                   <TouchableOpacity
                     style={styles.button}
-                    onPress={handleSubmit}
+                    onPress={handleSubmitWithAuth}
                   >
                     <Text style={styles.buttonText}>Enviar solicitud</Text>
                   </TouchableOpacity>
@@ -247,6 +257,15 @@ export default function AdoptionFormScreen() {
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      <LocalAuthModal
+        visible={showLocalModal}
+        onClose={() => setShowLocalModal(false)}
+        onSuccess={() => {
+          setTimeout(() => handleSubmit(), 100);
+        }}
+        initialMode="login" // Opcional: empezar en login
+      />
     </>
   );
 }

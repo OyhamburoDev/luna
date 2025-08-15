@@ -7,13 +7,19 @@ import { NavigationContainer } from "@react-navigation/native";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { navigationRef } from "./src/navigation/NavigationService";
 
+import { AuthModalProvider } from "./src/contexts/AuthModalContext";
+import { AuthModal } from "./src/components/AuthModal";
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <NavigationContainer ref={navigationRef}>
-          <RootNavigator />
-        </NavigationContainer>
+        <AuthModalProvider>
+          <NavigationContainer ref={navigationRef}>
+            <RootNavigator />
+          </NavigationContainer>
+          <AuthModal />
+        </AuthModalProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

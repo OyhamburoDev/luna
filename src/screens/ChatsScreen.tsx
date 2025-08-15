@@ -1,3 +1,5 @@
+import { useAuthModalContext } from "../contexts/AuthModalContext";
+import { useFocusEffect } from "@react-navigation/native";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -24,7 +26,51 @@ const { width } = Dimensions.get("window");
 
 const FILTERS = ["Todos", "Adopciones", "Perdidos", "Sistema"];
 
+// 👇 Componente para mostrar cuando no está autenticado
+const AuthRequiredView = () => {
+  const { openModal } = useAuthModalContext();
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffffff" />
+
+      {/* Header igual que el original */}
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
+          <View style={styles.titleIconContainer}>
+            <Ionicons name="mail" size={24} color="#667eea" />
+          </View>
+          <Text style={styles.title}>Mensajes</Text>
+        </View>
+      </View>
+
+      {/* Vista de autenticación requerida */}
+      <View style={styles.authRequiredContainer}>
+        <View style={styles.authRequiredContent}>
+          <Ionicons name="lock-closed" size={64} color="#667eea" />
+          <Text style={styles.authRequiredTitle}>
+            Inicia sesión para ver tus mensajes
+          </Text>
+          <Text style={styles.authRequiredSubtitle}>
+            Conecta con personas que quieren adoptar o dar en adopción mascotas
+          </Text>
+
+          <Pressable
+            style={styles.authRequiredButton}
+            onPress={() => openModal("login")}
+          >
+            <Text style={styles.authRequiredButtonText}>Iniciar sesión</Text>
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+};
+
 export default function ChatsScreen() {
+  const { isAuthenticated } = useAuthStore();
+  const { openModal } = useAuthModalContext();
+
   const [selectedFilter, setSelectedFilter] = useState("Todos");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
@@ -38,6 +84,22 @@ export default function ChatsScreen() {
 
   // 🔥 Usar el hook para inicializar (solo al entrar a la pantalla)
   useInitializeMessages();
+
+  // 👇 Abrir modal automáticamente cuando entra sin autenticación
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!isAuthenticated) {
+        setTimeout(() => {
+          openModal("login");
+        }, 100);
+      }
+    }, [isAuthenticated, openModal])
+  );
+
+  // 👇 Si no está autenticado, mostrar vista especial
+  if (!isAuthenticated) {
+    return <AuthRequiredView />;
+  }
 
   const handleMessagePress = (item: MessageType) => {
     if (item.type === "Adopciones") {
@@ -328,5 +390,47 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 12,
+  },
+  // 👇 Estilos para la vista de autenticación requerida
+  authRequiredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  authRequiredContent: {
+    alignItems: "center",
+    maxWidth: 300,
+  },
+  authRequiredTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#2d3436",
+    textAlign: "center",
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  authRequiredSubtitle: {
+    fontSize: 16,
+    color: "#636e72",
+    textAlign: "center",
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  authRequiredButton: {
+    backgroundColor: "#667eea",
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 12,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  authRequiredButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "700",
   },
 });

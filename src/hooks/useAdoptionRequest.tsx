@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Alert } from "react-native";
 import type { AdoptionFormData } from "../types/forms";
 import { useAdoptionFormStore } from "../store/adoptionFormStore";
@@ -25,6 +25,7 @@ export function useAdoptionRequest(
 ) {
   const { form, setFormField, resetForm } = useAdoptionFormStore();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const [showLocalModal, setShowLocalModal] = useState(false);
 
   const [errors, setErrors] = useState<AdoptionFormErrors>({
     fullName: false,
@@ -36,8 +37,18 @@ export function useAdoptionRequest(
     reason: false,
   });
 
+  const pendingSubmission = useRef<boolean>(false);
+
+  // Detectar cuando el usuario se autentica y hay una intención pendiente
+  useEffect(() => {
+    if (isAuthenticated && pendingSubmission.current) {
+      pendingSubmission.current = false;
+      handleSubmit();
+    }
+  }, [isAuthenticated]);
+
   const handleChange = (field: keyof typeof form, value: string) => {
-    setFormField(field, value); // ✅ usamos los dos argumentos correctamente
+    setFormField(field, value);
   };
 
   // subir al servidor
@@ -62,8 +73,6 @@ export function useAdoptionRequest(
       return;
     }
 
-    // No continuar si el usuario no esta registrado. llevarlo a la screen register
-
     if (isAuthenticated) {
       try {
         const payload: AdoptionFormData = {
@@ -76,24 +85,24 @@ export function useAdoptionRequest(
           applicantId: useAuthStore.getState().user?.uid!,
         };
 
-        // ✅ Reemplazar fetch por Firebase
         await AdoptionService.submitAdoptionRequest(payload);
-
         Alert.alert("Éxito", "Tu solicitud fue enviada");
         resetForm();
       } catch (error) {
         Alert.alert("Error", "No se pudo enviar tu solicitud");
       }
     } else {
-      Alert.alert(
-        "Iniciá sesión",
-        "Debés estar registrado para enviar la solicitud."
-      );
-      // Aca va la navegacion
-      navigate("Login");
+      setShowLocalModal(true);
       return;
     }
   };
 
-  return { form, handleChange, handleSubmit, errors };
+  return {
+    form,
+    handleChange,
+    handleSubmit,
+    errors,
+    setShowLocalModal,
+    showLocalModal,
+  };
 }

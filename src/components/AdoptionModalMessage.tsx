@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useInitializeMessages } from "../hooks/useInitializeMessages";
 
 interface Props {
   visible: boolean;
@@ -20,6 +21,7 @@ export default function AdoptionModalMessage({
   onClose,
   messageData,
 }: Props) {
+  const { deleteMessage } = useInitializeMessages();
   if (!messageData) return null;
 
   const formatDate = (timestamp: any) => {
@@ -99,7 +101,7 @@ export default function AdoptionModalMessage({
             <View style={styles.sectionHeader}>
               <Ionicons name="paw" size={20} color="#4CAF50" />
               <Text style={styles.sectionTitle}>
-                {messageData.petName || "Mascota"}
+                {`Para: ${messageData.petName}` || "Mascota"}
               </Text>
             </View>
             <Text style={styles.submittedDate}>
@@ -238,7 +240,10 @@ export default function AdoptionModalMessage({
 
             <TouchableOpacity
               style={styles.rejectButton}
-              onPress={handleReject}
+              onPress={() => {
+                deleteMessage(messageData.id);
+                onClose(); // Cerrar modal
+              }}
             >
               <Ionicons name="close-circle" size={20} color="white" />
               <Text style={styles.buttonText}>Rechazar</Text>

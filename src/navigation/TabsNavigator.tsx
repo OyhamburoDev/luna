@@ -58,7 +58,7 @@ export default function TabsNavigator({
                     position: "absolute",
                     right: -8,
                     top: -8,
-                    backgroundColor: "red",
+                    backgroundColor: "#FE2C55",
                     borderRadius: 10,
                     width: 20,
                     height: 20,

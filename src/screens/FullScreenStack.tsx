@@ -19,6 +19,7 @@ import PetMediaCarousel from "../components/PetMediaCarousel";
 
 import { StatusBar } from "react-native"; // 👈 importá StatusBar
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { navigate } from "../navigation/NavigationService";
 
 const { width, height } = Dimensions.get("window");
 
@@ -120,6 +121,16 @@ export default function FullScreenStack({
       setTextWasTruncated(true);
     }
   }, [textLineCount]);
+
+  const goToFormAdoption = () => {
+    navigate("AdoptionFormPet", {
+      petId: pet.id,
+      petName: pet.petName,
+      ownerId: pet.ownerId,
+      ownerName: pet.ownerName,
+      ownerEmail: pet.ownerEmail,
+    });
+  };
 
   return (
     <>

@@ -12,6 +12,7 @@ export const useInitializeMessages = () => {
   const updateUnreadCount = useMessageStore((state) => state.updateUnreadCount);
   const setLoading = useMessageStore((state) => state.setLoading);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const removeMessage = useMessageStore((state) => state.removeMessage);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -24,6 +25,7 @@ export const useInitializeMessages = () => {
         // 1️⃣ Traer datos de Firebase
         const adoptionResponse = await AdoptionService.getAdoptionRequests();
         console.log("📥 Datos de Firebase:", adoptionResponse);
+        console.log("Cantidad de objetos:", adoptionResponse.length);
 
         // 2️⃣ Guardar datos originales para el modal
         setOriginalData(adoptionResponse);
@@ -32,11 +34,11 @@ export const useInitializeMessages = () => {
         const adoptionMessages: MessageType[] = adoptionResponse.map(
           (req: any) => ({
             id: req.id,
-            title: `Solicitud para ${req.petName}`,
+            title: `${req.fullName} te envió una solicitud de adopción `,
             pet: req.petName,
             date: "Hace 2h",
-            color: "#4CAF50",
-            icon: "heart",
+            color: "#f093fb",
+            icon: "paw",
             isNew: true,
             isRead: false,
             type: "Adopciones",
@@ -64,5 +66,21 @@ export const useInitializeMessages = () => {
     loadMessages();
   }, [isAuthenticated]); // Dependencia del estado de auth
 
-  // Este hook no retorna nada, solo inicializa datos en background
+  const deleteMessage = async (messageId: string) => {
+    try {
+      console.log("🗑️ Eliminando mensaje:", messageId);
+
+      // 1. Eliminar de Firebase
+      await AdoptionService.deleteAdoptionRequest(messageId);
+
+      // 2. Actualizar store (quitar de la lista local)
+      removeMessage(messageId); // ← USAR la función del store
+
+      console.log("✅ Mensaje eliminado");
+    } catch (error) {
+      console.error("❌ Error eliminando mensaje:", error);
+    }
+  };
+
+  return { deleteMessage };
 };

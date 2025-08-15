@@ -10,6 +10,8 @@ import { mockPets } from "../data/mockPetsData";
 import { useState, useRef, useEffect } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 import { useInitializeMessages } from "../hooks/useInitializeMessages";
+import { AuthModalProvider } from "../contexts/AuthModalContext";
+import { AuthModal } from "../components/AuthModal";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
