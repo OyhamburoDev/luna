@@ -13,14 +13,25 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Necesitamos tu ubicación para mostrar mascotas perdidas cercanas."
+      },
+      "config": {
+        "googleMapsApiKey": "AIzaSyAQWeOz9z--Og7OyyjzGTAnefvtq1ilbe0"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAQWeOz9z--Og7OyyjzGTAnefvtq1ilbe0"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
