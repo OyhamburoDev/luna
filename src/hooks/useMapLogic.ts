@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { WebView } from "react-native-webview";
 import * as Location from "expo-location";
 import { PetPin } from "../types/mapTypes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Alert } from "react-native";
 
 export const useMapLogic = () => {
   // Estados principales
@@ -11,6 +13,7 @@ export const useMapLogic = () => {
   const [selected, setSelected] = useState<PetPin | null>(null);
   const [markedIds, setMarkedIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
 
   // Ref del WebView
   const webRef = useRef<WebView | null>(null);
@@ -22,6 +25,12 @@ export const useMapLogic = () => {
   // Coordenadas actuales (ubicación del usuario o por defecto)
   const currentLat = location ? location.coords.latitude : defaultLat;
   const currentLng = location ? location.coords.longitude : defaultLng;
+
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(
+    undefined
+  );
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [nearbyPetsCount, setNearbyPetsCount] = useState(8);
 
   // Solicitar permisos y obtener ubicación al montar el componente
   useEffect(() => {
@@ -42,18 +51,37 @@ export const useMapLogic = () => {
 
   // Función para centrar el mapa en la ubicación actual
   const onPressLocate = async () => {
+    // Si ya tenemos ubicación guardada, usarla inmediatamente
+    if (location) {
+      const { latitude, longitude } = location.coords;
+      webRef.current?.injectJavaScript(
+        `window._centerAndRegeneratePins(${latitude}, ${longitude}); true;`
+      );
+      return; // ¡Salir aquí! No pedir GPS de nuevo
+    }
+
+    // Solo si NO tenemos ubicación, pedir GPS nuevo
+    setIsLocating(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return;
+      if (status !== "granted") {
+        setIsLocating(false);
+        return;
+      }
 
-      const loc = await Location.getCurrentPositionAsync({});
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      setLocation(loc); // Guardar nueva ubicación
       const { latitude, longitude } = loc.coords;
-
       webRef.current?.injectJavaScript(
-        `window._recenter(${latitude}, ${longitude}); true;`
+        `window._centerAndRegeneratePins(${latitude}, ${longitude}); true;`
       );
     } catch (error) {
-      console.log("Error relocating:", error);
+      console.log("Error obteniendo ubicación:", error);
+    } finally {
+      setIsLocating(false);
     }
   };
 
@@ -96,13 +124,31 @@ export const useMapLogic = () => {
     setSelected(null);
   };
 
-  // Función para navegar a detalles (placeholder por ahora)
-  const onViewMore = () => {
-    if (selected) {
-      console.log("Ver más detalles para:", selected.id);
-      // Aquí irá la navegación: navigation.navigate("Detalle", { id: selected.id });
+  const loadUserData = useCallback(async () => {
+    try {
+      const userId = await AsyncStorage.getItem("userId");
+      const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
+
+      if (userId && isLoggedIn === "true") {
+        setCurrentUserId(userId);
+        setIsUserLoggedIn(true);
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
     }
-  };
+  }, []);
+
+  const onReportNewPet = useCallback(() => {
+    Alert.alert("Crear reporte", "Función de reportar mascota");
+  }, []);
+
+  const onLogin = useCallback(() => {
+    Alert.alert("Login", "Función de login");
+  }, []);
+
+  useEffect(() => {
+    loadUserData();
+  }, [loadUserData]);
 
   return {
     // Estados
@@ -111,6 +157,7 @@ export const useMapLogic = () => {
     markedIds,
     query,
     setQuery,
+    isLocating,
 
     // Coordenadas
     currentLat,
@@ -124,7 +171,12 @@ export const useMapLogic = () => {
     handleWebViewMessage,
     onMarkPin,
     onCloseSelection,
-    onViewMore,
+
+    currentUserId,
+    isUserLoggedIn,
+    nearbyPetsCount,
+    onReportNewPet,
+    onLogin,
 
     // Helpers
     isMarked: (id: string) => markedIds.has(id),

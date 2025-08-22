@@ -107,6 +107,65 @@ window._recenter = function (la, ln) {
   try { map.setView([la, ln], map.getZoom(), { animate: true }); } catch(e){}
 };
 
+ // Función para centrar mapa y regenerar pins (para búsqueda)
+window._centerAndRegeneratePins = function (newLat, newLng) {
+  try {
+    // Centrar mapa en nueva ubicación
+    map.setView([newLat, newLng], 15, { animate: true });
+    
+    // Limpiar pins existentes (excepto el usuario)
+    markerById.forEach(function (val) {
+      map.removeLayer(val.marker);
+    });
+    markerById.clear();
+    
+    // Generar nuevos pins alrededor de la nueva ubicación
+    var newPins = Array.from({ length: 8 }, (_, i) => {
+      var species = SPECIES[i % SPECIES.length];
+      var imgArr = species === "PERRO" ? DOG_IMAGES : CAT_IMAGES;
+      var image = imgArr[i % imgArr.length];
+      return {
+        id: String(i + 1),
+        lat: newLat + (Math.random() * 2 - 1) * R,
+        lng: newLng + (Math.random() * 2 - 1) * R,
+        image: image,
+        label: i % 2 ? "AVISTAMIENTO" : "PERDIDO",
+        species: species
+      };
+    });
+    
+    // Crear y agregar nuevos markers
+    newPins.forEach(function(p) {
+      var html =
+        '<div class="card">' +
+          '<img src="' + p.image + '" alt="pet" />' +
+          (p.label ? '<div class="badge">' + p.label + '</div>' : '') +
+        '</div>';
+
+      var icon = L.divIcon({
+        className: 'photo-marker',
+        html: html,
+        iconSize: [84,84],
+        iconAnchor: [42,42]
+      });
+
+      var m = L.marker([p.lat, p.lng], { icon: icon }).addTo(map);
+      markerById.set(p.id, { marker: m, data: p });
+
+      m.on("click", function () {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: "pin_tap", pin: p }));
+      });
+    });
+    
+    // Actualizar posición del usuario
+    map.removeLayer(userMarker);
+    userMarker = L.marker([newLat, newLng], { icon: userIcon }).addTo(map);
+    
+  } catch(e) {
+    console.log('Error regenerating pins:', e);
+  }
+};
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd', maxZoom: 19
     }).addTo(map);
@@ -116,7 +175,7 @@ window._recenter = function (la, ln) {
       html: '<div class="user-dot"></div>',
       iconSize: [14,14], iconAnchor: [7,7]
     });
-    L.marker([lat, lng], { icon: userIcon }).addTo(map);
+  var userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
 
     var markerById = new Map();
 
