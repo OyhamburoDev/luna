@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CustomHeaderTop from "../components/CustomHeaderTop"; // Asegúrate de que la ruta sea correcta
 import PetCardVertical from "../components/PetCardVertical"; // Asegúrate de que la ruta sea correcta
 import { setBackgroundColorAsync } from "expo-system-ui";
-import { PetPost } from "../types/petPots";
+import type { PetPost } from "../types/petPots";
 
 type Props = {
   pets: PetPost[];
@@ -128,6 +128,7 @@ export default function HomeScreen({
               pet={item}
               isActive={index === activeIndex && (isScreenActive ?? true)}
               alturaCard={cardHeight} // Pasa la altura medida dinámicamente
+              onPressArrow={onPressDiscoverMore}
             />
           )}
           decelerationRate="fast"

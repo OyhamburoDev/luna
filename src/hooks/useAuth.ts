@@ -1,7 +1,9 @@
-import { use, useState } from "react";
+import { useState } from "react";
 import { authApi } from "../api/auth.api";
 import { useAuthStore } from "../store/auth";
 import { navigate } from "../navigation/NavigationService";
+import { ensureUserDoc } from "../api/userProfileService";
+import { useUserStore } from "../store/userStore";
 
 export function useAuth() {
   const loginStore = useAuthStore((state) => state.login);
@@ -10,13 +12,25 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const updateUserInfo = useUserStore((s) => s.updateUserInfo);
+  const resetUserInfo = useUserStore((s) => s.resetUserInfo);
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const { user, token } = await authApi.login({ email, password });
+
+      // 1) Garantizar doc en Firestore
+      await ensureUserDoc(user.uid, user.email ?? "");
+
+      // 2) Guardar credenciales en auth store
       loginStore(user, token);
+
+      // 3) Sembrar mínimos en userStore
+      updateUserInfo({ uid: user.uid, email: user.email ?? "" });
+
       return true;
     } catch (err: any) {
       console.error("Login error:", err);
@@ -32,10 +46,16 @@ export function useAuth() {
     setError(null);
 
     try {
-      console.log("Registering user with email:", email);
-      const user = await authApi.register(email, password);
-      const idToken = await user.getIdToken();
-      loginStore(user, idToken);
+      const { user, token } = await authApi.register(email, password);
+
+      await ensureUserDoc(user.uid, user.email ?? "");
+
+      // auth store
+      loginStore(user, token);
+
+      // user store (semilla mínima)
+      updateUserInfo({ uid: user.uid, email: user.email ?? "" });
+
       navigate("Swipe");
       return true;
     } catch (err: any) {
@@ -49,6 +69,7 @@ export function useAuth() {
 
   const logout = () => {
     logoutStore();
+    resetUserInfo();
   };
 
   return {

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useAuthStore } from "../store/auth";
+import { useEffect } from "react";
 
 export type AuthModalType = "login" | "register";
 
@@ -7,33 +8,27 @@ export const useAuthModal = () => {
   // Estado para controlar si el modal está visible o no
   const [isVisible, setIsVisible] = useState(false);
 
-  // Estado para saber si mostrar login o register
-  const [modalType, setModalType] = useState<AuthModalType>("login");
+  // CAMBIO CLAVE: Ahora el estado inicial es "register"
+  const [modalType, setModalType] = useState<AuthModalType>("register");
 
   // Obtenemos el estado de autenticación actual
   const { isAuthenticated } = useAuthStore();
 
   // FUNCIÓN PRINCIPAL: Esta es la magia 🎩
   const requireAuth = useCallback(
-    (action: () => void, defaultModalType: AuthModalType = "login") => {
-      // Si el usuario YA está logueado...
+    (action: () => void, defaultModalType: AuthModalType = "register") => {
       if (isAuthenticated) {
-        // Ejecuta la acción directamente (ej: navegar a mensajes)
         action();
       } else {
-        // Si NO está logueado...
-        // 1. Define qué tipo de modal mostrar (login o register)
-        setModalType(defaultModalType);
-        // 2. Abre el modal
+        setModalType(defaultModalType); // 👈 ESTE podría ser el culpable
         setIsVisible(true);
-        // La acción NO se ejecuta hasta que se loguee
       }
     },
     [isAuthenticated]
   );
 
-  // Función para abrir el modal manualmente
-  const openModal = useCallback((type: AuthModalType = "login") => {
+  // Función para abrir el modal manualmente - CAMBIÉ DEFAULT A "register"
+  const openModal = useCallback((type: AuthModalType = "register") => {
     setModalType(type);
     setIsVisible(true);
   }, []);
@@ -45,8 +40,10 @@ export const useAuthModal = () => {
 
   // Función para cambiar entre login y register SIN cerrar el modal
   const switchModalType = useCallback(() => {
-    setModalType((prev) => (prev === "login" ? "register" : "login"));
-  }, []);
+    setModalType((prev) => {
+      return prev === "login" ? "register" : "login";
+    });
+  }, [modalType]);
 
   return {
     isVisible, // ¿Está el modal visible?

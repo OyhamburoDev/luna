@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import {
   View,
   TouchableOpacity,
@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SearchResult } from "../../hooks/useMapSearch";
+import type { SearchResult } from "../../hooks/useMapSearch";
 
 interface MapSearchBarProps {
   query: string;
@@ -44,7 +44,7 @@ export const MapSearchBar: React.FC<MapSearchBarProps> = ({
           <Ionicons
             name="search"
             size={18}
-            color="#fff"
+            color="#333"
             style={{ marginRight: 8 }}
           />
           <TextInput
@@ -58,7 +58,7 @@ export const MapSearchBar: React.FC<MapSearchBarProps> = ({
           {isSearching && (
             <ActivityIndicator
               size="small"
-              color="#fff"
+              color="#333"
               style={{ marginLeft: 8 }}
             />
           )}
@@ -66,9 +66,9 @@ export const MapSearchBar: React.FC<MapSearchBarProps> = ({
 
         <TouchableOpacity style={styles.locateBtn} onPress={onPressLocate}>
           {isLocating ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color="#333" />
           ) : (
-            <Ionicons name="locate" size={18} color="#fff" />
+            <Ionicons name="locate" size={18} color="#333" />
           )}
         </TouchableOpacity>
       </View>
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   searchInputWrap: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
     borderRadius: 24,
     height: 44,
     paddingHorizontal: 14,
@@ -151,10 +151,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(102, 126, 234, 0.2)",
   },
   searchInput: {
     flex: 1,
-    color: "#fff",
+    color: "#333",
     fontSize: 16,
     paddingVertical: 0,
   },
@@ -163,7 +165,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -171,6 +173,8 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(102, 126, 234, 0.2)",
   },
 
   // Estilos para sugerencias

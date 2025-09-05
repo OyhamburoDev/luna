@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import {
   View,
   TouchableOpacity,
@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { FilterType } from "../../types/mapTypes";
+import type { FilterType } from "../../types/mapTypes";
 
 const BOTTOM_CARD_HEIGHT = 180;
 
@@ -98,9 +98,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(102, 126, 234, 0.2)",
   },
   chipActive: {
-    backgroundColor: "#000000ff",
+    backgroundColor: "#667eea",
   },
   chipText: {
     fontSize: 14,

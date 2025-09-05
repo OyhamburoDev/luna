@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+"use client";
+
+import type React from "react";
+import { useState } from "react";
 import {
   Modal,
   View,
@@ -9,10 +12,9 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
-  Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { PetPin, PetDetailData } from "../../types/mapTypes";
+import type { PetDetailData } from "../../types/mapTypes";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -343,12 +345,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
+    borderBottomColor: "#f3f4f6",
+    backgroundColor: "#667eea08",
   },
   closeButton: {
-    padding: 4,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "#f9fafb",
   },
   headerTitle: {
     fontSize: 18,
@@ -380,17 +385,23 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.5)",
   },
   activeIndicator: {
-    backgroundColor: "#fff",
+    backgroundColor: "#667eea",
   },
   infoSection: {
     padding: 16,
+    backgroundColor: "#667eea05",
   },
   statusBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
     marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   statusText: {
     color: "#fff",
@@ -415,7 +426,16 @@ const styles = StyleSheet.create({
   section: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: "#f3f4f6",
+    borderTopColor: "#f9fafb",
+    marginHorizontal: 8,
+    marginVertical: 4,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   sectionTitle: {
     fontSize: 18,
@@ -435,6 +455,11 @@ const styles = StyleSheet.create({
   },
   characteristic: {
     width: "45%",
+    padding: 12,
+    backgroundColor: "#f9fafb",
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: "#667eea",
   },
   charLabel: {
     fontSize: 14,
@@ -445,12 +470,16 @@ const styles = StyleSheet.create({
   charValue: {
     fontSize: 16,
     color: "#1f2937",
+    fontWeight: "500",
   },
   locationInfo: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginBottom: 4,
+    padding: 12,
+    backgroundColor: "#f9fafb",
+    borderRadius: 8,
   },
   locationText: {
     fontSize: 16,
@@ -460,17 +489,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#9ca3af",
     fontStyle: "italic",
+    marginTop: 8,
   },
   reporterInfo: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    padding: 12,
+    backgroundColor: "#f9fafb",
+    borderRadius: 8,
   },
   reporterAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: "#f3f4f6",
+    borderWidth: 2,
+    borderColor: "#667eea20",
   },
   reporterDetails: {
     flex: 1,
@@ -488,15 +523,21 @@ const styles = StyleSheet.create({
   actions: {
     padding: 16,
     gap: 12,
+    backgroundColor: "#f9fafb",
   },
   contactButton: {
-    backgroundColor: "#6366f1",
+    backgroundColor: "#667eea",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 12,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   contactButtonText: {
     color: "#fff",
@@ -508,10 +549,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#e5e7eb",
+    backgroundColor: "#fff",
   },
   reportButtonText: {
     color: "#6b7280",
@@ -523,13 +565,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: "#6366f1",
+    borderColor: "#667eea",
+    backgroundColor: "#667eea08",
   },
   editButtonText: {
-    color: "#6366f1",
+    color: "#667eea",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -544,9 +587,14 @@ const styles = StyleSheet.create({
   },
   contactModalContent: {
     backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   contactModalTitle: {
     fontSize: 18,
@@ -560,10 +608,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
     paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     borderRadius: 12,
     backgroundColor: "#f9fafb",
     marginBottom: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: "#667eea20",
   },
   contactOptionText: {
     fontSize: 16,
@@ -573,6 +623,7 @@ const styles = StyleSheet.create({
   contactCancel: {
     paddingVertical: 16,
     alignItems: "center",
+    marginTop: 8,
   },
   contactCancelText: {
     fontSize: 16,

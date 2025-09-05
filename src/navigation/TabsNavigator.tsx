@@ -8,6 +8,9 @@ import MapScreen from "../screens/MapScreen";
 import ChatsScreen from "../screens/ChatsScreen";
 import { PetPost } from "../types/petPots";
 import { useMessageStore } from "../store/messageStore";
+import { textStyles } from "../theme/textStyles";
+import { useAuthModalContext } from "../contexts/AuthModalContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,7 +29,10 @@ export default function TabsNavigator({
   isScreenActive,
   onPressDiscoverMore,
 }: Props) {
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 16); // mismo criterio que en tu modal
   const unreadCount = useMessageStore((state) => state.unreadCount);
+  const { isVisible } = useAuthModalContext();
   return (
     <Tab.Navigator
       screenListeners={{
@@ -66,22 +72,28 @@ export default function TabsNavigator({
                     alignItems: "center",
                   }}
                 >
-                  <Text style={{ color: "white", fontSize: 12 }}>
-                    {unreadCount}
-                  </Text>
+                  <Text style={textStyles.badge}>{unreadCount}</Text>
                 </View>
               </View>
             );
           }
 
-          return <Ionicons name={iconName as any} size={24} color={color} />;
+          return <Ionicons name={iconName as any} size={23} color={color} />;
         },
         tabBarActiveTintColor: "white",
-        tabBarInactiveTintColor: "#888",
+        tabBarInactiveTintColor: isVisible ? "white" : "#888",
         tabBarStyle: {
           backgroundColor: "black",
           borderTopWidth: 0,
+          paddingTop: 4,
+          paddingBottom: bottomPad, // ✅ safe area dinámico
         },
+        tabBarLabelStyle: {
+          ...textStyles.tabLabel,
+          marginTop: -4, // Reduce espacio entre ícono y texto
+          fontSize: 12, // Opcional: texto más pequeño
+        },
+
         headerShown: false,
       })}
     >

@@ -1,7 +1,7 @@
-import React from "react";
+import type React from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { PetPin } from "../../types/mapTypes";
+import type { PetPin } from "../../types/mapTypes";
 
 const BOTTOM_CARD_HEIGHT = 180;
 
@@ -167,6 +167,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: -2 },
+    borderTopWidth: 3,
+    borderTopColor: "rgba(102, 126, 234, 0.1)",
   },
   bottomImg: {
     width: 84,
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   btnPrimary: {
-    backgroundColor: "#6366f1",
+    backgroundColor: "#667eea",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -259,7 +261,7 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 60,
     height: 60,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "rgba(102, 126, 234, 0.1)",
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   reportButton: {
-    backgroundColor: "#6366f1",
+    backgroundColor: "#667eea",
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   loginPromptText: {
-    color: "#6366f1",
+    color: "#667eea",
     fontWeight: "600",
     fontSize: 14,
   },

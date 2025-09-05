@@ -15,13 +15,15 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Necesitamos tu ubicación para mostrar mascotas perdidas cercanas."
+        "NSLocationWhenInUseUsageDescription": "Necesitamos tu ubicación para mostrar mascotas perdidas cercanas.",
+        "UIViewControllerBasedStatusBarAppearance": false
       },
       "config": {
         "googleMapsApiKey": "AIzaSyAQWeOz9z--Og7OyyjzGTAnefvtq1ilbe0"
       }
     },
     "android": {
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -35,6 +37,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": ["expo-font"]
   }
 }
