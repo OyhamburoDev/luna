@@ -1,6 +1,8 @@
 // SE OCUPA DE FIRESTORE DATABASE (COLECCIÓN USER) Y STORAGE (FOTO)
 
-import { db } from "../config/firebase";
+import { db, storage } from "../config/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import * as ImageManipulator from "expo-image-manipulator";
 import {
   doc,
   getDoc,
@@ -68,4 +70,39 @@ export async function ensureUserDoc(uid: string, email: string) {
 type Updatable = Partial<Omit<UserInfo, "uid" | "email" | "createdAt">>;
 export async function updateUserProfile(uid: string, patch: Updatable) {
   await updateDoc(doc(db, "users", uid), patch);
+}
+
+// Subir imagen de perfil a Firebase Storage
+export async function uploadProfileImage(
+  imageUri: string,
+  uid: string
+): Promise<string> {
+  try {
+    // 1. Reducir resolución de la imagen
+    const resizedImage = await ImageManipulator.manipulateAsync(
+      imageUri,
+      [{ resize: { width: 400, height: 400 } }],
+      {
+        compress: 0.8,
+        format: ImageManipulator.SaveFormat.JPEG,
+      }
+    );
+
+    // 2. Convertir a blob
+    const response = await fetch(resizedImage.uri);
+    const blob = await response.blob();
+
+    // 3. Crear referencia en Storage
+    const storageRef = ref(storage, `profile-images/${uid}/profile.jpg`);
+
+    // 4. Subir imagen
+    await uploadBytes(storageRef, blob);
+
+    // 5. Obtener URL de descarga
+    const downloadURL = await getDownloadURL(storageRef);
+
+    return downloadURL;
+  } catch (error: any) {
+    throw new Error(`Error subiendo imagen: ${error.message}`);
+  }
 }

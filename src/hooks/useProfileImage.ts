@@ -4,6 +4,10 @@ import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 import { useUserStore } from "../store/userStore";
+import {
+  uploadProfileImage,
+  updateUserProfile,
+} from "../api/userProfileService";
 
 export const useProfileImage = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -35,8 +39,16 @@ export const useProfileImage = () => {
 
       if (!result.canceled && result.assets && result.assets[0]) {
         const uri = result.assets[0].uri;
-        setProfileImage(uri);
-        updateUserInfo({ photoUrl: uri });
+
+        // Subir imagen a Firebase Storage
+        const firebaseUrl = await uploadProfileImage(uri, userInfo.uid);
+
+        // Actualizar store con URL de Firebase
+        setProfileImage(firebaseUrl);
+        updateUserInfo({ photoUrl: firebaseUrl });
+
+        // Actualizar documento en Firestore
+        await updateUserProfile(userInfo.uid, { photoUrl: firebaseUrl });
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo tomar la foto");
@@ -53,8 +65,15 @@ export const useProfileImage = () => {
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        setProfileImage(result.assets[0].uri);
-        updateUserInfo({ photoUrl: result.assets[0].uri });
+        const uri = result.assets[0].uri;
+
+        // Subir imagen a Firebase Storage
+        const firebaseUrl = await uploadProfileImage(uri, userInfo.uid);
+
+        // Actualizar store y Firestore
+        setProfileImage(firebaseUrl);
+        updateUserInfo({ photoUrl: firebaseUrl });
+        await updateUserProfile(userInfo.uid, { photoUrl: firebaseUrl });
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo seleccionar la imagen");

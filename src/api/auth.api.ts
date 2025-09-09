@@ -3,7 +3,7 @@ import { auth } from "../config/auth"; // <-- usamos el auth con persistencia na
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  // signOut, // si querés también cerrar sesión local en Firebase
+  signOut,
 } from "firebase/auth";
 
 type LoginPayload = {
@@ -32,9 +32,11 @@ export const authApi = {
   },
 
   logout: async () => {
-    // Si usás backend:
-    await api.post("/logout").catch(() => {});
-    // Si además querés cerrar sesión local en Firebase:
-    // await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error durante logout:", error);
+      throw error; // Re-lanzar para que useAuth pueda manejarlo
+    }
   },
 };

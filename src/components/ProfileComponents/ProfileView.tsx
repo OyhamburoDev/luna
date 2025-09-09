@@ -15,6 +15,8 @@ import { ImageViewer } from "./ImageViewer";
 import { textStyles } from "../../theme/textStyles";
 import { fonts } from "../../theme/fonts";
 import { useUserStore } from "../../store/userStore";
+import { ProfileOptionsModal } from "./ProfileOptionsModal";
+import { useProfileOptModal } from "../../hooks/useProfileOptModal";
 
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
@@ -22,6 +24,13 @@ type Props = {
 };
 
 export default function ProfileView({ onTabChange, onEditPress }: Props) {
+  const { visible, open, close, editProfile, closeAccount } =
+    useProfileOptModal({
+      onEditProfile: onEditPress, // ya la tenés por props
+      onCloseAccount: () => {
+        // tu lógica real: signOut / delete account / abrir confirmación, etc.
+      },
+    });
   const {
     showImageOptions,
     isModalVisible,
@@ -53,13 +62,31 @@ export default function ProfileView({ onTabChange, onEditPress }: Props) {
     // { id: 4, image: "/animal-rescue-success-story.png", likes: 67 },
   ];
 
+  const handleEditProfile = () => {
+    close(); // cierra el modal primero
+    onEditPress(); // ya tenés esta lógica
+  };
+
+  const handleCloseAccount = () => {
+    close();
+    // TODO: tu lógica real de cerrar cuenta (signOut / deleteAccount / etc.)
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={{ height: 20 }} />
         <View style={styles.headerBackground}>
           {/* Header con foto de perfil */}
+
           <View style={styles.profileHeader}>
+            <TouchableOpacity style={styles.topRightIcon} onPress={open}>
+              <Ionicons
+                name="menu-outline"
+                size={28}
+                color="rgba(133, 129, 129, 0.64)"
+              />
+            </TouchableOpacity>
             <View style={styles.profileImageContainer}>
               {userInfo.photoUrl ? (
                 <Image
@@ -197,7 +224,7 @@ export default function ProfileView({ onTabChange, onEditPress }: Props) {
           <View style={styles.emptyState}>
             {activeTab === "posts" ? (
               <>
-                <Ionicons name="paw-outline" size={50} color="#ccc" />
+                {/* <Ionicons name="paw-outline" size={50} color="#ccc" /> */}
                 <Text style={[textStyles.title, styles.emptyTitle]}>
                   Comparte con otros usuarios un animal en adopción
                 </Text>
@@ -231,6 +258,13 @@ export default function ProfileView({ onTabChange, onEditPress }: Props) {
           </View>
         )}
       </ScrollView>
+
+      <ProfileOptionsModal
+        visible={visible}
+        onClose={close}
+        onEditProfile={editProfile}
+        onCloseAccount={closeAccount}
+      />
 
       <ImagePickerModal
         visible={isModalVisible}
@@ -266,6 +300,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 20,
     marginTop: 10,
+  },
+  topRightIcon: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 6, // opcional para agrandar el área táctil
   },
   profileImageContainer: {
     position: "relative",
