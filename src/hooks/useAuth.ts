@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/auth";
 import { navigate } from "../navigation/NavigationService";
 import { ensureUserDoc } from "../api/userProfileService";
 import { useUserStore } from "../store/userStore";
+import { useMessageStore } from "../store/messageStore";
 
 export function useAuth() {
   const loginStore = useAuthStore((state) => state.login);
@@ -67,9 +68,13 @@ export function useAuth() {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const resetMessages = useMessageStore.getState().resetAllMessages;
+
+    await authApi.logout();
     logoutStore();
     resetUserInfo();
+    resetMessages();
   };
 
   return {

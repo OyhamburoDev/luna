@@ -8,7 +8,6 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { textStyles } from "../../theme/textStyles";
 import type { KeyboardTypeOptions } from "react-native";

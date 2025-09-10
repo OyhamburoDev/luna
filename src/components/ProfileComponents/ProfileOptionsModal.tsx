@@ -8,6 +8,7 @@ import {
   Pressable,
   StyleSheet as RNStyleSheet,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { textStyles } from "../../theme/textStyles";
 
 type Props = {
@@ -23,6 +24,9 @@ export const ProfileOptionsModal = ({
   onEditProfile,
   onCloseAccount,
 }: Props) => {
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 16);
+
   return (
     <Modal
       visible={visible}
@@ -36,7 +40,7 @@ export const ProfileOptionsModal = ({
         <Pressable style={styles.backdrop} onPress={onClose} />
 
         {/* Sheet */}
-        <View style={styles.sheet}>
+        <View style={[styles.sheet, { paddingBottom: bottomPad }]}>
           {/* Editar perfil */}
           <TouchableOpacity style={styles.option} onPress={onEditProfile}>
             <Text style={[styles.optionText, textStyles.modal]}>
@@ -86,7 +90,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingBottom: 24,
+    // Removido paddingBottom: 24 porque ahora es dinámico
   },
   option: {
     flexDirection: "row",
@@ -101,7 +105,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   dangerText: {
-    color: "#ff3b30", // rojo sutil para “Cerrar cuenta”
+    color: "#ff3b30", // rojo sutil para "Cerrar cuenta"
   },
   separatorBtn: {
     height: 1,

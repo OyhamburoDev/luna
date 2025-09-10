@@ -224,7 +224,7 @@ export default function PetCardVertical({
             onPress={() => setIsLiked(!isLiked)}
           >
             <HeartIcon
-              size={36}
+              size={34}
               color={isLiked ? "#FF3040" : "rgba(255, 255, 255, 0.91)"}
               filled={true}
             />

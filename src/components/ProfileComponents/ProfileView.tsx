@@ -17,6 +17,8 @@ import { fonts } from "../../theme/fonts";
 import { useUserStore } from "../../store/userStore";
 import { ProfileOptionsModal } from "./ProfileOptionsModal";
 import { useProfileOptModal } from "../../hooks/useProfileOptModal";
+import { useAuth } from "../../hooks/useAuth";
+import { authApi } from "../../api/auth.api";
 
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
@@ -24,11 +26,13 @@ type Props = {
 };
 
 export default function ProfileView({ onTabChange, onEditPress }: Props) {
+  const { logout } = useAuth();
   const { visible, open, close, editProfile, closeAccount } =
     useProfileOptModal({
       onEditProfile: onEditPress, // ya la tenés por props
       onCloseAccount: () => {
-        // tu lógica real: signOut / delete account / abrir confirmación, etc.
+        console.log("Se ejecutó onCloseAccount");
+        logout();
       },
     });
   const {

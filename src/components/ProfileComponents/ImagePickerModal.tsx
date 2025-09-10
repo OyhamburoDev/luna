@@ -9,6 +9,7 @@ import {
   StyleSheet as RNStyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { textStyles } from "../../theme/textStyles";
 
 type Props = {
@@ -28,6 +29,9 @@ export const ImagePickerModal = ({
   onViewPhoto,
   hasPhoto,
 }: Props) => {
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 16);
+
   return (
     <Modal
       visible={visible}
@@ -41,7 +45,7 @@ export const ImagePickerModal = ({
         <Pressable style={styles.backdrop} onPress={onClose} />
 
         {/* ESTE es el ÚNICO contenedor que pinta el fondo y tiene el radius */}
-        <View style={styles.sheet}>
+        <View style={[styles.sheet, { paddingBottom: bottomPad }]}>
           <TouchableOpacity style={styles.option} onPress={onTakePhoto}>
             <Text style={[styles.optionText, textStyles.modal]}>
               Hacer una foto
@@ -97,7 +101,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingBottom: 24,
+    // Removido paddingBottom: 24 porque ahora es dinámico
   },
 
   option: {

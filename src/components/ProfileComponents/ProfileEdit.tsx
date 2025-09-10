@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  TextInput,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useProfileImage } from "../../hooks/useProfileImage";
@@ -240,18 +232,28 @@ export default function ProfileEdit({ onBackPress, onFieldEdit }: Props) {
             style={styles.inputButton}
             onPress={() => handleFieldEdit("biografia")}
           >
-            <Text
-              style={[
-                textStyles.title,
-                styles.inputLabelTitle,
-                { marginBottom: 0 },
-              ]}
-            >
-              Biografía
-            </Text>
+            <View>
+              <Text
+                style={[
+                  textStyles.title,
+                  styles.inputLabelTitle,
+                  { marginBottom: 0 },
+                ]}
+              >
+                Biografía
+              </Text>
+            </View>
             <View style={styles.inputButtonRight}>
-              <Text style={[textStyles.body, styles.inputValue]}>
-                {userInfo.bio || "Añadir una descripción..."}
+              <Text
+                style={[textStyles.body, styles.inputValue]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {userInfo.bio
+                  ? userInfo.bio.length > 26
+                    ? `${userInfo.bio.substring(0, 26)}...`
+                    : userInfo.bio
+                  : "Añadir una descripción..."}
               </Text>
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </View>
@@ -419,7 +421,6 @@ const styles = StyleSheet.create({
   },
   inputButtonRight: {
     flexDirection: "row",
-
     alignItems: "center",
     flex: 1,
     justifyContent: "flex-end",
