@@ -16,4 +16,12 @@ export type RootStackParamList = {
   PetDetail: { pet: PetPost };
   Perfil: undefined;
   Swipe: { screen?: string } | undefined;
+  CreatePost: {
+    media: {
+      uri: string;
+      width?: number;
+      height?: number;
+    };
+    type: "photo" | "video";
+  };
 };

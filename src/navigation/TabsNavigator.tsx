@@ -6,16 +6,21 @@ import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import MapScreen from "../screens/MapScreen";
 import ChatsScreen from "../screens/ChatsScreen";
+import CreatePostScreen from "../screens/CreatePostScreen"; // 👈 Agregar import
 import { PetPost } from "../types/petPots";
 import { useMessageStore } from "../store/messageStore";
 import { textStyles } from "../theme/textStyles";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTabsStore } from "../store/tabsStore";
+import CameraScreen from "../screens/CamaraScreen";
 
 const Tab = createBottomTabNavigator();
 
 type Props = {
-  onTabChange?: (tab: "Inicio" | "Mapa" | "Mensajes" | "Perfil") => void;
+  onTabChange?: (
+    tab: "Inicio" | "Mapa" | "Crear" | "Mensajes" | "Perfil"
+  ) => void; // 👈 Agregar "Crear"
   pets: PetPost[];
   onSelectPet: (index: number) => void;
   isScreenActive?: boolean;
@@ -29,16 +34,20 @@ export default function TabsNavigator({
   isScreenActive,
   onPressDiscoverMore,
 }: Props) {
+  const hideBottomTabs = useTabsStore((state) => state.hideBottomTabs);
   const insets = useSafeAreaInsets();
-  const bottomPad = Math.max(insets.bottom, 16); // mismo criterio que en tu modal
+  const bottomPad = Math.max(insets.bottom, 16);
   const unreadCount = useMessageStore((state) => state.unreadCount);
   const { isVisible } = useAuthModalContext();
+
   return (
     <Tab.Navigator
       screenListeners={{
         state: (e) => {
           const tabName = e.data.state.routeNames[e.data.state.index];
-          onTabChange?.(tabName as "Inicio" | "Mapa" | "Mensajes" | "Perfil");
+          onTabChange?.(
+            tabName as "Inicio" | "Mapa" | "Crear" | "Mensajes" | "Perfil"
+          ); // 👈 Actualizar
         },
       }}
       screenOptions={({ route }) => ({
@@ -49,12 +58,27 @@ export default function TabsNavigator({
             iconName = focused ? "home" : "home-outline";
           else if (route.name === "Mapa")
             iconName = focused ? "map" : "map-outline";
-          else if (route.name === "Mensajes")
+          if (route.name === "Crear") {
+            return (
+              <View
+                style={{
+                  width: 40,
+                  height: 30,
+                  borderRadius: 6, // Bordes ligeramente redondeados como TikTok
+                  backgroundColor: "white",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Ionicons name="add" size={26} color="black" />
+              </View>
+            );
+          } else if (route.name === "Mensajes")
             iconName = focused ? "chatbubbles" : "chatbubbles-outline";
           else if (route.name === "Perfil")
             iconName = focused ? "person" : "person-outline";
 
-          // ✅ Badge SOLO para Mensajes
+          // Badge para Mensajes
           if (route.name === "Mensajes" && unreadCount > 0) {
             return (
               <View>
@@ -82,18 +106,20 @@ export default function TabsNavigator({
         },
         tabBarActiveTintColor: "white",
         tabBarInactiveTintColor: isVisible ? "white" : "#888",
-        tabBarStyle: {
-          backgroundColor: "black",
-          borderTopWidth: 0,
-          paddingTop: 4,
-          paddingBottom: bottomPad, // ✅ safe area dinámico
-        },
+
+        tabBarStyle: hideBottomTabs
+          ? { display: "none" }
+          : {
+              backgroundColor: "black",
+              borderTopWidth: 0,
+              paddingTop: 4,
+              paddingBottom: bottomPad,
+            },
         tabBarLabelStyle: {
           ...textStyles.tabLabel,
-          marginTop: -4, // Reduce espacio entre ícono y texto
-          fontSize: 12, // Opcional: texto más pequeño
+          marginTop: -4,
+          fontSize: 12,
         },
-
         headerShown: false,
       })}
     >
@@ -114,6 +140,14 @@ export default function TabsNavigator({
         name="Mapa"
         component={MapScreen}
         initialParams={{ onTabChange }}
+      />
+      <Tab.Screen
+        name="Crear" // 👈 Cambiar nombre
+        component={CameraScreen}
+        initialParams={{ onTabChange }}
+        options={{
+          tabBarLabel: () => null, // 👈 Retornar null
+        }}
       />
       <Tab.Screen
         name="Mensajes"

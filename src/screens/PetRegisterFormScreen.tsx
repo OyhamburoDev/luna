@@ -1,5 +1,3 @@
-"use client";
-
 import {
   View,
   Text,
@@ -15,8 +13,9 @@ import {
   Platform,
   Keyboard,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { usePetRegister } from "../hooks/usePetRegister";
 import { useAuthStore } from "../store/auth";
 import { useNavigation } from "@react-navigation/native";
@@ -30,8 +29,15 @@ import StepHealthInfo from "../components/PetRegisterSteps/StepHealthInfo";
 import StepConductInfo from "../components/PetRegisterSteps/StepConductInfo";
 import StepAdditionalInfo from "../components/PetRegisterSteps/StepAdditionalInfo";
 import { useUploadFiles } from "../hooks/useUploadFiles";
+import { useFocusEffect } from "@react-navigation/native";
+import { fonts } from "../theme/fonts";
 
-export default function PetRegisterFormScreen() {
+type Props = {
+  onBack: () => void; // Agregar esta línea
+  // ... otras props que pueda tener
+};
+
+export default function PetRegisterFormScreen({ onBack }: Props) {
   const { form, submitPet, setFormField } = usePetRegister();
   const { user } = useAuthStore();
   const navigation =
@@ -49,6 +55,30 @@ export default function PetRegisterFormScreen() {
   const { uploadPetImage, uploadPetVideo } = useUploadFiles();
 
   const scrollRef = useRef<ScrollView>(null);
+
+  // Ocultar tabs cuando entra a esta pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      const parent = navigation.getParent();
+      console.log("Parent navigator:", parent); // Ver si existe
+
+      if (parent) {
+        parent.setOptions({
+          tabBarStyle: { display: "none" },
+        });
+      } else {
+        console.log("No parent navigator found");
+      }
+
+      return () => {
+        if (parent) {
+          parent.setOptions({
+            tabBarStyle: undefined, // Cambiar a undefined
+          });
+        }
+      };
+    }, [navigation])
+  );
 
   const handleInputFocus = useCallback((event: any) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -144,7 +174,7 @@ export default function PetRegisterFormScreen() {
         {
           text: "Salir",
           style: "destructive",
-          onPress: () => navigation.goBack(),
+          onPress: onBack,
         },
       ]
     );
@@ -272,8 +302,10 @@ export default function PetRegisterFormScreen() {
                 </TouchableOpacity>
 
                 <View style={styles.headerContent}>
-                  <Text style={styles.title}>Registro de Mascota</Text>
-                  <Text style={styles.subtitle}>
+                  <Text style={[{ fontFamily: fonts.bold }, styles.title]}>
+                    Registro de Mascota
+                  </Text>
+                  <Text style={[{ fontFamily: fonts.bold }, styles.subtitle]}>
                     Paso {stepIndex + 1} de {steps.length}
                   </Text>
                 </View>
@@ -341,7 +373,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 60, // Aumentado significativamente para evitar el status bar
+    paddingTop: 30, // Aumentado significativamente para evitar el status bar
     paddingBottom: 16,
   },
   backButton: {
@@ -358,15 +390,13 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 22,
     color: "#1F2937",
     marginBottom: 2,
   },
   subtitle: {
     fontSize: 13,
     color: "#6B7280",
-    fontWeight: "500",
     paddingLeft: 60,
   },
   progressContainer: {

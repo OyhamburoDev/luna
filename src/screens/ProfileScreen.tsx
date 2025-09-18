@@ -9,16 +9,22 @@ import { getUserProfile } from "../api/userProfileService"; // ajustá la ruta e
 import FieldEdit from "../components/ProfileComponents/FieldEdit";
 import ProfileEdit from "../components/ProfileComponents/ProfileEdit";
 import ProfileView from "../components/ProfileComponents/ProfileView";
+import PetRegisterFormScreen from "./PetRegisterFormScreen";
+import { useNavigation } from "@react-navigation/native";
+import { useTabsStore } from "../store/tabsStore";
 
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
 };
 
 export default function ProfileScreen({ onTabChange }: Props) {
+  const navigation = useNavigation();
+  const setHideBottomTabs = useTabsStore((state) => state.setHideBottomTabs);
   const { isAuthenticated } = useAuthStore();
   const { openModal, requireAuth } = useAuthModalContext();
   const [isEditing, setIsEditing] = useState(false);
   const [fieldEditConfig, setFieldEditConfig] = useState(null as any);
+  const [showPetRegister, setShowPetRegister] = useState(false);
 
   // 👇 Abrir modal automáticamente cuando entra sin autenticación
   useFocusEffect(
@@ -59,6 +65,11 @@ export default function ProfileScreen({ onTabChange }: Props) {
     }, [isAuthenticated])
   );
 
+  // Controlar tabs basado en showPetRegister
+  React.useEffect(() => {
+    setHideBottomTabs(showPetRegister);
+  }, [showPetRegister, setHideBottomTabs]);
+
   // 👇 Si no está autenticado, mostrar vista especial
   if (!isAuthenticated) {
     return (
@@ -69,6 +80,10 @@ export default function ProfileScreen({ onTabChange }: Props) {
         buttonLabel="Iniciar sesión"
       />
     );
+  }
+
+  if (showPetRegister) {
+    return <PetRegisterFormScreen onBack={() => setShowPetRegister(false)} />;
   }
 
   if (fieldEditConfig) {
@@ -94,6 +109,7 @@ export default function ProfileScreen({ onTabChange }: Props) {
     <ProfileView
       onTabChange={onTabChange}
       onEditPress={() => setIsEditing(true)}
+      onPublishPress={() => setShowPetRegister(true)}
     />
   );
 }

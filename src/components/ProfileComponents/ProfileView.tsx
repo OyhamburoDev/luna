@@ -23,9 +23,14 @@ import { authApi } from "../../api/auth.api";
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
   onEditPress: () => void;
+  onPublishPress: () => void;
 };
 
-export default function ProfileView({ onTabChange, onEditPress }: Props) {
+export default function ProfileView({
+  onTabChange,
+  onEditPress,
+  onPublishPress,
+}: Props) {
   const { logout } = useAuth();
   const { visible, open, close, editProfile, closeAccount } =
     useProfileOptModal({
@@ -110,9 +115,11 @@ export default function ProfileView({ onTabChange, onEditPress }: Props) {
               </TouchableOpacity>
             </View>
 
-            {userInfo.firstName && userInfo.lastName ? (
+            {userInfo.firstName || userInfo.lastName ? (
               <Text style={styles.userName}>
-                {userInfo.firstName} {userInfo.lastName}
+                {[userInfo.firstName, userInfo.lastName]
+                  .filter(Boolean)
+                  .join(" ")}
               </Text>
             ) : (
               <Text style={[textStyles.title, styles.userNameDefault]}>
@@ -234,7 +241,7 @@ export default function ProfileView({ onTabChange, onEditPress }: Props) {
                 </Text>
                 <TouchableOpacity
                   style={styles.uploadButton}
-                  onPress={() => {}}
+                  onPress={onPublishPress}
                 >
                   <Text
                     style={[

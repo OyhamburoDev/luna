@@ -12,6 +12,7 @@ import { usePetRegister } from "../../hooks/usePetRegister";
 import { useState } from "react";
 // @ts-ignore
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { fonts } from "../../theme/fonts";
 
 type ValidationErrors = {
   petName: boolean;
@@ -156,18 +157,25 @@ export default function StepBasicInfo({
       {/* Card wrapper */}
       <View style={styles.card}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📋 Información Básica</Text>
-          <Text style={styles.sectionDescription}>
+          <Text style={[{ fontFamily: fonts.bold }, styles.sectionTitle]}>
+            Información Básica
+          </Text>
+          <Text
+            style={[{ fontFamily: fonts.semiBold }, styles.sectionDescription]}
+          >
             Contanos sobre tu mascota
           </Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nombre de la mascota *</Text>
+            <Text style={[{ fontFamily: fonts.bold }, styles.label]}>
+              Nombre de la mascota *
+            </Text>
             <TextInput
               onFocus={handleInputFocus}
               style={[
+                { fontFamily: fonts.regular },
                 styles.input,
 
                 validationErrors.petName && {
@@ -216,7 +224,9 @@ export default function StepBasicInfo({
             </View>
 
             <View style={styles.halfInputGroup}>
-              <Text style={styles.label}>Raza</Text>
+              <Text style={[{ fontFamily: fonts.bold }, styles.label]}>
+                Raza
+              </Text>
               <TextInput
                 onFocus={handleInputFocus}
                 style={styles.input}
@@ -230,7 +240,9 @@ export default function StepBasicInfo({
 
           <View style={styles.row}>
             <View style={styles.halfInputGroup}>
-              <Text style={styles.label}>Edad *</Text>
+              <Text style={[{ fontFamily: fonts.bold }, styles.label]}>
+                Edad *
+              </Text>
               <TextInput
                 onFocus={handleInputFocus}
                 keyboardType="numeric"
@@ -305,14 +317,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: "700",
     color: "#1F2937",
     marginBottom: 6,
   },
   sectionDescription: {
     fontSize: 14,
     color: "#6B7280",
-    fontWeight: "500",
   },
   form: {
     gap: 20,
@@ -326,7 +336,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
     color: "#374151",
     marginBottom: 6,
   },

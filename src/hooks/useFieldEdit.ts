@@ -28,12 +28,14 @@ export function useFieldEdit(fieldType: EditableField) {
 
     switch (fieldType) {
       case "firstName":
-      case "lastName":
-        if (!textValue)
-          return `${
-            fieldType === "firstName" ? "Nombre" : "Apellido"
-          } es requerido`;
+        if (!textValue) return "Nombre es requerido";
         if (textValue.length < 2) return "Debe tener al menos 2 caracteres";
+        if (textValue.length > 30) return "Máximo 30 caracteres";
+        break;
+
+      case "lastName":
+        if (textValue && textValue.length < 2)
+          return "Debe tener al menos 2 caracteres";
         if (textValue.length > 30) return "Máximo 30 caracteres";
         break;
 
@@ -75,9 +77,7 @@ export function useFieldEdit(fieldType: EditableField) {
 
     // Normalizar valor (string vacío -> null en bio, string en otros)
     const trimmed = inputValue.trim();
-    const valueToSave =
-      fieldType === "bio" ? (trimmed === "" ? null : trimmed) : trimmed;
-
+    const valueToSave = trimmed === "" ? null : trimmed;
     try {
       // 1) Guardar remotamente (Firestore)
       await updateUserProfile(uid, {

@@ -8,9 +8,9 @@ export interface AuthUserBasic {
 export interface UserInfo {
   uid: string; // mismo uid que Auth
   firstName: string;
-  lastName: string;
+  lastName: string | null;
   email: string;
-  location: string;
+  location: string | null;
   phone: string; // requerido
   bio: string | null; // antes “biografia”
   photoUrl?: string | null; // opcional
