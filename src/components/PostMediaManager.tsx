@@ -12,7 +12,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Video } from "expo-av";
 import * as ImagePicker from "expo-image-picker";
-import { validateVideoMedia } from "../utils/mediaValidation";
+import {
+  validateVideoMedia,
+  validatePhotoMedia,
+} from "../utils/mediaValidation";
 
 type MediaItem = {
   uri: string;
@@ -61,7 +64,7 @@ const PostMediaManager: React.FC<PostMediaManagerProps> = ({
 
       if (mediaType === "video") {
         options.mediaTypes = ImagePicker.MediaTypeOptions.Videos;
-        options.videoMaxDuration = 30;
+
         console.log("=== 3. CONFIGURANDO VIDEO ===", options);
       }
 
@@ -89,6 +92,24 @@ const PostMediaManager: React.FC<PostMediaManagerProps> = ({
           height: newMedia.height,
         };
 
+        // Validar foto antes de agregar (igual que CameraScreen)
+        if (mediaType === "photo") {
+          console.log("=== VALIDANDO FOTO (CAMARA) ===");
+          const photoValidation = await validatePhotoMedia(mediaItem.uri);
+          console.log(
+            "Foto válida?",
+            photoValidation.isValid,
+            "sizeMB:",
+            photoValidation.sizeMB
+          );
+
+          if (!photoValidation.isValid) {
+            Alert.alert("Foto muy pesada", photoValidation.error);
+            // Mantener modal abierto (comportamiento consistente)
+            return;
+          }
+        }
+
         // Validar video antes de agregar
         if (mediaType === "video") {
           console.log("=== 7. INICIANDO VALIDACIÓN VIDEO ===");
@@ -106,7 +127,7 @@ const PostMediaManager: React.FC<PostMediaManagerProps> = ({
           if (!validation.isValid) {
             console.log("=== 9. VIDEO RECHAZADO ===");
             Alert.alert("Video no válido", validation.error);
-            setShowMediaModal(false);
+            // Mantener modal abierto (consistente con CameraScreen)
             return;
           }
         }
@@ -158,7 +179,25 @@ const PostMediaManager: React.FC<PostMediaManagerProps> = ({
           height: newMedia.height,
         };
 
-        // Validar video antes de agregar
+        // Validar foto (ahora lo hace igual que CameraScreen)
+        if (type === "photo") {
+          console.log("=== VALIDANDO FOTO (GALERIA) ===");
+          const photoValidation = await validatePhotoMedia(mediaItem.uri);
+          console.log(
+            "Foto válida?",
+            photoValidation.isValid,
+            "sizeMB:",
+            photoValidation.sizeMB
+          );
+
+          if (!photoValidation.isValid) {
+            Alert.alert("Foto muy pesada", photoValidation.error);
+            // Mantener modal abierto (consistente)
+            return;
+          }
+        }
+
+        // Validar video antes de agregar (igual que CameraScreen)
         if (type === "video") {
           console.log("Duración del video:", newMedia.duration);
           const validation = await validateVideoMedia(
@@ -170,7 +209,7 @@ const PostMediaManager: React.FC<PostMediaManagerProps> = ({
           console.log("Error:", validation.error);
           if (!validation.isValid) {
             Alert.alert("Video no válido", validation.error);
-            setShowMediaModal(false);
+            // Mantener modal abierto (consistente)
             return;
           }
         }

@@ -7,17 +7,18 @@ import {
 import TabsNavigator from "./TabsNavigator";
 import FullScreenStack from "../screens/FullScreenStack";
 import { mockPets } from "../data/mockPetsData";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 import { useInitializeMessages } from "../hooks/useInitializeMessages";
 import { AuthModalProvider } from "../contexts/AuthModalContext";
 import { AuthModal } from "../components/AuthModal";
+import { useFirebasePosts } from "../hooks/useFirebasePosts";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 export default function SwipeNavigator() {
   const [activeTab, setActiveTab] = useState<
-    "Inicio" | "Mapa" | "Mensajes" | "Perfil"
+    "Inicio" | "Mapa" | "Crear" | "Mensajes" | "Perfil"
   >("Inicio"); // para saber que tabs esta sellecionada?
 
   const scrollEnabled = activeTab === "Inicio"; // si esta activa , hacer scroll horizontal
@@ -31,10 +32,16 @@ export default function SwipeNavigator() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useInitializeMessages();
+  const { firebasePosts, loading, error } = useFirebasePosts();
+
+  // 👇 Combinar mockPets (arriba) con firebasePosts (abajo)
+  const allPets = useMemo(() => {
+    return [...mockPets, ...firebasePosts];
+  }, [firebasePosts]);
 
   // Para saber que tabbar esta activa
   const handleTabChange = (
-    tabName: "Inicio" | "Mapa" | "Mensajes" | "Perfil"
+    tabName: "Inicio" | "Mapa" | "Crear" | "Mensajes" | "Perfil"
   ) => {
     console.log("🔥 Tab activa desde FeedTabs:", tabName);
     setActiveTab(tabName);
@@ -74,7 +81,7 @@ export default function SwipeNavigator() {
                 {item === 0 ? (
                   <TabsNavigator
                     onTabChange={handleTabChange}
-                    pets={mockPets}
+                    pets={allPets}
                     onSelectPet={setSelectedPetIndex}
                     isScreenActive={
                       currentIndex === 0 && activeTab === "Inicio"
@@ -83,7 +90,7 @@ export default function SwipeNavigator() {
                   />
                 ) : activeTab === "Inicio" && selectedPetIndex !== null ? (
                   <FullScreenStack
-                    pet={mockPets[selectedPetIndex]}
+                    pet={allPets[selectedPetIndex]}
                     onGoBackToFeed={goToPage0}
                     setModalVisible={setModalVisible}
                   />
@@ -104,7 +111,7 @@ export default function SwipeNavigator() {
       <AdoptionConfirmModal
         onCancel={() => setModalVisible(false)}
         visible={modalVisible}
-        pet={selectedPetIndex !== null ? mockPets[selectedPetIndex] : null}
+        pet={selectedPetIndex !== null ? allPets[selectedPetIndex] : null}
         onConfirm={() => {
           setModalVisible(false);
         }}

@@ -63,10 +63,12 @@ export default function CameraScreen() {
         closeModal();
 
         console.log("Navegando a CreatePost...");
+
         navigate("CreatePost", {
           media: { uri: photo.uri, width: photo.width, height: photo.height },
           type: "photo",
         });
+
         console.log("Navigate ejecutado");
       }
     } catch (error) {
@@ -113,6 +115,7 @@ export default function CameraScreen() {
 
         console.log("=== VIDEO VÁLIDO, NAVEGANDO ===");
         closeModal();
+
         navigate("CreatePost", {
           media: { uri: video.uri, width: video.width, height: video.height },
           type: "video",
@@ -164,6 +167,7 @@ export default function CameraScreen() {
         }
 
         closeModal();
+
         navigate("CreatePost", {
           media: { uri: media.uri, width: media.width, height: media.height },
           type,
@@ -176,6 +180,9 @@ export default function CameraScreen() {
 
   const closeModal = () => {
     setModalVisible(false);
+  };
+
+  const exitCameraScreen = () => {
     navigation.goBack();
   };
 
@@ -206,7 +213,7 @@ export default function CameraScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.header}>
-                <TouchableOpacity onPress={closeModal}>
+                <TouchableOpacity onPress={exitCameraScreen}>
                   <Ionicons name="close" size={24} color="white" />
                 </TouchableOpacity>
                 <Text style={styles.title}>Publicar adopción</Text>

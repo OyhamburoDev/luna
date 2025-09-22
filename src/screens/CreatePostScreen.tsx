@@ -4,21 +4,21 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
-  Alert,
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import PostMediaManager from "../components/PostMediaManager";
 import { fonts } from "../theme/fonts";
 import PetBasicInfo from "../components/PetBasicInfo";
-import PetHealthInfo from "../components/PetHealthInfo";
-import PetBehaviorInfo from "../components/PetBehaviorInfo";
 import HealthModal from "../components/HealthModal";
 import BehaviorModal from "../components/BehaviorModal";
+import { navigate } from "../navigation/NavigationService";
+import PetFieldEdit from "../components/PetFieldEdit";
+import { PetPost } from "../types/petPots";
+import { useCreatePost } from "../hooks/useCreatePost"; // HOOK LIMPIO
+import type { KeyboardTypeOptions } from "react-native";
 
 type MediaItem = {
   uri: string;
@@ -27,53 +27,30 @@ type MediaItem = {
   height?: number;
 };
 
-type PetFormData = {
-  petName: string;
-  species: string;
-  breed: string;
-  age: string;
-  gender: string;
-  size: string;
-  description: string;
-};
-
-type PetHealthData = {
-  isVaccinated: string;
-  isNeutered: string;
-  hasMedicalConditions: string;
-  medicalDetails: string;
-  healthInfo: string;
-};
-
-type PetBehaviorData = {
-  goodWithKids: string;
-  goodWithOtherPets: string;
-  friendlyWithStrangers: string;
-  needsWalks: string;
-  energyLevel: string;
-};
-
 type CreatePostScreenProps = {
   route?: {
     params?: {
-      media?: {
-        uri: string;
-        width?: number;
-        height?: number;
-      };
+      media?: { uri: string; width?: number; height?: number };
       type?: "photo" | "video";
     };
   };
+  onBack?: () => void;
 };
 
-export default function CreatePostScreen({ route }: CreatePostScreenProps) {
-  const navigation = useNavigation();
+export default function CreatePostScreen({
+  route,
+  onBack,
+}: CreatePostScreenProps) {
   const initialMedia = route?.params?.media;
   const initialType = route?.params?.type;
+
+  // HOOK QUE MANEJA TODO
+  const { createPost, loading, updateFieldError, touchField, hasError } =
+    useCreatePost();
+
   const [healthModalVisible, setHealthModalVisible] = useState(false);
   const [behaviorModalVisible, setBehaviorModalVisible] = useState(false);
 
-  // Estado para múltiples media
   const [mediaList, setMediaList] = useState<MediaItem[]>(
     initialMedia && initialType
       ? [
@@ -87,92 +64,177 @@ export default function CreatePostScreen({ route }: CreatePostScreenProps) {
       : []
   );
 
-  const [petFormData, setPetFormData] = useState<PetFormData>({
+  const [postData, setPostData] = useState<Partial<PetPost>>({
     petName: "",
     species: "",
     breed: "",
-    age: "",
+    age: 0,
     gender: "",
     size: "",
     description: "",
   });
 
-  const handlePetFormChange = (field: keyof PetFormData, value: string) => {
-    setPetFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const [fieldEditConfig, setFieldEditConfig] = useState<{
+    title: string;
+    fieldType: keyof PetPost;
+    value: string;
+    placeholder: string;
+    maxLength: number;
+    multiline: boolean;
+    keyboardType?: KeyboardTypeOptions;
+  } | null>(null);
+
+  const updateField = (field: keyof PetPost, value: any) => {
+    setPostData((prev) => ({ ...prev, [field]: value }));
+    updateFieldError(field, value);
+  };
+
+  const handleFieldBlur = (field: keyof PetPost) => {
+    touchField(field);
+    updateFieldError(field, postData[field]);
   };
 
   const handleFieldEdit = (fieldType: string) => {
-    // Por ahora solo un console.log, después implementamos la navegación
-    console.log("Editar campo:", fieldType);
+    const fieldConfig: Record<
+      string,
+      { title: string; placeholder: string; modalTitle?: string }
+    > = {
+      petName: { title: "Nombre", placeholder: "Ej: Max, Luna..." },
+      species: { title: "Especie", placeholder: "Ej: Perro, Gato..." },
+      breed: {
+        title: "Raza",
+        placeholder: "Ej: Mixto, Callejero, Labrador, Persa...",
+      },
+      age: {
+        title: "Edad",
+        modalTitle: "Edad aproximada", // Título diferente para el modal
+        placeholder: "Edad en años (0-25)",
+      },
+      gender: { title: "Sexo", placeholder: "Macho o Hembra" },
+      size: { title: "Tamaño", placeholder: "Pequeño, Mediano, Grande" },
+      description: {
+        title: "Descripción",
+        placeholder: "Describe a tu mascota...",
+      },
+
+      isVaccinated: {
+        title: "¿Está vacunado/a?",
+        placeholder: "Seleccionar",
+      },
+      isNeutered: {
+        title: "¿Está castrado/a?",
+        placeholder: "Seleccionar",
+      },
+      hasMedicalConditions: {
+        title: "¿Condiciones médicas?",
+        placeholder: "Seleccionar",
+        modalTitle: "Condiciones médicas",
+      },
+      healthInfo: {
+        title: "Información adicional",
+        placeholder: "Añade detalles sobre la salud de tu mascota...",
+        modalTitle: "Info adicional",
+      },
+      goodWithKids: {
+        title: "Bueno con niños",
+        placeholder: "Seleccionar",
+      },
+      goodWithOtherPets: {
+        title: "Bueno con mascotas",
+        placeholder: "Seleccionar",
+      },
+      friendlyWithStrangers: {
+        title: "Sociable con extraños",
+        placeholder: "Seleccionar",
+      },
+      needsWalks: {
+        title: "Necesita paseos",
+        placeholder: "Seleccionar",
+      },
+    };
+
+    const config = fieldConfig[fieldType];
+    if (config) {
+      // Cerrar el modal de salud si está abierto
+      setHealthModalVisible(false);
+      setBehaviorModalVisible(false);
+
+      setFieldEditConfig({
+        title: (config as any).modalTitle || config.title, // Usa modalTitle si existe
+        fieldType: fieldType as keyof PetPost,
+        value: String(postData[fieldType as keyof PetPost] || ""),
+        placeholder: config.placeholder,
+        maxLength:
+          fieldType === "description"
+            ? 500
+            : fieldType === "breed"
+            ? 40
+            : fieldType === "age"
+            ? 2
+            : 50,
+        multiline: fieldType === "description",
+        keyboardType: fieldType === "age" ? "numeric" : "default", // AGREGAR ESTA LÍNEA
+      });
+    }
   };
 
-  const [petHealthData, setPetHealthData] = useState<PetHealthData>({
-    isVaccinated: "",
-    isNeutered: "",
-    hasMedicalConditions: "",
-    medicalDetails: "",
-    healthInfo: "",
-  });
+  const saveField = (fieldType: keyof PetPost, value: string) => {
+    updateField(fieldType, value);
+    setFieldEditConfig(null);
 
-  const handleHealthChange = (field: keyof PetHealthData, value: string) => {
-    setPetHealthData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    // Si venía del modal de salud, volver a abrirlo
+    const healthFields = [
+      "isVaccinated",
+      "isNeutered",
+      "hasMedicalConditions",
+      "healthInfo",
+    ];
+    // Si venía del modal de comportamiento, volver a abrirlo
+    const behaviorFields = [
+      "goodWithKids",
+      "goodWithOtherPets",
+      "friendlyWithStrangers",
+      "needsWalks",
+    ];
+    if (behaviorFields.includes(fieldType)) {
+      setBehaviorModalVisible(true);
+    }
+    if (healthFields.includes(fieldType)) {
+      setHealthModalVisible(true);
+    }
   };
 
-  const [petBehaviorData, setPetBehaviorData] = useState<PetBehaviorData>({
-    goodWithKids: "",
-    goodWithOtherPets: "",
-    friendlyWithStrangers: "",
-    needsWalks: "",
-    energyLevel: "",
-  });
-
-  const handleBehaviorChange = (
-    field: keyof PetBehaviorData,
-    value: string
-  ) => {
-    setPetBehaviorData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  // FUNCIÓN SUPER LIMPIA
   const handlePublish = async () => {
-    if (mediaList.length === 0) {
-      Alert.alert("Error", "No hay media para publicar");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      // Tu lógica de upload aquí
-      Alert.alert("Éxito!", "Publicación creada correctamente");
-      navigation.goBack();
-    } catch (error) {
-      Alert.alert("Error", "No se pudo crear la publicación");
-    } finally {
-      setLoading(false);
-    }
+    const success = await createPost(postData, mediaList, () => {
+      navigate("Swipe");
+    });
   };
 
   const goBack = () => {
-    navigation.goBack();
+    navigate("Swipe");
   };
+
+  if (fieldEditConfig) {
+    return (
+      <PetFieldEdit
+        title={fieldEditConfig.title}
+        value={fieldEditConfig.value}
+        placeholder={fieldEditConfig.placeholder}
+        maxLength={fieldEditConfig.maxLength}
+        multiline={fieldEditConfig.multiline}
+        fieldType={fieldEditConfig.fieldType}
+        keyboardType={fieldEditConfig.keyboardType} // AGREGAR ESTA LÍNEA
+        onSave={(value) => saveField(fieldEditConfig.fieldType, value)}
+        onCancel={() => setFieldEditConfig(null)}
+      />
+    );
+  }
 
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <SafeAreaView style={styles.container}>
-        {/* Header simple como TikTok */}
         <View style={styles.header}>
           <TouchableOpacity onPress={goBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#000" />
@@ -184,36 +246,37 @@ export default function CreatePostScreen({ route }: CreatePostScreenProps) {
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Componente para manejo de media */}
           <PostMediaManager
             mediaList={mediaList}
             onMediaListChange={setMediaList}
           />
 
-          {/* Descripción */}
-          {/* Desde aca  */}
-          {/* <View style={styles.section}>
-            <TextInput
-              style={styles.descriptionInput}
-              placeholder="Añade un título llamativo"
-              placeholderTextColor="#999"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              maxLength={150}
-            />
-            <Text style={styles.subtitle}>
-              Si escribes una descripción larga, puedes conseguir el triple de
-              visualizaciones de media.
-            </Text>
-          </View> */}
           <PetBasicInfo
-            formData={petFormData}
-            onFormChange={handlePetFormChange}
+            formData={{
+              petName: postData.petName || "",
+              species: postData.species || "",
+              breed: postData.breed || "",
+              age: String(postData.age || ""),
+              gender: postData.gender || "",
+              size: postData.size || "",
+              description: postData.description || "",
+            }}
+            onFormChange={(field, value) =>
+              updateField(field as keyof PetPost, value)
+            }
             onFieldEdit={handleFieldEdit}
+            errors={{
+              petName: hasError("petName"),
+              species: hasError("species"),
+              breed: hasError("breed"),
+              age: hasError("age"),
+              gender: hasError("gender"),
+              size: hasError("size"),
+              description: hasError("description"),
+            }}
+            onBlur={handleFieldBlur}
           />
 
-          {/* Botones para secciones opcionales */}
           <TouchableOpacity
             style={styles.optionRow}
             onPress={() => setHealthModalVisible(true)}
@@ -239,85 +302,8 @@ export default function CreatePostScreen({ route }: CreatePostScreenProps) {
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
-
-          {/* <PetHealthInfo
-            healthData={petHealthData}
-            onHealthChange={handleHealthChange}
-            onFieldEdit={handleFieldEdit}
-          />
-
-          <PetBehaviorInfo
-            behaviorData={petBehaviorData}
-            onBehaviorChange={handleBehaviorChange}
-            onFieldEdit={handleFieldEdit}
-          /> */}
-
-          {/* Hashtags y menciones */}
-          {/* <View style={styles.section}>
-            <View style={styles.tagsContainer}>
-              <TouchableOpacity style={styles.tagButton}>
-                <Text style={styles.tagText}># Hashtags</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.tagButton}>
-                <Text style={styles.tagText}>@ Mencionar</Text>
-              </TouchableOpacity>
-            </View>
-          </View> */}
-
-          {/* Ubicación */}
-          {/* <TouchableOpacity style={styles.optionRow}>
-            <Ionicons name="location-outline" size={24} color="#333" />
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>Ubicación</Text>
-              <Text style={styles.optionSubtitle}>Añadir ubicación</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity> */}
-
-          {/* Etiquetar personas */}
-          {/* <TouchableOpacity style={styles.optionRow}>
-            <Ionicons name="people-outline" size={24} color="#333" />
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>Etiquetar personas</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity> */}
-
-          {/* Añadir enlace */}
-          {/* <TouchableOpacity style={styles.optionRow}>
-            <Ionicons name="link-outline" size={24} color="#333" />
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>Añadir enlace</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity> */}
-
-          {/* Privacidad */}
-          {/* <TouchableOpacity style={styles.optionRow}>
-            <Ionicons name="globe-outline" size={24} color="#333" />
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>
-                Todo el mundo puede ver esta publicación
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity> */}
-
-          {/* Más opciones */}
-          {/* <TouchableOpacity style={styles.optionRow}>
-            <Ionicons name="ellipsis-horizontal" size={24} color="#333" />
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>Más opciones</Text>
-              <Text style={styles.optionSubtitle}>
-                La privacidad y otros ajustes se han trasladado aquí.
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity> */}
         </ScrollView>
 
-        {/* Footer con botones como Instagram */}
         <View style={styles.footer}>
           <TouchableOpacity
             style={[
@@ -333,7 +319,6 @@ export default function CreatePostScreen({ route }: CreatePostScreenProps) {
           </TouchableOpacity>
         </View>
 
-        {/* Loading overlay */}
         {loading && (
           <View style={styles.loadingOverlay}>
             <View style={styles.loadingContainer}>
@@ -346,16 +331,32 @@ export default function CreatePostScreen({ route }: CreatePostScreenProps) {
         <HealthModal
           visible={healthModalVisible}
           onClose={() => setHealthModalVisible(false)}
-          healthData={petHealthData}
-          onHealthChange={handleHealthChange}
+          healthData={{
+            isVaccinated: postData.isVaccinated || "",
+            isNeutered: postData.isNeutered || "",
+            hasMedicalConditions: postData.hasMedicalConditions || "",
+            medicalDetails: postData.medicalDetails || "",
+            healthInfo: postData.healthInfo || "",
+          }}
+          onHealthChange={(field, value) =>
+            updateField(field as keyof PetPost, value)
+          }
           onFieldEdit={handleFieldEdit}
         />
 
         <BehaviorModal
           visible={behaviorModalVisible}
           onClose={() => setBehaviorModalVisible(false)}
-          behaviorData={petBehaviorData}
-          onBehaviorChange={handleBehaviorChange}
+          behaviorData={{
+            goodWithKids: postData.goodWithKids || "",
+            goodWithOtherPets: postData.goodWithOtherPets || "",
+            friendlyWithStrangers: postData.friendlyWithStrangers || "",
+            needsWalks: postData.needsWalks || "",
+            energyLevel: postData.energyLevel || "",
+          }}
+          onBehaviorChange={(field, value) =>
+            updateField(field as keyof PetPost, value)
+          }
           onFieldEdit={handleFieldEdit}
         />
       </SafeAreaView>
@@ -364,10 +365,7 @@ export default function CreatePostScreen({ route }: CreatePostScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -375,50 +373,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
-  },
-  placeholder: {
-    width: 32,
-  },
-  content: {
-    flex: 1,
-  },
-  section: {
-    padding: 16,
-  },
-  descriptionInput: {
-    fontSize: 16,
-    color: "#000",
-    minHeight: 50,
-    textAlignVertical: "top",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#666",
-    lineHeight: 18,
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  tagButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 20,
-  },
-  tagText: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
-  },
+  backButton: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: "600", color: "#000" },
+  placeholder: { width: 32 },
+  content: { flex: 1 },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -427,49 +385,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  optionContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  optionTitle: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "400",
-  },
-  optionSubtitle: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 2,
-  },
-
-  draftButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
+  optionContent: { flex: 1, marginLeft: 12 },
+  optionTitle: { fontSize: 16, color: "#000", fontWeight: "400" },
+  optionSubtitle: { fontSize: 13, color: "#666", marginTop: 2 },
+  footer: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
     alignItems: "center",
   },
-  draftButtonText: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  publishButton: {
-    flex: 2,
+  publishButtonCentered: {
     paddingVertical: 14,
-    borderRadius: 8,
+    paddingHorizontal: 70,
+    borderRadius: 10,
     backgroundColor: "#6366F1",
     alignItems: "center",
   },
-  publishButtonDisabled: {
-    backgroundColor: "#ffaaaa",
-  },
-  publishButtonText: {
-    fontSize: 16,
-    color: "white",
-    fontWeight: "600",
-  },
+  publishButtonDisabled: { backgroundColor: "#ffaaaa" },
+  publishButtonText: { fontSize: 16, color: "white", fontWeight: "600" },
   loadingOverlay: {
     position: "absolute",
     top: 0,
@@ -489,22 +423,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 8,
   },
-  loadingText: {
-    color: "white",
-    fontSize: 16,
-  },
-  footer: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
-    alignItems: "center", // Esto centra el contenido
-  },
-  publishButtonCentered: {
-    paddingVertical: 14,
-    paddingHorizontal: 70,
-    borderRadius: 10,
-    backgroundColor: "#6366F1",
-    alignItems: "center",
-  },
+  loadingText: { color: "white", fontSize: 16 },
 });

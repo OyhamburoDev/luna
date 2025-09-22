@@ -149,6 +149,7 @@ export default function TabsNavigator({
           tabBarLabel: () => null, // 👈 Retornar null
         }}
       />
+
       <Tab.Screen
         name="Mensajes"
         component={ChatsScreen}

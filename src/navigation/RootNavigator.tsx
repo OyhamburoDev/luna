@@ -37,7 +37,7 @@ export default function RootNavigator() {
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="Swipe" component={SwipeNavigator} />
-      <Stack.Screen name="PetRegister" component={PetRegisterScreen} />
+      {/* <Stack.Screen name="PetRegister" component={PetRegisterScreen} /> */}
       <Stack.Screen
         name="CreatePost"
         component={CreatePostScreen}

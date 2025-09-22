@@ -206,8 +206,12 @@ export default function PetCardVertical({
               <View style={styles.avatarGap}>
                 <Image
                   source={
-                    pet.ownerAvatar ||
-                    require("../../assets/media/avatars/default-avatar.jpg")
+                    pet.ownerAvatar
+                      ? typeof pet.ownerAvatar === "string" &&
+                        pet.ownerAvatar.startsWith("http")
+                        ? { uri: pet.ownerAvatar }
+                        : pet.ownerAvatar
+                      : require("../../assets/media/avatars/default-avatar.jpg")
                   }
                   style={styles.profileImageInner}
                 />
