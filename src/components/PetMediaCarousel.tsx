@@ -7,7 +7,6 @@ import Props from "react-native-paper";
 import { PetPost } from "../types/petPots";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { useMemo } from "react";
-import { Asset } from "expo-asset";
 
 const { width } = Dimensions.get("window");
 const { height: screenHeight } = Dimensions.get("window");
@@ -52,11 +51,14 @@ export default function PetMediaCarousel({ pet }: Props) {
 
     // Agregar imágenes si hay
     if (Array.isArray(pet.imageUris)) {
-      pet.imageUris.forEach((uri) => {
+      pet.imageUris.forEach((item) => {
+        // Si viene como objeto {uri: "..."}, extraer la uri
+        const uri = typeof item === "object" && item?.uri ? item.uri : item;
+
         if (typeof uri === "string" || typeof uri === "number") {
           items.push({ type: "image", uri });
         } else {
-          console.warn("URI inválida:", uri);
+          console.warn("URI inválida:", item);
         }
       });
     }

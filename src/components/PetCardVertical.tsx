@@ -280,18 +280,6 @@ export default function PetCardVertical({
           </View>
         )}
 
-        {/* ver detalle prueba */}
-        {/* <View style={styles.btnScroll}>
-          <Pressable onPress={() => {}} style={styles.link}>
-            <Text style={[{ fontFamily: fonts.semiBold }, styles.linkText]}>
-              ¿Ya tienes una cuenta?{" "}
-              <Text style={[{ fontFamily: fonts.bold }, styles.linkTextTwo]}>
-                Iniciar sesión
-              </Text>
-            </Text>
-          </Pressable>
-        </View> */}
-
         <View style={[styles.overlay]}>
           <LinearGradient
             colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.8)"]}
@@ -302,24 +290,25 @@ export default function PetCardVertical({
           </Text>
 
           <View style={styles.btnScroll}>
-            <Pressable onPress={() => {}} style={styles.link}>
+            <Pressable
+              onPress={onPressArrow}
+              style={({ pressed }) => [
+                styles.link,
+                pressed && { opacity: 0.6 }, // 👈 Feedback visual
+              ]}
+            >
               <Text style={[{ fontFamily: fonts.semiBold }, styles.linkText]}>
                 Más información
               </Text>
               <Ionicons
-                name="chevron-forward" // 👈 flecha como en WhatsApp
+                name="chevron-forward"
                 size={18}
-                color="#fff" // podés cambiarlo si querés más parecido
+                color="#fff"
                 style={{ marginLeft: 6 }}
               />
             </Pressable>
           </View>
 
-          {/* <PrimaryCTA
-            label="verMas"
-            style={{ width: 180, height: 40 }}
-            onPress={() => console.log("Ver más")}
-          /> */}
           <View style={styles.descriptionContainer}>
             <View style={{ flex: 1 }}>
               <Text
@@ -392,7 +381,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 12,
-    paddingLeft: 20,
+    paddingLeft: 17,
     paddingBottom: 10, // Added more bottom padding to separate from bottomTabs
   },
   name: {

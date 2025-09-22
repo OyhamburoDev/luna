@@ -64,7 +64,7 @@ export default function TabsNavigator({
                 style={{
                   width: 40,
                   height: 30,
-                  borderRadius: 6, // Bordes ligeramente redondeados como TikTok
+                  borderRadius: 6,
                   backgroundColor: "white",
                   justifyContent: "center",
                   alignItems: "center",

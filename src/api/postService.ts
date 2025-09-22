@@ -2,6 +2,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../config/firebase"; // Ajusta la ruta según tu proyecto
 import { PetPost } from "../types/petPots";
+import * as VideoThumbnails from "expo-video-thumbnails";
 
 type MediaItem = {
   uri: string;
@@ -43,6 +44,43 @@ class PostService {
   }
 
   /**
+   * Genera un thumbnail de un video y lo sube a Storage
+   */
+  private async generateAndUploadThumbnail(
+    videoUri: string,
+    userId: string,
+    index: number
+  ): Promise<string> {
+    try {
+      // Generar thumbnail del video
+      const { uri: thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
+        videoUri,
+        {
+          time: 0, // Toma el frame en el segundo 0
+        }
+      );
+
+      // Convertir thumbnail a Blob
+      const response = await fetch(thumbnailUri);
+      const blob = await response.blob();
+
+      // Crear referencia en Storage
+      const fileName = `${Date.now()}_${index}_thumb.jpg`;
+      const storageRef = ref(storage, `posts/${userId}/${fileName}`);
+
+      // Subir thumbnail
+      await uploadBytes(storageRef, blob);
+
+      // Obtener URL de descarga
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
+    } catch (error) {
+      console.error("Error generating thumbnail:", error);
+      throw new Error("Error al generar miniatura del video");
+    }
+  }
+
+  /**
    * Crea un nuevo post en Firestore con sus medias
    */
   async createPost(
@@ -58,19 +96,33 @@ class PostService {
 
       const mediaUrls = await Promise.all(uploadPromises);
 
-      // 2. Preparar datos del post
+      // 2. Buscar si hay video y generar thumbnail
+      let thumbnailUri: string | undefined;
+      const videoMedia = mediaList.find((media) => media.type === "video");
+
+      if (videoMedia) {
+        const videoIndex = mediaList.indexOf(videoMedia);
+        thumbnailUri = await this.generateAndUploadThumbnail(
+          videoMedia.uri,
+          userId,
+          videoIndex
+        );
+      }
+
+      // 3. Preparar datos del post
       const completePostData = {
         ...postData,
         userId,
         mediaUrls,
+        thumbnailUri, // ← NUEVO: se guarda el thumbnail
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        status: "available", // o 'pending', 'adopted', etc.
+        status: "available",
         likes: 0,
         views: 0,
       };
 
-      // 3. Guardar en Firestore
+      // 4. Guardar en Firestore
       const docRef = await addDoc(collection(db, "posts"), completePostData);
 
       console.log("Post created with ID:", docRef.id);

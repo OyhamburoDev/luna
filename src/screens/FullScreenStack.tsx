@@ -44,6 +44,8 @@ export default function FullScreenStack({
 
   useEffect(() => {
     console.log("🔎 PetDetailScreen: Mascota recibida:", pet);
+    console.log("📸 IMAGENES:", pet.imageUris);
+    console.log("📸 VIDEO:", pet.videoUri);
   }, [pet]);
 
   const mandatoryFields = ["age", "gender", "size", "species"];
@@ -277,7 +279,7 @@ export default function FullScreenStack({
                   <View style={styles.onlineIndicator} />
                 </View>
                 <View style={styles.ownerInfo}>
-                  <Text style={styles.ownerName}>María García</Text>
+                  <Text style={styles.ownerName}>{pet.ownerName}</Text>
                   <Text style={styles.ownerRole}>Dueña verificada</Text>
                   <View style={styles.locationContainer}>
                     <Ionicons name="location" size={14} color="#ff6b6b" />
