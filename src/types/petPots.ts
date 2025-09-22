@@ -14,7 +14,6 @@ export type PetPost = {
   // ✅ NUEVO: Campo para identificar al dueño
   ownerId: string; // ← ID del usuario dueño
   ownerName: string; // ← Nombre del dueño (para mostrar)
-  ownerEmail?: string; // ← Email del dueño (opcional)
   ownerAvatar?: any;
 
   // Campos opcionales

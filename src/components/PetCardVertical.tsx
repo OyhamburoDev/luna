@@ -23,6 +23,7 @@ import { SoundOnIcon } from "./SoundOnIcon";
 import ArrowBigRightIcon from "./ChevronsRightIcon";
 import PrimaryCTA from "../components/PrimaryCTA";
 import { Ionicons } from "@expo/vector-icons";
+import { useMute } from "../contexts/MuteContext";
 
 type Props = {
   pet: PetPost;
@@ -56,7 +57,7 @@ export default function PetCardVertical({
   const [progress, setProgress] = useState(0);
 
   // Activar o desactivar sonido
-  const [isMuted, setIsMuted] = useState(false);
+  const { isMuted, toggleMute } = useMute();
 
   const [isLiked, setIsLiked] = useState(false);
 
@@ -138,8 +139,8 @@ export default function PetCardVertical({
   const handleMuteToggle = async () => {
     try {
       if (!videoRef.current) return;
+      toggleMute(); // 👈 Ya no usa setIsMuted
       await videoRef.current.setIsMutedAsync(!isMuted);
-      setIsMuted(!isMuted);
     } catch (error) {
       console.log("Error al cambiar mute:", error);
     }

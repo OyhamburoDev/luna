@@ -66,7 +66,6 @@ export function useFirebasePosts() {
 
               // Campos opcionales del contrato
               breed: data.breed,
-              ownerEmail: data.ownerEmail,
               ownerAvatar: data.ownerAvatar,
               thumbnailUri: data.thumbnailUri,
               healthInfo: data.healthInfo,

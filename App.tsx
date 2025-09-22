@@ -15,6 +15,7 @@ import {
 
 import { AuthModalProvider } from "./src/contexts/AuthModalContext";
 import { AuthModal } from "./src/components/AuthModal";
+import { MuteProvider } from "./src/contexts/MuteContext";
 
 /** 🔽 NUEVO: imports para sincronizar sesión */
 import { onAuthStateChanged } from "firebase/auth";
@@ -69,12 +70,14 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthModalProvider>
-          <NavigationContainer ref={navigationRef}>
-            <>
-              <RootNavigator />
-              <AuthModal />
-            </>
-          </NavigationContainer>
+          <MuteProvider>
+            <NavigationContainer ref={navigationRef}>
+              <>
+                <RootNavigator />
+                <AuthModal />
+              </>
+            </NavigationContainer>
+          </MuteProvider>
         </AuthModalProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

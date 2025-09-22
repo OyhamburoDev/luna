@@ -18,7 +18,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 1: Juan (dueño de Carboncito)
     ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Ramiro oyhamburo",
-    ownerEmail: "Rami@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_nueve.jpg"),
   },
   {
@@ -50,7 +50,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 2: María (dueña de Dora)
     ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "María García",
-    ownerEmail: "maria@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_dos.jpg"),
   },
   {
@@ -72,7 +72,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 3: Ana (dueña de Max)
     ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Ana López",
-    ownerEmail: "ana@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_tres.jpg"),
   },
   {
@@ -91,7 +91,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 1: Juan (también dueño de fermin)
     ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Juan Pérez",
-    ownerEmail: "juan@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_siete.jpg"),
   },
   {
@@ -123,7 +123,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 5: Sofía (dueña de Vitto)
     ownerId: "2vbyGg3zIlMnzooBBTWowwJqTbu2",
     ownerName: "Sofía Martínez",
-    ownerEmail: "sofia@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_cuatro.jpg"),
   },
   {
@@ -142,7 +142,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 6: Diego (dueño de Caminador)
     ownerId: "user_diego_303",
     ownerName: "Diego Fernández",
-    ownerEmail: "diego@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_cinco.jpg"),
   },
   {
@@ -164,7 +164,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 7: Valentina (dueña de Shila)
     ownerId: "user_valentina_404",
     ownerName: "Valentina Torres",
-    ownerEmail: "valentina@example.com",
+
     ownerAvatar: null,
   },
   {
@@ -182,7 +182,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 8: Mateo (dueño de Coby)
     ownerId: "user_mateo_505",
     ownerName: "Mateo Silva",
-    ownerEmail: "mateo@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_seis.jpg"),
   },
   {
@@ -204,7 +204,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 9: Isabella (dueña de Bruno)
     ownerId: "user_isabella_606",
     ownerName: "Isabella Morales",
-    ownerEmail: "isabella@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_siete.jpg"),
   },
   {
@@ -227,7 +227,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 10: Sebastián (dueño de Copito)
     ownerId: "user_sebastian_707",
     ownerName: "Sebastián Vega",
-    ownerEmail: "sebastian@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-human-image_ocho.jpg"),
   },
   {
@@ -249,7 +249,7 @@ export const mockPets: PetPost[] = [
     // ✅ USUARIO 11: Camila (dueña de Blanquito)
     ownerId: "user_camila_808",
     ownerName: "Camila Herrera",
-    ownerEmail: "camila@example.com",
+
     ownerAvatar: require("../../assets/media/avatars/uifaces-popular-image_uno.jpg"),
   },
 ];

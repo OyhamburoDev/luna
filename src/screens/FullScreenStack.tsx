@@ -60,6 +60,12 @@ export default function FullScreenStack({
         "createdAt",
         "videoUri",
         "imageUris",
+        "thumbnailUri",
+        "userId", // AGREGAR
+        "ownerId", // AGREGAR
+        "ownerName", // AGREGAR (ya se muestra en otra sección)
+        "ownerAvatar", // AGREGAR (ya se muestra en otra sección)
+        "updatedAt",
       ].includes(key)
   );
   const hasExtraFields = extraFields.length > 0;
@@ -130,7 +136,6 @@ export default function FullScreenStack({
       petName: pet.petName,
       ownerId: pet.ownerId,
       ownerName: pet.ownerName,
-      ownerEmail: pet.ownerEmail,
     });
   };
 
@@ -225,31 +230,37 @@ export default function FullScreenStack({
             </View>
             {showMore && (
               <View style={styles.infoCardsGrid2}>
-                {extraFields.map((key, index) => {
-                  const color =
-                    extraFieldColors[index % extraFieldColors.length]; // Asigna color cíclicamente
-                  return (
-                    <View
-                      key={index}
-                      style={[
-                        styles.infoCardCompact2,
-                        { borderTopColor: color },
-                      ]}
-                    >
-                      <Ionicons
-                        name={fieldIcons[key] ?? "information-circle-outline"}
-                        size={16}
-                        color={color}
-                      />
-                      <Text style={styles.infoLabelCompact2}>
-                        {fieldLabels[key] ?? key}
-                      </Text>
-                      <Text style={styles.infoValueCompact2}>
-                        {String(pet[key as keyof PetPost])}
-                      </Text>
-                    </View>
-                  );
-                })}
+                {extraFields
+                  .filter(
+                    (key) =>
+                      pet[key as keyof PetPost] !== undefined &&
+                      pet[key as keyof PetPost] !== null
+                  )
+                  .map((key, index) => {
+                    const color =
+                      extraFieldColors[index % extraFieldColors.length]; // Asigna color cíclicamente
+                    return (
+                      <View
+                        key={index}
+                        style={[
+                          styles.infoCardCompact2,
+                          { borderTopColor: color },
+                        ]}
+                      >
+                        <Ionicons
+                          name={fieldIcons[key] ?? "information-circle-outline"}
+                          size={16}
+                          color={color}
+                        />
+                        <Text style={styles.infoLabelCompact2}>
+                          {fieldLabels[key] ?? key}
+                        </Text>
+                        <Text style={styles.infoValueCompact2}>
+                          {String(pet[key as keyof PetPost])}
+                        </Text>
+                      </View>
+                    );
+                  })}
               </View>
             )}
             {/* Botón ver más */}
@@ -273,7 +284,15 @@ export default function FullScreenStack({
               <View style={styles.ownerCard}>
                 <View style={styles.ownerImageContainer}>
                   <Image
-                    source={require("../../assets/media/images/user-photo.jpg")}
+                    source={
+                      pet.ownerAvatar &&
+                      typeof pet.ownerAvatar === "string" &&
+                      pet.ownerAvatar.startsWith("http")
+                        ? { uri: pet.ownerAvatar }
+                        : pet.ownerAvatar
+                        ? pet.ownerAvatar
+                        : require("../../assets/media/images/user-photo.jpg")
+                    }
                     style={styles.ownerImage}
                   />
                   <View style={styles.onlineIndicator} />

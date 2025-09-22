@@ -54,7 +54,6 @@ export const useCreatePost = () => {
         ownerName:
           `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Usuario",
         ownerAvatar: userInfo.photoUrl || undefined,
-        ownerEmail: userInfo.email || undefined,
       };
 
       await postService.createPost(completePostData, mediaList, userId);
