@@ -13,7 +13,7 @@ type MediaItem = {
   height?: number;
 };
 
-export const useCreatePost = () => {
+export const useCreatePost = (addNewPostLocally?: (post: PetPost) => void) => {
   const [loading, setLoading] = useState(false);
   const validation = usePostValidation();
   const { userInfo } = useUserStore();
@@ -48,7 +48,42 @@ export const useCreatePost = () => {
         throw new Error("Usuario no autenticado");
       }
 
-      // 👇 AGREGAR: Combinar datos del post con info del usuario
+      // 1. CREAR POST LOCAL TEMPORAL
+      const tempPostId = `temp-${Date.now()}`;
+      const localPost: PetPost = {
+        id: tempPostId,
+        petName: postData.petName || "",
+        description: postData.description || "",
+        createdAt: new Date(),
+        age: postData.age || 0,
+        gender: postData.gender || "",
+        size: postData.size || "",
+        species: postData.species || "dog",
+        ownerId: userId,
+        ownerName:
+          `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Usuario",
+        ownerAvatar: userInfo.photoUrl || undefined,
+        videoUri: undefined,
+        imageUris: undefined,
+        breed: postData.breed,
+        healthInfo: postData.healthInfo,
+        isVaccinated: postData.isVaccinated,
+        isNeutered: postData.isNeutered,
+        hasMedicalConditions: postData.hasMedicalConditions,
+        medicalDetails: postData.medicalDetails,
+        goodWithKids: postData.goodWithKids,
+        goodWithOtherPets: postData.goodWithOtherPets,
+        friendlyWithStrangers: postData.friendlyWithStrangers,
+        needsWalks: postData.needsWalks,
+        energyLevel: postData.energyLevel,
+      };
+
+      // 2. AGREGAR AL ESTADO LOCAL INMEDIATAMENTE
+      if (addNewPostLocally) {
+        addNewPostLocally(localPost);
+      }
+
+      // 3. SUBIR A FIREBASE
       const completePostData = {
         ...postData,
         ownerName:
@@ -77,6 +112,6 @@ export const useCreatePost = () => {
   return {
     createPost,
     loading,
-    ...validation, // Incluye todas las funciones de validación
+    ...validation,
   };
 };

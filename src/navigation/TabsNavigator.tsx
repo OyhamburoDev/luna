@@ -25,6 +25,9 @@ type Props = {
   onSelectPet: (index: number) => void;
   isScreenActive?: boolean;
   onPressDiscoverMore: () => void;
+  loadMore?: () => void;
+  loadingMore?: boolean;
+  hasMore?: boolean;
 };
 
 export default function TabsNavigator({
@@ -33,6 +36,9 @@ export default function TabsNavigator({
   onSelectPet,
   isScreenActive,
   onPressDiscoverMore,
+  loadMore,
+  loadingMore,
+  hasMore,
 }: Props) {
   const hideBottomTabs = useTabsStore((state) => state.hideBottomTabs);
   const insets = useSafeAreaInsets();
@@ -132,6 +138,9 @@ export default function TabsNavigator({
             route={route}
             isScreenActive={isScreenActive}
             onPressDiscoverMore={onPressDiscoverMore}
+            loadMore={loadMore}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
           />
         )}
         initialParams={{ onTabChange }}

@@ -7,8 +7,9 @@ import {
   StyleSheet,
   Image,
   Pressable,
+  AppState,
 } from "react-native";
-import { Video, ResizeMode } from "expo-av";
+import { Video, ResizeMode, AVPlaybackStatus } from "expo-av";
 import { useRef, useEffect, useState } from "react";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -28,15 +29,15 @@ import { useMute } from "../contexts/MuteContext";
 type Props = {
   pet: PetPost;
   isActive: boolean;
-  alturaCard: number; // Esto ahora será la altura medida dinámicamente
+  alturaCard: number;
   onPressArrow?: () => void;
 };
 
-const AVATAR_SIZE = 45; // tamaño exterior = el mismo que ya tenías
-const RING = 2; // grosor del degradé
-const GAP = 1; // separación blanca
-const INNER = AVATAR_SIZE - RING * 2; // después del ring
-const IMG = INNER - GAP * 2; // después del gap
+const AVATAR_SIZE = 45;
+const RING = 2;
+const GAP = 1;
+const INNER = AVATAR_SIZE - RING * 2;
+const IMG = INNER - GAP * 2;
 
 export default function PetCardVertical({
   pet,
@@ -44,12 +45,19 @@ export default function PetCardVertical({
   alturaCard,
   onPressArrow,
 }: Props) {
+  console.log("🔧 PetCardVertical props:", {
+    hasPet: !!pet,
+    hasImageUris: !!pet.imageUris?.length,
+    hasVideoUri: !!pet.videoUri,
+    petId: pet.id,
+    renderTime: Date.now(),
+  });
   const videoRef = useRef<Video>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const controlTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const insets = useSafeAreaInsets(); // Se mantiene por si es útil para afinar la posición del overlay
+  const insets = useSafeAreaInsets();
 
   // Estados para la barra de progreso del video
   const [currentTime, setCurrentTime] = useState(0);
@@ -58,50 +66,195 @@ export default function PetCardVertical({
 
   // Activar o desactivar sonido
   const { isMuted, toggleMute } = useMute();
-
   const [isLiked, setIsLiked] = useState(false);
 
+  // 🔍 LOG: Validación inicial del componente
+  useEffect(() => {
+    console.log("🔍 PetCardVertical Mount/Update:", {
+      petId: pet.id || pet.petName,
+      hasVideoUri: !!pet.videoUri,
+      videoUri: pet.videoUri,
+      videoUriType: typeof pet.videoUri,
+      isLocalAsset: typeof pet.videoUri === "number",
+      isFirebaseUrl:
+        typeof pet.videoUri === "string" && pet.videoUri.includes("firebase"),
+      isValidUrl:
+        typeof pet.videoUri === "string" &&
+        (pet.videoUri.startsWith("http") || pet.videoUri.startsWith("file")),
+      alturaCard,
+      isActive,
+    });
+
+    // 🔍 Verificar si es una URL de Firebase válida
+    if (typeof pet.videoUri === "string" && pet.videoUri.includes("firebase")) {
+      try {
+        const url = new URL(pet.videoUri);
+        console.log("🔍 Firebase URL Analysis:", {
+          protocol: url.protocol,
+          hostname: url.hostname,
+          pathname: url.pathname,
+          hasToken: url.searchParams.has("token"),
+          tokenLength: url.searchParams.get("token")?.length,
+          fullUrl: pet.videoUri,
+        });
+      } catch (urlError: unknown) {
+        console.error("💥 INVALID FIREBASE URL:", {
+          uri: pet.videoUri,
+          error:
+            urlError instanceof Error ? urlError.message : String(urlError),
+        });
+      }
+    }
+  }, [pet.videoUri, isActive, alturaCard]);
+
+  // 🔍 LOG: Monitoreo de memoria
+  useEffect(() => {
+    const handleMemoryWarning = () => {
+      console.warn("⚠️ MEMORY WARNING - Video might be too large:", {
+        petId: pet.id || pet.petName,
+        videoUri: pet.videoUri,
+        isActive,
+        currentTime: Date.now(),
+      });
+    };
+
+    const subscription = AppState.addEventListener(
+      "memoryWarning",
+      handleMemoryWarning
+    );
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [pet.videoUri, isActive]);
+
+  // 🔍 LOG: Detectar tipo de media al renderizar
+  useEffect(() => {
+    if (pet.videoUri) {
+      console.log("📹 Renderizando video:", pet.videoUri);
+    } else if (pet.imageUris?.length) {
+      console.log("🖼️ No video URI, mostrando imagen de fallback");
+    } else {
+      console.log("⚠️ No hay media disponible para:", pet.petName);
+    }
+  }, [pet.videoUri, pet.imageUris, pet.petName]);
+
+  // 🔍 LOG: Control principal de reproducción con debugging completo
   useEffect(() => {
     const controlPlayback = async () => {
-      if (!videoRef.current) return;
+      // 🔍 LOG: Estado inicial
+      console.log("🎬 CONTROL PLAYBACK:", {
+        isActive,
+        hasVideoRef: !!videoRef.current,
+        videoUri: pet.videoUri,
+        videoUriType: typeof pet.videoUri,
+        isLocalAsset: typeof pet.videoUri === "number",
+        isFirebaseUrl:
+          typeof pet.videoUri === "string" && pet.videoUri.includes("firebase"),
+        petId: pet.id || pet.petName,
+        timestamp: Date.now(),
+      });
+
+      if (!videoRef.current) {
+        console.log("❌ No video ref available");
+        return;
+      }
+
       try {
         if (isActive) {
+          // 🔍 LOG: Intentando reproducir
+          console.log("▶️ Intentando PLAY:", {
+            currentTime: Date.now(),
+            videoUri: pet.videoUri,
+            isMuted,
+          });
+
           await videoRef.current.playAsync();
           setIsPlaying(true);
+
+          // 🔍 LOG: Play exitoso
+          console.log("✅ PLAY exitoso para:", pet.petName);
         } else {
+          // 🔍 LOG: Pausando video
+          console.log("⏸️ Pausando video:", pet.petName);
+
           await videoRef.current.pauseAsync();
           setIsPlaying(false);
           setShowControls(false);
+
+          console.log("✅ PAUSE exitoso");
         }
-      } catch (error) {
-        console.log("Error controlando reproducción:", error);
+      } catch (error: unknown) {
+        // 🔍 LOG: Error detallado
+        console.error("💥 ERROR controlando reproducción:", {
+          error: error instanceof Error ? error.message : String(error),
+          errorCode:
+            error instanceof Error && "code" in error
+              ? (error as any).code
+              : "unknown",
+          errorStack: error instanceof Error ? error.stack : undefined,
+          isActive,
+          videoUri: pet.videoUri,
+          petId: pet.id || pet.petName,
+          timestamp: Date.now(),
+        });
       }
     };
+
     controlPlayback();
+
     return () => {
+      console.log("🧹 Cleanup PetCardVertical:", pet.petName);
       if (controlTimeoutRef.current) {
         clearTimeout(controlTimeoutRef.current);
       }
     };
   }, [isActive]);
 
+  // 🔍 LOG: Función de video press con debugging
   const handleVideoPress = async () => {
+    console.log("👆 Video pressed:", {
+      isPlaying,
+      hasVideoRef: !!videoRef.current,
+      videoUri: pet.videoUri,
+      petId: pet.id || pet.petName,
+    });
+
     try {
-      if (!videoRef.current) return;
+      if (!videoRef.current) {
+        console.log("❌ No video ref on press");
+        return;
+      }
+
       if (isPlaying) {
+        console.log("⏸️ Manual pause...");
         await videoRef.current.pauseAsync();
         setIsPlaying(false);
         setShowControls(true);
+        console.log("✅ Manual pause success");
       } else {
+        console.log("▶️ Manual play...");
         await videoRef.current.playAsync();
         setIsPlaying(true);
         setShowControls(true);
+        console.log("✅ Manual play success");
+
         controlTimeoutRef.current = setTimeout(() => {
           setShowControls(false);
         }, 500);
       }
-    } catch (error) {
-      console.log("Error al reproducir/pausar video:", error);
+    } catch (error: unknown) {
+      console.error("💥 ERROR en handleVideoPress:", {
+        error: error instanceof Error ? error.message : String(error),
+        errorCode:
+          error instanceof Error && "code" in error
+            ? (error as any).code
+            : "unknown",
+        isPlaying,
+        videoUri: pet.videoUri,
+        petId: pet.id || pet.petName,
+        timestamp: Date.now(),
+      });
     }
   };
 
@@ -119,9 +272,85 @@ export default function PetCardVertical({
     overlayHeight = baseOverlayHeight + 2 * lineHeight;
   }
 
-  // Manejar callback apra el estado del progreso del video
+  // 🔍 LOG: Callback de progreso con más detalles
+  const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    // Log solo cada 2 segundos para no saturar
+    const shouldLog = status.isLoaded
+      ? Math.floor((status.positionMillis || 0) / 2000) !==
+        Math.floor((currentTime || 0) / 2000)
+      : true;
 
-  const onPlaybackStatusUpdate = (status: any) => {
+    // 🔍 DEBUGGING: Ver si se reporta didJustFinish cerca del final
+    if (status.isLoaded && status.positionMillis && status.durationMillis) {
+      const timeRemaining = status.durationMillis - status.positionMillis;
+      if (timeRemaining < 1000) {
+        // Último segundo
+        console.log("🔚 Video cerca del final:", {
+          positionMillis: status.positionMillis,
+          durationMillis: status.durationMillis,
+          timeRemaining,
+          didJustFinish: status.didJustFinish,
+          petId: pet.id || pet.petName,
+        });
+      }
+    }
+
+    if (shouldLog || !status.isLoaded) {
+      console.log("📊 Video Status:", {
+        isLoaded: status.isLoaded,
+        ...(status.isLoaded && {
+          isPlaying: status.isPlaying,
+          positionMillis: status.positionMillis,
+          durationMillis: status.durationMillis,
+          isBuffering: status.isBuffering,
+          playableDurationMillis: status.playableDurationMillis,
+          didJustFinish: status.didJustFinish,
+        }),
+        ...(!status.isLoaded && {
+          error: status.error,
+        }),
+        uri: pet.videoUri,
+        petId: pet.id || pet.petName,
+      });
+    }
+
+    // Tu loop manual existente (no cambiar)
+    if (
+      status.isLoaded &&
+      status.didJustFinish &&
+      typeof pet.videoUri === "object" &&
+      isActive
+    ) {
+      console.log("🔄 Iniciando LOOP MANUAL para Firebase video:", {
+        petId: pet.id || pet.petName,
+        uri: pet.videoUri,
+        timestamp: Date.now(),
+      });
+
+      videoRef.current
+        ?.replayAsync()
+        .then(() => {
+          console.log("✅ Loop manual exitoso");
+        })
+        .catch((error: unknown) => {
+          console.error("💥 Error en loop manual:", {
+            error: error instanceof Error ? error.message : String(error),
+            petId: pet.id || pet.petName,
+          });
+        });
+    }
+
+    // Resto del código igual...
+    if (!status.isLoaded && status.error) {
+      console.error("💥 VIDEO STATUS ERROR:", {
+        error: status.error,
+        errorString: status.error?.toString(),
+        uri: pet.videoUri,
+        petId: pet.id || pet.petName,
+        timestamp: Date.now(),
+      });
+    }
+
     if (status.isLoaded) {
       const currentPosition = status.positionMillis || 0;
       const totalDuration = status.durationMillis || 0;
@@ -139,11 +368,44 @@ export default function PetCardVertical({
   const handleMuteToggle = async () => {
     try {
       if (!videoRef.current) return;
-      toggleMute(); // 👈 Ya no usa setIsMuted
+      console.log("🔇 Toggling mute:", { from: isMuted, to: !isMuted });
+      toggleMute();
       await videoRef.current.setIsMutedAsync(!isMuted);
-    } catch (error) {
-      console.log("Error al cambiar mute:", error);
+    } catch (error: unknown) {
+      console.log(
+        "Error al cambiar mute:",
+        error instanceof Error ? error.message : String(error)
+      );
     }
+  };
+
+  // Funciones de callback para Video component
+  const handleVideoLoad = (status: AVPlaybackStatus) => {
+    if (status.isLoaded) {
+      console.log("✅ Video LOADED:", {
+        uri: pet.videoUri,
+        duration: status.durationMillis,
+        isLoaded: status.isLoaded,
+        petId: pet.id || pet.petName,
+      });
+    }
+  };
+
+  const handleVideoError = (error: string) => {
+    console.error("💥 VIDEO ERROR:", {
+      error: error,
+      errorString: error?.toString(),
+      uri: pet.videoUri,
+      petId: pet.id || pet.petName,
+      timestamp: Date.now(),
+    });
+  };
+
+  const handleVideoLoadStart = () => {
+    console.log("🔄 Video LOAD START:", {
+      uri: pet.videoUri,
+      petId: pet.id || pet.petName,
+    });
   };
 
   return (
@@ -159,10 +421,13 @@ export default function PetCardVertical({
                 source={pet.videoUri}
                 style={styles.video}
                 resizeMode={ResizeMode.COVER}
-                isLooping
+                isLooping={typeof pet.videoUri === "number"} // Solo loop para mock videos
                 isMuted={isMuted}
                 ref={videoRef}
                 onPlaybackStatusUpdate={onPlaybackStatusUpdate}
+                onLoad={handleVideoLoad}
+                onError={handleVideoError}
+                onLoadStart={handleVideoLoadStart}
               />
               {showControls && isActive && (
                 <View style={styles.playButton} pointerEvents="none">
@@ -179,11 +444,6 @@ export default function PetCardVertical({
           ) : null}
         </View>
 
-        {/* <TouchableOpacity style={styles.detailButton}>
-          <MaterialIcons name="info-outline" size={20} "rgba(0, 0, 0, 0.77)" color="white" />
-        </TouchableOpacity> */}
-
-        {/* Círculo de perfil */}
         <View>
           <LinearGradient
             colors={["rgba(0,0,0,0)", "rgba(0, 0, 0, 0.77)"]}
@@ -192,18 +452,16 @@ export default function PetCardVertical({
               left: 0,
               right: 0,
               bottom: 0,
-              height: 260, // ajustá según necesites
+              height: 260,
             }}
           />
           <TouchableOpacity style={styles.profileContainer}>
-            {/* Ring degradé, mismo tamaño exterior: 45x45 */}
             <LinearGradient
-              colors={["#41D1FF", "#22D3EE", "#10B981"]} // celeste → verde
+              colors={["#41D1FF", "#22D3EE", "#10B981"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.avatarRing}
             >
-              {/* Gap blanco para separar ring e imagen (1–2px) */}
               <View style={styles.avatarGap}>
                 <Image
                   source={
@@ -218,12 +476,9 @@ export default function PetCardVertical({
                 />
               </View>
             </LinearGradient>
-
-            {/* Tu indicador online queda igual */}
             <View style={styles.onlineIndicator} />
           </TouchableOpacity>
 
-          {/* Botón de like */}
           <TouchableOpacity
             style={styles.likeButton}
             onPress={() => setIsLiked(!isLiked)}
@@ -238,10 +493,8 @@ export default function PetCardVertical({
             </Text>
           </TouchableOpacity>
 
-          {/*Botón de ver detalle */}
           <TouchableOpacity style={styles.detalleButton} onPress={onPressArrow}>
             <View style={styles.detalleBackground}>
-              {/* <ArrowBigRightIcon size={35} color="white" /> */}
               <Ionicons
                 name="information-circle"
                 size={32}
@@ -253,7 +506,6 @@ export default function PetCardVertical({
             </View>
           </TouchableOpacity>
 
-          {/* Botón de mute/unmute */}
           {pet.videoUri && (
             <TouchableOpacity
               style={styles.muteButton}
@@ -270,7 +522,6 @@ export default function PetCardVertical({
           )}
         </View>
 
-        {/* Barra de progreso */}
         {pet.videoUri && duration > 0 && (
           <View style={styles.progressContainer}>
             <View style={styles.progressBackground}>
@@ -295,7 +546,7 @@ export default function PetCardVertical({
               onPress={onPressArrow}
               style={({ pressed }) => [
                 styles.link,
-                pressed && { opacity: 0.6 }, // 👈 Feedback visual
+                pressed && { opacity: 0.6 },
               ]}
             >
               <Text style={[{ fontFamily: fonts.semiBold }, styles.linkText]}>
@@ -336,15 +587,6 @@ export default function PetCardVertical({
               </TouchableOpacity>
             )}
           </View>
-          {/*Botón de ver detalle */}
-          {/* <View style={styles.cntVerDetalle}>
-            <TouchableOpacity onPress={() => {}} activeOpacity={0.7} style={{}}>
-              <Text style={styles.text}>
-                Ver detalle{" "}
-                <MaterialIcons name="chevron-right" size={20} color="white" />
-              </Text>
-            </TouchableOpacity>
-          </View> */}
         </View>
       </View>
     </Pressable>
@@ -354,16 +596,15 @@ export default function PetCardVertical({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    // La altura se establece mediante la prop alturaCard
-    backgroundColor: "black", // Para depuración, se puede eliminar
+    backgroundColor: "black",
     paddingTop: 33,
   },
   contentWrapper: {
     flex: 1,
-    backgroundColor: "black", // Para depuración, se puede eliminar
+    backgroundColor: "black",
   },
   mediaContainer: {
-    flex: 1, // Ocupa todo el espacio disponible de la tarjeta
+    flex: 1,
     width: "100%",
     backgroundColor: "black",
   },
@@ -378,15 +619,15 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: "absolute",
-    bottom: 0, // Se mantiene como estaba, es un offset desde la parte inferior de la tarjeta
+    bottom: 0,
     left: 0,
     right: 0,
     padding: 12,
     paddingLeft: 17,
-    paddingBottom: 10, // Added more bottom padding to separate from bottomTabs
+    paddingBottom: 10,
   },
   name: {
-    fontSize: 22, // Increased font size for better prominence
+    fontSize: 22,
     color: "white",
     textShadowColor: "rgba(0, 0, 0, 0.8)",
     textShadowOffset: { width: 1, height: 1 },
@@ -410,7 +651,7 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     flexDirection: "row",
-    marginTop: 0, // Removed marginTop since we added marginBottom to name
+    marginTop: 0,
     width: "85%",
   },
   descriptionWithButton: {
@@ -484,7 +725,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
     borderRadius: 20,
   },
-
   detalleButton: {
     position: "absolute",
     bottom: 113,
@@ -503,10 +743,10 @@ const styles = StyleSheet.create({
     textShadowRadius: 1,
   },
   detalleIcon: {
-    width: 34, // 👈 ajustá tamaño
+    width: 34,
     height: 34,
-    resizeMode: "contain", // evita que se deforme
-    tintColor: "rgba(255, 255, 255, 0.82)", // 👈 así le cambiás el color desde código
+    resizeMode: "contain",
+    tintColor: "rgba(255, 255, 255, 0.82)",
   },
   muteButton: {
     position: "absolute",
@@ -517,7 +757,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   muteButtonBackground: {
-    // backgroundColor: "rgba(0, 0, 0, 0.4)",
     borderRadius: 20,
     padding: 8,
     alignItems: "center",
@@ -538,7 +777,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: "100%",
-    backgroundColor: "#667eea", // Using app color for progress bar
+    backgroundColor: "#667eea",
     borderRadius: 1.5,
   },
   cntVerDetalle: {
@@ -552,11 +791,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 20,
     right: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Improved button design with app color accent
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     borderRadius: 25,
     padding: 10,
     zIndex: 10,
-    borderWidth: 1, // Added subtle border with app color
+    borderWidth: 1,
     borderColor: "rgba(102, 126, 234, 0.3)",
   },
   text: {
@@ -577,7 +816,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   link: {
-    flexDirection: "row", // 👈 importante para que texto + icono estén alineados
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
   },

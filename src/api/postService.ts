@@ -114,13 +114,17 @@ class PostService {
         ...postData,
         userId,
         mediaUrls,
-        thumbnailUri, // ← NUEVO: se guarda el thumbnail
+
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         status: "available",
         likes: 0,
         views: 0,
       };
+
+      if (thumbnailUri) {
+        completePostData.thumbnailUri = thumbnailUri;
+      }
 
       // 4. Guardar en Firestore
       const docRef = await addDoc(collection(db, "posts"), completePostData);

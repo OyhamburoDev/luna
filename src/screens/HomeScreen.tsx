@@ -7,13 +7,14 @@ import {
   type ViewToken,
   type LayoutChangeEvent,
   ActivityIndicator,
+  Text,
 } from "react-native";
 import { useCallback, useState, useRef, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import CustomHeaderTop from "../components/CustomHeaderTop"; // Asegúrate de que la ruta sea correcta
-import PetCardVertical from "../components/PetCardVertical"; // Asegúrate de que la ruta sea correcta
+import CustomHeaderTop from "../components/CustomHeaderTop";
+import PetCardVertical from "../components/PetCardVertical";
 import { setBackgroundColorAsync } from "expo-system-ui";
 import type { PetPost } from "../types/petPots";
 
@@ -24,6 +25,9 @@ type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
   isScreenActive?: boolean;
   onPressDiscoverMore: () => void;
+  loadMore?: () => void;
+  loadingMore?: boolean;
+  hasMore?: boolean;
 };
 
 export default function HomeScreen({
@@ -33,24 +37,18 @@ export default function HomeScreen({
   onTabChange,
   isScreenActive,
   onPressDiscoverMore,
+  loadMore,
+  loadingMore,
+  hasMore,
 }: Props) {
-  // --- TODOS LOS HOOKS DEBEN IR AQUÍ, ANTES DE CUALQUIER RETURN CONDICIONAL ---
   const [activeIndex, setActiveIndex] = useState(0);
-  const [displayedPets, setDisplayedPets] = useState<PetPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-
-  // Estado para almacenar la altura calculada para cada tarjeta
   const [cardHeight, setCardHeight] = useState(0);
 
   useEffect(() => {
-    setBackgroundColorAsync("black"); // 🔲 Cambia la navigation bar abajo
+    setBackgroundColorAsync("black");
   }, []);
 
-  // Función para medir la altura del contenedor del FlatList
-  // Se mueve aquí para que siempre se llame.
   const onLayoutFlatListContainer = useCallback((event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
     setCardHeight(height);
@@ -64,8 +62,6 @@ export default function HomeScreen({
 
   useEffect(() => {
     if (pets.length > 0) {
-      const initialPets = pets.slice(0, pageSize);
-      setDisplayedPets(initialPets);
       setIsLoading(false);
     }
   }, [pets]);
@@ -89,10 +85,15 @@ export default function HomeScreen({
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 80,
   };
-  // --- FIN DE LOS HOOKS ---
 
-  // Ahora, el return condicional para el estado de carga
-  if (isLoading || displayedPets.length === 0) {
+  const handleLoadMore = useCallback(() => {
+    console.log("🎯 onEndReached ejecutado!");
+    if (loadMore && hasMore && !loadingMore) {
+      loadMore();
+    }
+  }, [loadMore, hasMore, loadingMore]);
+
+  if (isLoading || pets.length === 0) {
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#667eea" />
@@ -100,61 +101,44 @@ export default function HomeScreen({
     );
   }
 
-  const loadMorePets = () => {
-    if (isLoadingMore) return;
-    setIsLoadingMore(true);
-    setTimeout(() => {
-      const nextPage = page + 1;
-      const newPets = pets.slice(0, nextPage * pageSize);
-      setDisplayedPets(newPets);
-      setPage(nextPage);
-      setIsLoadingMore(false);
-    }, 1000);
-  };
-
   return (
-    // Usa SafeAreaView para asegurar que el contenido respete las áreas seguras del sistema
     <SafeAreaView style={styles.fullScreenContainer} edges={["left", "right"]}>
       <CustomHeaderTop currentPage={0} onPressArrow={onPressDiscoverMore} />
-      {/* Este View tomará el espacio vertical restante y su altura será medida */}
+
       <View style={styles.flatListWrapper} onLayout={onLayoutFlatListContainer}>
-        {/* El FlatList siempre se renderiza. Si cardHeight es 0 inicialmente,
-            las tarjetas tendrán altura 0 hasta que se mida el layout. */}
         <FlatList
-          data={displayedPets}
+          data={pets}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => (
             <PetCardVertical
               pet={item}
               isActive={index === activeIndex && (isScreenActive ?? true)}
-              alturaCard={cardHeight} // Pasa la altura medida dinámicamente
+              alturaCard={cardHeight}
               onPressArrow={onPressDiscoverMore}
             />
           )}
           decelerationRate="fast"
           showsVerticalScrollIndicator={false}
           pagingEnabled
-          // Asegura que snapToInterval no sea 0 para evitar errores
           snapToInterval={cardHeight > 0 ? cardHeight : 1}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
-          onEndReached={loadMorePets}
+          onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           initialNumToRender={3}
           maxToRenderPerBatch={5}
           windowSize={5}
           removeClippedSubviews={true}
           ListFooterComponent={
-            isLoadingMore ? (
-              <View
-                style={{
-                  paddingVertical: 20,
-                  backgroundColor: "black",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+            loadingMore ? (
+              <View style={styles.footerLoader}>
                 <ActivityIndicator size="small" color="#f093fb" />
+              </View>
+            ) : !hasMore ? (
+              <View style={styles.footerEnd}>
+                <Text style={{ color: "white", fontSize: 14 }}>
+                  No hay más posts
+                </Text>
               </View>
             ) : null
           }
@@ -166,11 +150,11 @@ export default function HomeScreen({
 
 const styles = StyleSheet.create({
   fullScreenContainer: {
-    flex: 1, // Hace que SafeAreaView ocupe todo el espacio de pantalla disponible
-    backgroundColor: "black", // Establece un color de fondo para la pantalla
+    flex: 1,
+    backgroundColor: "black",
   },
   flatListWrapper: {
-    flex: 1, // Este View ocupa todo el espacio restante después de CustomHeaderTop
+    flex: 1,
     backgroundColor: "black",
   },
   loaderContainer: {
@@ -178,5 +162,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "black",
+  },
+  footerLoader: {
+    paddingVertical: 20,
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footerEnd: {
+    paddingVertical: 20,
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

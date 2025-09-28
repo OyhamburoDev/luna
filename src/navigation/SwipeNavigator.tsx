@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, View, Dimensions } from "react-native";
+import { FlatList, View, Dimensions, ActivityIndicator } from "react-native";
 import {
   NavigationContainer,
   NavigationIndependentTree,
@@ -32,11 +32,12 @@ export default function SwipeNavigator() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useInitializeMessages();
-  const { firebasePosts, loading, error } = useFirebasePosts();
+  const { firebasePosts, loading, error, loadMore, hasMore, loadingMore } =
+    useFirebasePosts();
 
   // 👇 Combinar mockPets (arriba) con firebasePosts (abajo)
   const allPets = useMemo(() => {
-    return [...mockPets, ...firebasePosts];
+    return firebasePosts || [];
   }, [firebasePosts]);
 
   // Para saber que tabbar esta activa
@@ -64,6 +65,21 @@ export default function SwipeNavigator() {
     flatListRef.current?.scrollToIndex({ index: 0, animated: true });
   };
 
+  if (loading || !firebasePosts || firebasePosts.length === 0) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "black",
+        }}
+      >
+        <ActivityIndicator size="large" color="#667eea" />
+      </View>
+    );
+  }
+
   return (
     <>
       <FlatList
@@ -87,6 +103,9 @@ export default function SwipeNavigator() {
                       currentIndex === 0 && activeTab === "Inicio"
                     }
                     onPressDiscoverMore={goToDetailScreen}
+                    loadMore={loadMore}
+                    loadingMore={loadingMore}
+                    hasMore={hasMore}
                   />
                 ) : activeTab === "Inicio" && selectedPetIndex !== null ? (
                   <FullScreenStack

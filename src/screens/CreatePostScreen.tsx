@@ -18,6 +18,7 @@ import { navigate } from "../navigation/NavigationService";
 import PetFieldEdit from "../components/PetFieldEdit";
 import { PetPost } from "../types/petPots";
 import { useCreatePost } from "../hooks/useCreatePost"; // HOOK LIMPIO
+import { useFirebasePosts } from "../hooks/useFirebasePosts";
 import type { KeyboardTypeOptions } from "react-native";
 
 type MediaItem = {
@@ -44,9 +45,12 @@ export default function CreatePostScreen({
   const initialMedia = route?.params?.media;
   const initialType = route?.params?.type;
 
-  // HOOK QUE MANEJA TODO
+  // 👇 OBTENER LA FUNCIÓN PARA AGREGAR POSTS LOCALMENTE
+  const { addNewPostLocally } = useFirebasePosts();
+
+  // 👇 PASAR LA FUNCIÓN AL HOOK DE CREACIÓN
   const { createPost, loading, updateFieldError, touchField, hasError } =
-    useCreatePost();
+    useCreatePost(addNewPostLocally); // 👈 AGREGAR addNewPostLocally AQUÍ
 
   const [healthModalVisible, setHealthModalVisible] = useState(false);
   const [behaviorModalVisible, setBehaviorModalVisible] = useState(false);

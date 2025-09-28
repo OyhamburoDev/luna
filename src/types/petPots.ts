@@ -2,7 +2,7 @@ export type PetPost = {
   id: string;
   petName: string;
   description: string;
-  createdAt: string;
+  createdAt: string | Date | null;
   videoUri?: any;
   imageUris?: any[];
   thumbnailUri?: any;
