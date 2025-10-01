@@ -33,7 +33,8 @@ export const useLike = ({ postId, initialLikesCount }: UseLikeProps) => {
 
   const toggleLike = async () => {
     if (!userId) {
-      console.warn("Usuario no autenticado");
+      console.warn("Usuario no autenticad ");
+
       return;
     }
 
@@ -78,5 +79,6 @@ export const useLike = ({ postId, initialLikesCount }: UseLikeProps) => {
     likesCount,
     toggleLike,
     isLoading,
+    userId,
   };
 };

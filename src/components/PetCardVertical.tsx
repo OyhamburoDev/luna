@@ -27,6 +27,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMute } from "../contexts/MuteContext";
 import { useLike } from "../hooks/useLike";
 import DoubleTapHeart from "./DoubleTapHeart";
+import { useAuthModalContext } from "../contexts/AuthModalContext";
 
 type Props = {
   pet: PetPost;
@@ -60,6 +61,7 @@ export default function PetCardVertical({
   const controlTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const insets = useSafeAreaInsets();
+  const { openModal, requireAuth } = useAuthModalContext();
 
   // Estados para la barra de progreso del video
   const [currentTime, setCurrentTime] = useState(0);
@@ -69,7 +71,7 @@ export default function PetCardVertical({
   // Activar o desactivar sonido
   const { isMuted, toggleMute } = useMute();
   // Hook de likes
-  const { isLiked, likesCount, toggleLike, isLoading } = useLike({
+  const { isLiked, likesCount, toggleLike, isLoading, userId } = useLike({
     postId: pet.id,
     initialLikesCount: pet.likes || 0,
   });
@@ -228,6 +230,10 @@ export default function PetCardVertical({
     // Detectar doble tap
     if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
       console.log("❤️ Doble tap detectado");
+      if (!userId) {
+        openModal();
+        return;
+      }
 
       // Dar like si no está likeado
       if (!isLoading) {
@@ -506,7 +512,13 @@ export default function PetCardVertical({
 
           <TouchableOpacity
             style={styles.likeButton}
-            onPress={toggleLike}
+            onPress={() => {
+              if (!userId) {
+                openModal();
+                return;
+              }
+              toggleLike();
+            }}
             disabled={isLoading}
           >
             <HeartIcon
