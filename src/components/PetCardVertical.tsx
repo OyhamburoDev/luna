@@ -25,6 +25,7 @@ import ArrowBigRightIcon from "./ChevronsRightIcon";
 import PrimaryCTA from "../components/PrimaryCTA";
 import { Ionicons } from "@expo/vector-icons";
 import { useMute } from "../contexts/MuteContext";
+import { useLike } from "../hooks/useLike";
 
 type Props = {
   pet: PetPost;
@@ -66,7 +67,11 @@ export default function PetCardVertical({
 
   // Activar o desactivar sonido
   const { isMuted, toggleMute } = useMute();
-  const [isLiked, setIsLiked] = useState(false);
+  // Hook de likes
+  const { isLiked, likesCount, toggleLike, isLoading } = useLike({
+    postId: pet.id,
+    initialLikesCount: pet.likes || 0,
+  });
 
   // 🔍 LOG: Validación inicial del componente
   useEffect(() => {
@@ -481,7 +486,8 @@ export default function PetCardVertical({
 
           <TouchableOpacity
             style={styles.likeButton}
-            onPress={() => setIsLiked(!isLiked)}
+            onPress={toggleLike}
+            disabled={isLoading}
           >
             <HeartIcon
               size={34}
@@ -489,7 +495,7 @@ export default function PetCardVertical({
               filled={true}
             />
             <Text style={[{ fontFamily: fonts.bold }, styles.detalleText]}>
-              Me g...
+              {likesCount > 0 ? likesCount : "Me g..."}
             </Text>
           </TouchableOpacity>
 

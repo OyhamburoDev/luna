@@ -55,6 +55,7 @@ export function useFirebasePosts() {
       species: data.species || "dog",
       ownerId: data.userId || data.ownerId || "",
       ownerName: data.ownerName || "Usuario",
+      likes: data.likes || 0,
       videoUri: data.mediaUrls?.find((url: string) => url.includes(".mp4"))
         ? { uri: data.mediaUrls.find((url: string) => url.includes(".mp4")) }
         : undefined,
