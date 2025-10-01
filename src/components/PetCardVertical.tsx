@@ -26,6 +26,7 @@ import PrimaryCTA from "../components/PrimaryCTA";
 import { Ionicons } from "@expo/vector-icons";
 import { useMute } from "../contexts/MuteContext";
 import { useLike } from "../hooks/useLike";
+import DoubleTapHeart from "./DoubleTapHeart";
 
 type Props = {
   pet: PetPost;
@@ -72,6 +73,9 @@ export default function PetCardVertical({
     postId: pet.id,
     initialLikesCount: pet.likes || 0,
   });
+
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const lastTapRef = useRef<number>(0);
 
   // 🔍 LOG: Validación inicial del componente
   useEffect(() => {
@@ -218,49 +222,65 @@ export default function PetCardVertical({
 
   // 🔍 LOG: Función de video press con debugging
   const handleVideoPress = async () => {
-    console.log("👆 Video pressed:", {
-      isPlaying,
-      hasVideoRef: !!videoRef.current,
-      videoUri: pet.videoUri,
-      petId: pet.id || pet.petName,
-    });
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300; // 300ms para detectar doble tap
 
-    try {
-      if (!videoRef.current) {
-        console.log("❌ No video ref on press");
-        return;
+    // Detectar doble tap
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      console.log("❤️ Doble tap detectado");
+
+      // Dar like si no está likeado
+      if (!isLoading) {
+        setShowHeartAnimation(true);
+        toggleLike();
       }
 
-      if (isPlaying) {
-        console.log("⏸️ Manual pause...");
-        await videoRef.current.pauseAsync();
-        setIsPlaying(false);
-        setShowControls(true);
-        console.log("✅ Manual pause success");
-      } else {
-        console.log("▶️ Manual play...");
-        await videoRef.current.playAsync();
-        setIsPlaying(true);
-        setShowControls(true);
-        console.log("✅ Manual play success");
-
-        controlTimeoutRef.current = setTimeout(() => {
-          setShowControls(false);
-        }, 500);
-      }
-    } catch (error: unknown) {
-      console.error("💥 ERROR en handleVideoPress:", {
-        error: error instanceof Error ? error.message : String(error),
-        errorCode:
-          error instanceof Error && "code" in error
-            ? (error as any).code
-            : "unknown",
-        isPlaying,
-        videoUri: pet.videoUri,
-        petId: pet.id || pet.petName,
-        timestamp: Date.now(),
-      });
+      lastTapRef.current = 0; // Reset
+      return; // No ejecutar el play/pause
     }
+
+    // Guardar timestamp del tap
+    lastTapRef.current = now;
+
+    // Esperar para ver si viene otro tap
+    setTimeout(async () => {
+      // Si pasó el tiempo y no hubo doble tap, ejecutar play/pause
+      if (now === lastTapRef.current) {
+        console.log("👆 Single tap - play/pause video");
+
+        try {
+          if (!videoRef.current) {
+            console.log("❌ No video ref on press");
+            return;
+          }
+
+          if (isPlaying) {
+            console.log("⏸️ Manual pause...");
+            await videoRef.current.pauseAsync();
+            setIsPlaying(false);
+            setShowControls(true);
+            console.log("✅ Manual pause success");
+          } else {
+            console.log("▶️ Manual play...");
+            await videoRef.current.playAsync();
+            setIsPlaying(true);
+            setShowControls(true);
+            console.log("✅ Manual play success");
+
+            controlTimeoutRef.current = setTimeout(() => {
+              setShowControls(false);
+            }, 500);
+          }
+        } catch (error: unknown) {
+          console.error("💥 ERROR en handleVideoPress:", {
+            error: error instanceof Error ? error.message : String(error),
+            isPlaying,
+            videoUri: pet.videoUri,
+            petId: pet.id || pet.petName,
+          });
+        }
+      }
+    }, DOUBLE_TAP_DELAY);
   };
 
   const shouldShowMoreButton = pet.description && pet.description.length > 80;
@@ -537,6 +557,11 @@ export default function PetCardVertical({
             </View>
           </View>
         )}
+
+        <DoubleTapHeart
+          isVisible={showHeartAnimation}
+          onAnimationComplete={() => setShowHeartAnimation(false)}
+        />
 
         <View style={[styles.overlay]}>
           <LinearGradient
