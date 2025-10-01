@@ -13,11 +13,13 @@ import { Ionicons } from "@expo/vector-icons";
 type DoubleTapHeartProps = {
   isVisible: boolean;
   onAnimationComplete: () => void;
+  isLiked: boolean;
 };
 
 export default function DoubleTapHeart({
   isVisible,
   onAnimationComplete,
+  isLiked,
 }: DoubleTapHeartProps) {
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
@@ -52,7 +54,11 @@ export default function DoubleTapHeart({
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
-      <Ionicons name="heart" size={120} color="#FF3B30" />
+      <Ionicons
+        name="heart"
+        size={120}
+        color={isLiked ? "#E91E63" : "#FFFFFF"}
+      />
     </Animated.View>
   );
 }

@@ -511,7 +511,7 @@ export default function PetCardVertical({
           >
             <HeartIcon
               size={34}
-              color={isLiked ? "#FF3040" : "rgba(255, 255, 255, 0.91)"}
+              color={isLiked ? "#E91E63" : "rgba(255, 255, 255, 0.91)"}
               filled={true}
             />
             <Text style={[{ fontFamily: fonts.bold }, styles.detalleText]}>
@@ -561,6 +561,7 @@ export default function PetCardVertical({
         <DoubleTapHeart
           isVisible={showHeartAnimation}
           onAnimationComplete={() => setShowHeartAnimation(false)}
+          isLiked={isLiked}
         />
 
         <View style={[styles.overlay]}>
