@@ -97,7 +97,7 @@ export const useCreatePost = (addNewPostLocally?: (post: PetPost) => void) => {
       onSuccess?.();
       return true;
     } catch (error) {
-      console.error("Error al publicar:", error);
+      console.log("Error al publicar:", error);
       const errorMessage =
         error instanceof Error
           ? error.message

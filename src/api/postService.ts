@@ -1,4 +1,12 @@
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../config/firebase"; // Ajusta la ruta según tu proyecto
 import { PetPost } from "../types/petPots";
@@ -38,7 +46,7 @@ class PostService {
       const downloadURL = await getDownloadURL(storageRef);
       return downloadURL;
     } catch (error) {
-      console.error("Error uploading media:", error);
+      console.log("Error uploading media:", error);
       throw new Error("Error al subir el archivo");
     }
   }
@@ -75,7 +83,7 @@ class PostService {
       const downloadURL = await getDownloadURL(storageRef);
       return downloadURL;
     } catch (error) {
-      console.error("Error generating thumbnail:", error);
+      console.log("Error generating thumbnail:", error);
       throw new Error("Error al generar miniatura del video");
     }
   }
@@ -89,6 +97,23 @@ class PostService {
     userId: string
   ): Promise<string> {
     try {
+      const today = new Date();
+
+      // verificacion para un limite diario de posteos
+      today.setHours(0, 0, 0, 0);
+
+      const postsQuery = query(
+        collection(db, "posts"),
+        where("userId", "==", userId),
+        where("createdAt", ">=", Timestamp.fromDate(today))
+      );
+
+      const snapshot = await getDocs(postsQuery);
+
+      if (snapshot.size >= 3) {
+        throw new Error("Alcanzaste el límite de 3 publicaciones por día");
+      }
+
       // 1. Subir todas las imágenes/videos
       const uploadPromises = mediaList.map((media, index) =>
         this.uploadMedia(media.uri, userId, index, media.type)
@@ -132,7 +157,11 @@ class PostService {
       console.log("Post created with ID:", docRef.id);
       return docRef.id;
     } catch (error) {
-      console.error("Error creating post:", error);
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      // Si no, lanzar error genérico
       throw new Error("Error al crear la publicación");
     }
   }
@@ -144,7 +173,7 @@ class PostService {
     try {
       // Implementar según necesites (con paginación, filtros, etc.)
     } catch (error) {
-      console.error("Error getting posts:", error);
+      console.log("Error getting posts:", error);
       throw error;
     }
   }
@@ -156,7 +185,7 @@ class PostService {
     try {
       // Implementar update
     } catch (error) {
-      console.error("Error updating post:", error);
+      console.log("Error updating post:", error);
       throw error;
     }
   }
@@ -168,7 +197,7 @@ class PostService {
     try {
       // Implementar delete
     } catch (error) {
-      console.error("Error deleting post:", error);
+      console.log("Error deleting post:", error);
       throw error;
     }
   }
