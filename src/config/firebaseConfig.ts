@@ -1,8 +1,13 @@
+import Constants from "expo-constants";
+
 export const firebaseConfig = {
-  apiKey: "AIzaSyARU21WXe2PXo7oTLRbxK097QJpn-2Kj9Q",
-  authDomain: "luna-18810.firebaseapp.com",
-  projectId: "luna-18810",
-  storageBucket: "luna-18810.firebasestorage.app",
-  messagingSenderId: "671975384028",
-  appId: "1:671975384028:web:fc40ca57b617df51272519",
+  apiKey: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain:
+    Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  projectId: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "",
+  storageBucket:
+    Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId:
+    Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_APP_ID || "",
 };
