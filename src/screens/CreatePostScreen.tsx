@@ -20,6 +20,7 @@ import { PetPost } from "../types/petPots";
 import { useCreatePost } from "../hooks/useCreatePost"; // HOOK LIMPIO
 import { useFirebasePosts } from "../hooks/useFirebasePosts";
 import type { KeyboardTypeOptions } from "react-native";
+import { useAuthModalContext } from "../contexts/AuthModalContext";
 
 type MediaItem = {
   uri: string;
@@ -44,6 +45,8 @@ export default function CreatePostScreen({
 }: CreatePostScreenProps) {
   const initialMedia = route?.params?.media;
   const initialType = route?.params?.type;
+
+  const { requireAuth } = useAuthModalContext();
 
   // 👇 OBTENER LA FUNCIÓN PARA AGREGAR POSTS LOCALMENTE
   const { addNewPostLocally } = useFirebasePosts();
@@ -107,7 +110,7 @@ export default function CreatePostScreen({
       species: { title: "Especie", placeholder: "Ej: Perro, Gato..." },
       breed: {
         title: "Raza",
-        placeholder: "Ej: Mixto, Callejero, Labrador, Persa...",
+        placeholder: "Ej: mestizo, Callejero, Labrador, Persa...",
       },
       age: {
         title: "Edad",
@@ -210,8 +213,10 @@ export default function CreatePostScreen({
 
   // FUNCIÓN SUPER LIMPIA
   const handlePublish = async () => {
-    const success = await createPost(postData, mediaList, () => {
-      navigate("Swipe");
+    requireAuth(async () => {
+      const success = await createPost(postData, mediaList, () => {
+        navigate("Swipe");
+      });
     });
   };
 

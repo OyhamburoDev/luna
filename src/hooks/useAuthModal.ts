@@ -20,7 +20,7 @@ export const useAuthModal = () => {
       if (isAuthenticated) {
         action();
       } else {
-        setModalType(defaultModalType); // 👈 ESTE podría ser el culpable
+        setModalType(defaultModalType);
         setIsVisible(true);
       }
     },

@@ -291,7 +291,7 @@ export default function FullScreenStack({
                         ? { uri: pet.ownerAvatar }
                         : pet.ownerAvatar
                         ? pet.ownerAvatar
-                        : require("../../assets/media/images/user-photo.jpg")
+                        : require("../../assets/media/avatars/default-avatar.jpg")
                     }
                     style={styles.ownerImage}
                   />

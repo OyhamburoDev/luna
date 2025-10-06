@@ -88,9 +88,12 @@ export const AuthModal: React.FC = () => {
     if (modalType === "register") {
       const success = await register(email, password);
       if (success) {
-        Alert.alert("Cuenta creada", "Ya podés iniciar sesión");
-        switchModalType(); // Esto cambiará a "login" y disparará el scroll
-        setPassword("");
+        handleClose(); // Cerrar primero
+        Alert.alert(
+          "Cuenta creada con éxito",
+          "Ahara puedes usar todas las funciones"
+        );
+        setPassword(""); // Limpiar después
       } else {
         Alert.alert("Error", "No se pudo crear la cuenta");
       }

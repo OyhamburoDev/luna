@@ -57,7 +57,6 @@ export function useAuth() {
       // user store (semilla mínima)
       updateUserInfo({ uid: user.uid, email: user.email ?? "" });
 
-      navigate("Swipe");
       return true;
     } catch (err: any) {
       console.error("Register error:", err);

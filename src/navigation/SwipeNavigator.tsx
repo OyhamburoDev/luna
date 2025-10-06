@@ -6,7 +6,7 @@ import {
 } from "@react-navigation/native";
 import TabsNavigator from "./TabsNavigator";
 import FullScreenStack from "../screens/FullScreenStack";
-import { mockPets } from "../data/mockPetsData";
+// import { mockPets } from "../data/mockPetsData";
 import { useState, useRef, useEffect, useMemo } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 import { useInitializeMessages } from "../hooks/useInitializeMessages";

@@ -12,6 +12,7 @@ import ProfileView from "../components/ProfileComponents/ProfileView";
 import PetRegisterFormScreen from "./PetRegisterFormScreen";
 import { useNavigation } from "@react-navigation/native";
 import { useTabsStore } from "../store/tabsStore";
+import CameraScreen from "../screens/CamaraScreen";
 
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
@@ -82,9 +83,9 @@ export default function ProfileScreen({ onTabChange }: Props) {
     );
   }
 
-  if (showPetRegister) {
-    return <PetRegisterFormScreen onBack={() => setShowPetRegister(false)} />;
-  }
+  // if (showPetRegister) {
+  //   return <PetRegisterFormScreen onBack={() => setShowPetRegister(false)} />;
+  // }
 
   if (fieldEditConfig) {
     return (

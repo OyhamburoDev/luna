@@ -237,9 +237,9 @@ export default function ProfileView({
               <>
                 {/* <Ionicons name="paw-outline" size={50} color="#ccc" /> */}
                 <Text style={[textStyles.title, styles.emptyTitle]}>
-                  Comparte con otros usuarios un animal en adopción
+                  Aún no has compartido con otros usuarios una publicación
                 </Text>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   style={styles.uploadButton}
                   onPress={onPublishPress}
                 >
@@ -251,7 +251,7 @@ export default function ProfileView({
                   >
                     Publicar
                   </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </>
             ) : (
               <>
@@ -487,6 +487,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 5,
+    marginTop: 10,
   },
   emptyLikeTitle: {
     fontSize: 15,
