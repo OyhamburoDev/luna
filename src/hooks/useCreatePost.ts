@@ -93,7 +93,6 @@ export const useCreatePost = (addNewPostLocally?: (post: PetPost) => void) => {
 
       await postService.createPost(completePostData, mediaList, userId);
 
-      Alert.alert("Éxito!", "Publicación creada correctamente");
       onSuccess?.();
       return true;
     } catch (error) {

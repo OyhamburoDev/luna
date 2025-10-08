@@ -19,6 +19,12 @@ import { ProfileOptionsModal } from "./ProfileOptionsModal";
 import { useProfileOptModal } from "../../hooks/useProfileOptModal";
 import { useAuth } from "../../hooks/useAuth";
 import { authApi } from "../../api/auth.api";
+import useProfilePosts from "../../hooks/useProfilePosts";
+import DeletePostModal from "../DeletePostModal";
+import { useProfileLikes } from "../../hooks/useProfileLikes";
+import { likesService } from "../../api/likesService";
+import { useAuthStore } from "../../store/auth";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
@@ -53,23 +59,24 @@ export default function ProfileView({
   const userInfo = useUserStore((state) => state.userInfo);
 
   const [activeTab, setActiveTab] = useState<"posts" | "likes">("posts");
+  const { posts, loading, error, handleDeletePost } = useProfilePosts();
+  const {
+    posts: likedPosts,
+    loading: loadingLikes,
+    refresh: refreshLikes,
+  } = useProfileLikes();
 
-  // Mock data para las publicaciones y likes
-  const userPosts: any[] = [
-    // { id: 1, image: "/rescued-dog-happy.png", likes: 24 },
-    // { id: 2, image: "/cat-adoption-success.png", likes: 18 },
-    // { id: 3, image: "/puppy-rescue-story.png", likes: 32 },
-    // { id: 4, image: "/animal-shelter-volunteer.png", likes: 15 },
-    // { id: 5, image: "/dog-training.png", likes: 27 },
-    // { id: 6, image: "/playful-cat.png", likes: 21 },
-  ];
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const userId = useAuthStore((state) => state.user?.uid);
+  console.log("🔍 ProfileView render - likedPosts:", likedPosts.length);
 
-  const likedPosts: any[] = [
-    // { id: 1, image: "/golden-retriever-playing.png", likes: 45 },
-    // { id: 2, image: "/kitten-sleeping-peacefully.png", likes: 38 },
-    // { id: 3, image: "/dog-park-fun-activities.png", likes: 52 },
-    // { id: 4, image: "/animal-rescue-success-story.png", likes: 67 },
-  ];
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("🔄 Refrescando likes del perfil...");
+      refreshLikes();
+    }, [refreshLikes])
+  );
 
   const handleEditProfile = () => {
     close(); // cierra el modal primero
@@ -79,6 +86,23 @@ export default function ProfileView({
   const handleCloseAccount = () => {
     close();
     // TODO: tu lógica real de cerrar cuenta (signOut / deleteAccount / etc.)
+  };
+
+  const handleDeletePress = (post: any) => {
+    setSelectedPost(post);
+    setDeleteModalVisible(true);
+  };
+
+  const handleUnlike = async (post: any) => {
+    if (!userId) return;
+
+    try {
+      await likesService.toggleLike(userId, post.id, true);
+      // Refrescar la lista de likes
+      const { posts: likedPosts } = useProfileLikes();
+    } catch (error) {
+      console.log("Error removing like:", error);
+    }
   };
 
   return (
@@ -219,16 +243,34 @@ export default function ProfileView({
         </View>
 
         {/* Grid de contenido o estado vacío */}
-        {(activeTab === "posts" ? userPosts : likedPosts).length > 0 ? (
-          <View style={styles.contentGrid}>
-            {(activeTab === "posts" ? userPosts : likedPosts).map((post) => (
-              <TouchableOpacity key={post.id} style={styles.postItem}>
-                <Image source={{ uri: post.image }} style={styles.postImage} />
+        {(activeTab === "posts" ? posts : likedPosts).length > 0 ? (
+          <View
+            style={styles.contentGrid}
+            key={`${activeTab}-${
+              (activeTab === "posts" ? posts : likedPosts).length
+            }`}
+          >
+            {(activeTab === "posts" ? posts : likedPosts).map((post) => (
+              <View key={post.id} style={styles.postItem}>
+                <Image
+                  source={{
+                    uri: post.thumbnailUri || post.imageUris?.[0]?.uri,
+                  }}
+                  style={styles.postImage}
+                />
+                {activeTab === "posts" && (
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeletePress(post)}
+                  >
+                    <Ionicons name="close" size={18} color="white" />
+                  </TouchableOpacity>
+                )}
                 <View style={styles.postOverlay}>
                   <Ionicons name="heart" size={16} color="white" />
                   <Text style={styles.postLikes}>{post.likes}</Text>
                 </View>
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         ) : (
@@ -289,6 +331,21 @@ export default function ProfileView({
         visible={isViewerVisible}
         imageUri={userInfo.photoUrl || null}
         onClose={closeViewer}
+      />
+      <DeletePostModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={async () => {
+          if (selectedPost) {
+            await handleDeletePost(
+              selectedPost.id,
+              selectedPost.mediaUrls || [],
+              selectedPost.thumbnailUri
+            );
+          }
+          setDeleteModalVisible(false);
+        }}
+        petName={selectedPost?.petName || ""}
       />
     </SafeAreaView>
   );
@@ -416,8 +473,8 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: "row",
     backgroundColor: "white",
-    paddingVertical: 16,
-    marginBottom: 2,
+    paddingTop: 16,
+    marginBottom: 10,
   },
   tab: {
     flex: 1,
@@ -443,11 +500,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     backgroundColor: "white",
-    paddingTop: 2,
   },
   postItem: {
     width: "33.33%",
-    aspectRatio: 1,
+    aspectRatio: 0.75,
     position: "relative",
     borderWidth: 1,
     borderColor: "#f0f0f0",
@@ -456,13 +512,24 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  deleteButton: {
+    position: "absolute",
+    top: 6,
+    right: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(0, 0, 0, 0.11)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   postOverlay: {
     position: "absolute",
-    bottom: 8,
-    right: 8,
+    bottom: 4,
+    left: 4,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "rgba(0, 0, 0, 0.11)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,

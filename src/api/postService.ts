@@ -6,9 +6,19 @@ import {
   where,
   getDocs,
   Timestamp,
+  orderBy,
+  deleteDoc,
+  doc,
+  documentId,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../config/firebase"; // Ajusta la ruta según tu proyecto
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { getAuth } from "firebase/auth"; // ✅ NUEVO
+import { db, storage } from "../config/firebase";
 import { PetPost } from "../types/petPots";
 import * as VideoThumbnails from "expo-video-thumbnails";
 
@@ -20,6 +30,17 @@ type MediaItem = {
 };
 
 class PostService {
+  /**
+   * ✅ NUEVO - Obtiene el userId del usuario autenticado
+   */
+  private getCurrentUserId(): string {
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      throw new Error("Usuario no autenticado");
+    }
+    return auth.currentUser.uid;
+  }
+
   /**
    * Sube una imagen/video a Firebase Storage
    */
@@ -139,7 +160,6 @@ class PostService {
         ...postData,
         userId,
         mediaUrls,
-
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         status: "available",
@@ -167,14 +187,27 @@ class PostService {
   }
 
   /**
-   * Obtiene todos los posts disponibles
+   * ✅ MODIFICADO - Obtiene los posts del usuario autenticado
    */
-  async getPosts() {
+  async getUserPosts(): Promise<PetPost[]> {
     try {
-      // Implementar según necesites (con paginación, filtros, etc.)
+      const userId = this.getCurrentUserId(); // ✅ Obtiene userId del login
+
+      const postsQuery = query(
+        collection(db, "posts"),
+        where("userId", "==", userId),
+        orderBy("createdAt", "desc")
+      );
+
+      const snapshot = await getDocs(postsQuery);
+
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as PetPost[];
     } catch (error) {
-      console.log("Error getting posts:", error);
-      throw error;
+      console.log("Error getting user posts:", error);
+      throw new Error("Error al obtener las publicaciones");
     }
   }
 
@@ -191,14 +224,91 @@ class PostService {
   }
 
   /**
-   * Elimina un post (soft delete cambiando status)
+   * Elimina un post y sus medias asociados
    */
-  async deletePost(postId: string) {
+  async deletePost(postId: string, mediaUrls: string[], thumbnailUri?: string) {
     try {
-      // Implementar delete
+      // 1. Eliminar todas las imágenes/videos del Storage
+      const deletePromises = mediaUrls.map(async (url) => {
+        try {
+          const mediaRef = ref(storage, url);
+          await deleteObject(mediaRef);
+        } catch (error) {
+          console.log("Error deleting media:", error);
+          // Continuar aunque falle alguna imagen
+        }
+      });
+
+      // 2. Eliminar thumbnail si existe
+      if (thumbnailUri) {
+        try {
+          const thumbRef = ref(storage, thumbnailUri);
+          await deleteObject(thumbRef);
+        } catch (error) {
+          console.log("Error deleting thumbnail:", error);
+        }
+      }
+
+      await Promise.allSettled(deletePromises);
+
+      // 3. Eliminar documento de Firestore
+      await deleteDoc(doc(db, "posts", postId));
+
+      console.log("Post deleted successfully");
     } catch (error) {
       console.log("Error deleting post:", error);
-      throw error;
+      throw new Error("Error al eliminar la publicación");
+    }
+  }
+
+  /**
+   * Obtiene posts por sus IDs (máximo 10)
+   */
+  async getPostsByIds(postIds: string[]): Promise<PetPost[]> {
+    try {
+      if (postIds.length === 0) return [];
+
+      const limitedIds = postIds.slice(0, 10);
+
+      const postsQuery = query(
+        collection(db, "posts"),
+        where(documentId(), "in", limitedIds)
+      );
+
+      const snapshot = await getDocs(postsQuery);
+
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          petName: data.petName || "",
+          description: data.description || "",
+          createdAt: data.createdAt?.toDate
+            ? data.createdAt.toDate()
+            : new Date(data.createdAt),
+          age: data.age || 0,
+          gender: data.gender || "",
+          size: data.size || "",
+          species: data.species || "dog",
+          ownerId: data.userId || data.ownerId || "",
+          ownerName: data.ownerName || "Usuario",
+          likes: data.likes || 0,
+          videoUri: data.mediaUrls?.find((url: string) => url.includes(".mp4"))
+            ? {
+                uri: data.mediaUrls.find((url: string) => url.includes(".mp4")),
+              }
+            : undefined,
+          imageUris: data.mediaUrls
+            ? data.mediaUrls
+                .filter((url: string) => !url.includes(".mp4"))
+                .map((url: string) => ({ uri: url }))
+            : undefined,
+          thumbnailUri: data.thumbnailUri,
+        } as PetPost;
+      });
+    } catch (error) {
+      console.log("Error getting posts by IDs:", error);
+      throw new Error("Error al obtener publicaciones");
     }
   }
 }

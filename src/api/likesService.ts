@@ -98,6 +98,29 @@ class LikesService {
       return false;
     }
   }
+
+  /**
+   * Obtiene los IDs de los posts que el usuario likeó
+   * @param userId - ID del usuario
+   * @returns Array de postIds
+   */
+  async getLikedPostIds(userId: string): Promise<string[]> {
+    try {
+      const userLikesRef = doc(db, "userLikes", userId);
+      const userLikesDoc = await getDoc(userLikesRef);
+
+      if (!userLikesDoc.exists()) {
+        return [];
+      }
+
+      const likedPosts = userLikesDoc.data()?.likedPosts || {};
+      // Filtrar solo los que NO sean null
+      return Object.keys(likedPosts).filter((key) => likedPosts[key] !== null);
+    } catch (error) {
+      console.error("Error getting liked post IDs:", error);
+      return [];
+    }
+  }
 }
 
 export const likesService = new LikesService();

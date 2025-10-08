@@ -24,7 +24,7 @@ export const useLike = ({ postId, initialLikesCount }: UseLikeProps) => {
         const liked = await likesService.checkIfUserLikedPost(userId, postId);
         setIsLiked(liked);
       } catch (error) {
-        console.error("Error checking like status:", error);
+        console.log("Error checking like status:", error);
       }
     };
 

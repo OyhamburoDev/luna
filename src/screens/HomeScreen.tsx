@@ -117,10 +117,13 @@ export default function HomeScreen({
               onPressArrow={onPressDiscoverMore}
             />
           )}
-          decelerationRate="fast"
+          decelerationRate={0.7} // Buen balance
+          overScrollMode="never" // Reduce el rebote excesivo en Android
           showsVerticalScrollIndicator={false}
-          pagingEnabled
+          disableIntervalMomentum={true}
+          // pagingEnabled
           snapToInterval={cardHeight > 0 ? cardHeight : 1}
+          snapToAlignment="start"
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
           onEndReached={handleLoadMore}

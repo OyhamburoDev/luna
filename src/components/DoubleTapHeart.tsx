@@ -33,7 +33,7 @@ export default function DoubleTapHeart({
 
       opacity.value = withSequence(
         withTiming(1, { duration: 200 }),
-        withTiming(0, { duration: 300 }, (finished) => {
+        withTiming(0, { duration: 400 }, (finished) => {
           if (finished) {
             runOnJS(onAnimationComplete)();
           }
