@@ -50,6 +50,9 @@ export const useCreatePost = (addNewPostLocally?: (post: PetPost) => void) => {
 
       // 1. CREAR POST LOCAL TEMPORAL
       const tempPostId = `temp-${Date.now()}`;
+
+      const videoMedia = mediaList.find((media) => media.type === "video");
+      const photoMedias = mediaList.filter((media) => media.type === "photo");
       const localPost: PetPost = {
         id: tempPostId,
         petName: postData.petName || "",
@@ -63,8 +66,11 @@ export const useCreatePost = (addNewPostLocally?: (post: PetPost) => void) => {
         ownerName:
           `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Usuario",
         ownerAvatar: userInfo.photoUrl || null,
-        videoUri: undefined,
-        imageUris: undefined,
+        videoUri: videoMedia ? { uri: videoMedia.uri } : undefined,
+        imageUris:
+          photoMedias.length > 0
+            ? photoMedias.map((photo) => ({ uri: photo.uri }))
+            : undefined,
         breed: postData.breed,
         healthInfo: postData.healthInfo,
         isVaccinated: postData.isVaccinated,

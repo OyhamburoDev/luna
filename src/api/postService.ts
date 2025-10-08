@@ -191,20 +191,46 @@ class PostService {
    */
   async getUserPosts(): Promise<PetPost[]> {
     try {
-      const userId = this.getCurrentUserId(); // ✅ Obtiene userId del login
+      const userId = this.getCurrentUserId(); // ✅ Mantener esta verificación
 
       const postsQuery = query(
         collection(db, "posts"),
         where("userId", "==", userId),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc") // ✅ Mantener el orden
       );
 
       const snapshot = await getDocs(postsQuery);
 
-      return snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as PetPost[];
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          petName: data.petName || "",
+          description: data.description || "",
+          createdAt: data.createdAt?.toDate
+            ? data.createdAt.toDate()
+            : new Date(data.createdAt),
+          age: data.age || 0,
+          gender: data.gender || "",
+          size: data.size || "",
+          species: data.species || "dog",
+          ownerId: data.userId || data.ownerId || "",
+          ownerName: data.ownerName || "Usuario",
+          likes: data.likes || 0,
+          // ✅ AGREGAR LA TRANSFORMACIÓN (igual que getPostsByIds):
+          videoUri: data.mediaUrls?.find((url: string) => url.includes(".mp4"))
+            ? {
+                uri: data.mediaUrls.find((url: string) => url.includes(".mp4")),
+              }
+            : undefined,
+          imageUris: data.mediaUrls
+            ? data.mediaUrls
+                .filter((url: string) => !url.includes(".mp4"))
+                .map((url: string) => ({ uri: url }))
+            : undefined,
+          thumbnailUri: data.thumbnailUri,
+        } as PetPost;
+      });
     } catch (error) {
       console.log("Error getting user posts:", error);
       throw new Error("Error al obtener las publicaciones");

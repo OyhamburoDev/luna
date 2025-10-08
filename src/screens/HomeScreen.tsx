@@ -117,7 +117,7 @@ export default function HomeScreen({
               onPressArrow={onPressDiscoverMore}
             />
           )}
-          decelerationRate={0.7} // Buen balance
+          decelerationRate={0.8} // Buen balance
           overScrollMode="never" // Reduce el rebote excesivo en Android
           showsVerticalScrollIndicator={false}
           disableIntervalMomentum={true}
