@@ -28,12 +28,16 @@ import { useMute } from "../contexts/MuteContext";
 import { useLike } from "../hooks/useLike";
 import DoubleTapHeart from "./DoubleTapHeart";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
+import { ActivityIndicator } from "react-native";
+import { useConfettiStore } from "../store/useConfettiStore";
+import LottieView from "lottie-react-native";
 
 type Props = {
   pet: PetPost;
   isActive: boolean;
   alturaCard: number;
   onPressArrow?: () => void;
+  index?: number;
 };
 
 const AVATAR_SIZE = 45;
@@ -47,14 +51,8 @@ export default function PetCardVertical({
   isActive,
   alturaCard,
   onPressArrow,
+  index = -1,
 }: Props) {
-  console.log("🔧 PetCardVertical props:", {
-    hasPet: !!pet,
-    hasImageUris: !!pet.imageUris?.length,
-    hasVideoUri: !!pet.videoUri,
-    petId: pet.id,
-    renderTime: Date.now(),
-  });
   const videoRef = useRef<Video>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -62,9 +60,11 @@ export default function PetCardVertical({
   const [isExpanded, setIsExpanded] = useState(false);
   const insets = useSafeAreaInsets();
   const { openModal, requireAuth } = useAuthModalContext();
+  const [mediaLoaded, setMediaLoaded] = useState(false);
+  const { mostrarConfetti, resetConfetti } = useConfettiStore();
+  const confettiRef = useRef<LottieView>(null);
 
   // Estados para la barra de progreso del video
-  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -222,6 +222,25 @@ export default function PetCardVertical({
     };
   }, [isActive]);
 
+  useEffect(() => {
+    console.log("🔍 useEffect ejecutado:", {
+      mediaLoaded,
+      mostrarConfetti,
+      index,
+    });
+
+    if (mediaLoaded && mostrarConfetti && index === 0 && confettiRef.current) {
+      // 👈 Agregá index === 0
+      console.log("🎊 DISPARANDO confetti");
+      confettiRef.current.play();
+
+      setTimeout(() => {
+        console.log("♻️ Reseteando confetti");
+        resetConfetti();
+      }, 3000);
+    }
+  }, [mediaLoaded, mostrarConfetti, index]);
+
   // 🔍 LOG: Función de video press con debugging
   const handleVideoPress = async () => {
     const now = Date.now();
@@ -303,91 +322,39 @@ export default function PetCardVertical({
     overlayHeight = baseOverlayHeight + 2 * lineHeight;
   }
 
-  // 🔍 LOG: Callback de progreso con más detalles
   const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    // Log solo cada 2 segundos para no saturar
-    const shouldLog = status.isLoaded
-      ? Math.floor((status.positionMillis || 0) / 2000) !==
-        Math.floor((currentTime || 0) / 2000)
-      : true;
-
-    // 🔍 DEBUGGING: Ver si se reporta didJustFinish cerca del final
-    if (status.isLoaded && status.positionMillis && status.durationMillis) {
-      const timeRemaining = status.durationMillis - status.positionMillis;
-      if (timeRemaining < 1000) {
-        // Último segundo
-        console.log("🔚 Video cerca del final:", {
-          positionMillis: status.positionMillis,
-          durationMillis: status.durationMillis,
-          timeRemaining,
-          didJustFinish: status.didJustFinish,
-          petId: pet.id || pet.petName,
-        });
-      }
-    }
-
-    if (shouldLog || !status.isLoaded) {
-      console.log("📊 Video Status:", {
-        isLoaded: status.isLoaded,
-        ...(status.isLoaded && {
-          isPlaying: status.isPlaying,
-          positionMillis: status.positionMillis,
-          durationMillis: status.durationMillis,
-          isBuffering: status.isBuffering,
-          playableDurationMillis: status.playableDurationMillis,
-          didJustFinish: status.didJustFinish,
-        }),
-        ...(!status.isLoaded && {
-          error: status.error,
-        }),
-        uri: pet.videoUri,
-        petId: pet.id || pet.petName,
-      });
-    }
-
-    // Tu loop manual existente (no cambiar)
+    // Loop manual cuando termina el video
     if (
       status.isLoaded &&
       status.didJustFinish &&
       typeof pet.videoUri === "object" &&
       isActive
     ) {
-      console.log("🔄 Iniciando LOOP MANUAL para Firebase video:", {
-        petId: pet.id || pet.petName,
-        uri: pet.videoUri,
-        timestamp: Date.now(),
-      });
-
-      videoRef.current
-        ?.replayAsync()
-        .then(() => {
-          console.log("✅ Loop manual exitoso");
-        })
-        .catch((error: unknown) => {
-          console.error("💥 Error en loop manual:", {
-            error: error instanceof Error ? error.message : String(error),
-            petId: pet.id || pet.petName,
-          });
+      videoRef.current?.replayAsync().catch((error: unknown) => {
+        console.error("💥 Error en loop manual:", {
+          error: error instanceof Error ? error.message : String(error),
+          petId: pet.id || pet.petName,
         });
-    }
-
-    // Resto del código igual...
-    if (!status.isLoaded && status.error) {
-      console.error("💥 VIDEO STATUS ERROR:", {
-        error: status.error,
-        errorString: status.error?.toString(),
-        uri: pet.videoUri,
-        petId: pet.id || pet.petName,
-        timestamp: Date.now(),
       });
     }
 
+    // Manejo de errores
+    if (!status.isLoaded && status.error) {
+      console.error("💥 VIDEO ERROR:", {
+        error: status.error,
+        uri: pet.videoUri,
+        petId: pet.id || pet.petName,
+      });
+    }
+
+    // Actualizar barra de progreso
     if (status.isLoaded) {
       const currentPosition = status.positionMillis || 0;
       const totalDuration = status.durationMillis || 0;
 
-      setCurrentTime(currentPosition);
-      setDuration(totalDuration);
+      if (duration === 0 && totalDuration > 0) {
+        setDuration(totalDuration);
+      }
 
       if (totalDuration > 0) {
         setProgress(currentPosition / totalDuration);
@@ -413,6 +380,7 @@ export default function PetCardVertical({
   // Funciones de callback para Video component
   const handleVideoLoad = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
+      setMediaLoaded(true);
       console.log("✅ Video LOADED:", {
         uri: pet.videoUri,
         duration: status.durationMillis,
@@ -446,6 +414,21 @@ export default function PetCardVertical({
     >
       <View style={styles.contentWrapper}>
         <View style={styles.mediaContainer}>
+          {!mediaLoaded && (
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <ActivityIndicator size="large" color="#fff" />
+            </View>
+          )}
           {pet.videoUri ? (
             <View style={{ flex: 1 }}>
               <Video
@@ -471,7 +454,11 @@ export default function PetCardVertical({
               )}
             </View>
           ) : pet.imageUris?.length ? (
-            <Image source={pet.imageUris[0]} style={styles.image} />
+            <Image
+              source={pet.imageUris[0]}
+              style={styles.image}
+              onLoad={() => setMediaLoaded(true)}
+            />
           ) : null}
         </View>
 
@@ -633,6 +620,24 @@ export default function PetCardVertical({
           </View>
         </View>
       </View>
+      {mostrarConfetti && (
+        <LottieView
+          ref={confettiRef}
+          source={require("../../assets/animations/confetti.json")} // 👈 Tu ruta
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+            pointerEvents: "none",
+            transform: [{ scale: 2 }],
+          }}
+          autoPlay={false}
+          loop={false}
+        />
+      )}
     </Pressable>
   );
 }

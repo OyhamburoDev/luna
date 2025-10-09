@@ -21,6 +21,7 @@ import { useCreatePost } from "../hooks/useCreatePost"; // HOOK LIMPIO
 import { useFirebasePosts } from "../hooks/useFirebasePosts";
 import type { KeyboardTypeOptions } from "react-native";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
+import { useConfettiStore } from "../store/useConfettiStore";
 
 type MediaItem = {
   uri: string;
@@ -45,6 +46,7 @@ export default function CreatePostScreen({
 }: CreatePostScreenProps) {
   const initialMedia = route?.params?.media;
   const initialType = route?.params?.type;
+  const { marcarNuevoPost } = useConfettiStore();
 
   const { requireAuth } = useAuthModalContext();
 
@@ -214,9 +216,12 @@ export default function CreatePostScreen({
   // FUNCIÓN SUPER LIMPIA
   const handlePublish = async () => {
     requireAuth(async () => {
-      const success = await createPost(postData, mediaList, () => {
+      const success = await createPost(postData, mediaList);
+
+      if (success) {
+        marcarNuevoPost();
         navigate("Swipe");
-      });
+      }
     });
   };
 

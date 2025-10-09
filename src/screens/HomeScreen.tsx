@@ -115,6 +115,7 @@ export default function HomeScreen({
               isActive={index === activeIndex && (isScreenActive ?? true)}
               alturaCard={cardHeight}
               onPressArrow={onPressDiscoverMore}
+              index={index}
             />
           )}
           decelerationRate={0.8} // Buen balance

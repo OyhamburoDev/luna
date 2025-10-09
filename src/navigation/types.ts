@@ -15,7 +15,8 @@ export type RootStackParamList = {
   PetSwipe: { pet: PetPost };
   PetDetail: { pet: PetPost };
   Perfil: undefined;
-  Swipe: { screen?: string } | undefined;
+  Swipe: { screen?: string; mostrarConfetti?: boolean } | undefined;
+
   CreatePost: {
     media: {
       uri: string;

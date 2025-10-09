@@ -6,12 +6,9 @@ import {
 } from "@react-navigation/native";
 import TabsNavigator from "./TabsNavigator";
 import FullScreenStack from "../screens/FullScreenStack";
-// import { mockPets } from "../data/mockPetsData";
 import { useState, useRef, useEffect, useMemo } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 import { useInitializeMessages } from "../hooks/useInitializeMessages";
-import { AuthModalProvider } from "../contexts/AuthModalContext";
-import { AuthModal } from "../components/AuthModal";
 import { useFirebasePosts } from "../hooks/useFirebasePosts";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -35,7 +32,6 @@ export default function SwipeNavigator() {
   const { firebasePosts, loading, error, loadMore, hasMore, loadingMore } =
     useFirebasePosts();
 
-  // 👇 Combinar mockPets (arriba) con firebasePosts (abajo)
   const allPets = useMemo(() => {
     return firebasePosts || [];
   }, [firebasePosts]);
