@@ -20,6 +20,7 @@ import PetMediaCarousel from "../components/PetMediaCarousel";
 import { StatusBar } from "react-native"; // 👈 importá StatusBar
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { navigate } from "../navigation/NavigationService";
+import { fonts } from "../theme/fonts";
 
 const { width, height } = Dimensions.get("window");
 
@@ -180,12 +181,14 @@ export default function FullScreenStack({
           >
             {/* Pet Name con estilo hero */}
             <View style={styles.heroSection}>
-              <Text style={styles.petName}>{pet.petName}</Text>
-              <View style={styles.heartContainer}>
+              <Text style={[{ fontFamily: fonts.bold }, styles.petName]}>
+                {pet.petName}
+              </Text>
+              {/* <View style={styles.heartContainer}>
                 <TouchableOpacity style={styles.heartButton}>
                   <Ionicons name="heart-outline" size={28} color="#ff6b6b" />
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
             {/* Info Cards con nuevo diseño */}
             <View style={styles.infoCardsGrid}>
@@ -223,8 +226,22 @@ export default function FullScreenStack({
                   ]}
                 >
                   <Ionicons name={item.icon} size={16} color={item.color} />
-                  <Text style={styles.infoLabelCompact}>{item.label}</Text>
-                  <Text style={styles.infoValueCompact}>{item.value}</Text>
+                  <Text
+                    style={[
+                      { fontFamily: fonts.bold },
+                      styles.infoLabelCompact,
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                  <Text
+                    style={[
+                      { fontFamily: fonts.semiBold },
+                      styles.infoValueCompact,
+                    ]}
+                  >
+                    {item.value}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -252,7 +269,12 @@ export default function FullScreenStack({
                           size={16}
                           color={color}
                         />
-                        <Text style={styles.infoLabelCompact2}>
+                        <Text
+                          style={[
+                            { fontFamily: fonts.bold },
+                            styles.infoLabelCompact2,
+                          ]}
+                        >
                           {fieldLabels[key] ?? key}
                         </Text>
                         <Text style={styles.infoValueCompact2}>
@@ -271,6 +293,7 @@ export default function FullScreenStack({
               >
                 <Text
                   style={[
+                    { fontFamily: fonts.bold },
                     styles.toggleMoreButtonText,
                     showMore && styles.toggleMoreButtonTextUnderlined,
                   ]}
@@ -298,11 +321,24 @@ export default function FullScreenStack({
                   <View style={styles.onlineIndicator} />
                 </View>
                 <View style={styles.ownerInfo}>
-                  <Text style={styles.ownerName}>{pet.ownerName}</Text>
-                  <Text style={styles.ownerRole}>Dueña verificada</Text>
+                  <Text style={[{ fontFamily: fonts.bold }, styles.ownerName]}>
+                    {pet.ownerName}
+                  </Text>
+                  <Text
+                    style={[{ fontFamily: fonts.semiBold }, styles.ownerRole]}
+                  >
+                    Dueña verificada
+                  </Text>
                   <View style={styles.locationContainer}>
                     <Ionicons name="location" size={14} color="#ff6b6b" />
-                    <Text style={styles.locationText}>2,5 km de distancia</Text>
+                    <Text
+                      style={[
+                        { fontFamily: fonts.semiBold },
+                        styles.locationText,
+                      ]}
+                    >
+                      2,5 km de distancia
+                    </Text>
                   </View>
                 </View>
                 <TouchableOpacity style={styles.messageButton}>
@@ -316,10 +352,14 @@ export default function FullScreenStack({
             </View>
             {/* Description con mejor formato */}
             <View style={styles.descriptionSection}>
-              <Text style={styles.descriptionTitle}>Sobre {pet.petName}</Text>
+              <Text
+                style={[{ fontFamily: fonts.bold }, styles.descriptionTitle]}
+              >
+                Sobre {pet.petName}
+              </Text>
               <Text
                 key={pet.id + "-" + textLineCount}
-                style={styles.description}
+                style={[{ fontFamily: fonts.regular }, styles.description]}
                 numberOfLines={showFullText ? undefined : 2}
                 onTextLayout={(e) => {
                   const lines = e.nativeEvent.lines.length;
@@ -358,7 +398,9 @@ export default function FullScreenStack({
                     color="white"
                     style={styles.adoptIcon}
                   />
-                  <Text style={styles.adoptButtonText}>
+                  <Text
+                    style={[{ fontFamily: fonts.bold }, styles.adoptButtonText]}
+                  >
                     Adoptar a {pet.petName}
                   </Text>
                 </View>
@@ -420,8 +462,8 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0, // Se extiende hasta el final de la pantalla
     backgroundColor: "white",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
     paddingTop: 15,
     paddingHorizontal: 0,
   },
@@ -439,8 +481,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   petName: {
-    fontSize: 28,
-    fontWeight: "800",
+    fontSize: 20,
     color: "#2d3436",
     flex: 1,
   },
@@ -487,13 +528,12 @@ const styles = StyleSheet.create({
   infoLabelCompact: {
     fontSize: 10,
     color: "#74b9ff",
-    fontWeight: "600",
     textTransform: "uppercase",
     marginTop: 4,
   },
   infoValueCompact: {
     fontSize: 14,
-    fontWeight: "700",
+
     color: "#2d3436",
     marginTop: 2,
   },
@@ -579,7 +619,6 @@ const styles = StyleSheet.create({
   },
   toggleMoreButtonText: {
     color: "#999",
-    fontWeight: "bold",
     fontSize: 14,
     textDecorationLine: "underline",
   },
@@ -629,14 +668,13 @@ const styles = StyleSheet.create({
   },
   ownerName: {
     fontSize: 18,
-    fontWeight: "700",
     color: "#2d3436",
     marginBottom: 2,
   },
   ownerRole: {
     fontSize: 13,
     color: "#00b894",
-    fontWeight: "600",
+
     marginBottom: 4,
   },
   locationContainer: {
@@ -662,9 +700,8 @@ const styles = StyleSheet.create({
   },
   descriptionTitle: {
     fontSize: 18,
-    fontWeight: "700",
     color: "#2d3436",
-    marginBottom: 12,
+    marginBottom: 5,
   },
   description: {
     fontSize: 16,
@@ -680,23 +717,23 @@ const styles = StyleSheet.create({
   },
   actionSection: {
     paddingBottom: 20,
-    paddingHorizontal: 16,
+    paddingHorizontal: 40,
   },
   adoptButton: {
-    borderRadius: 16,
+    borderRadius: 10,
     overflow: "hidden",
     shadowColor: "#667eea",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowRadius: 0,
     elevation: 6,
   },
   adoptButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 18,
-    paddingHorizontal: 30,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
     backgroundColor: "#667eea",
   },
   adoptIcon: {
@@ -705,6 +742,5 @@ const styles = StyleSheet.create({
   adoptButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "700",
   },
 });
