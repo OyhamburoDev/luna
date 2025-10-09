@@ -415,19 +415,17 @@ export default function PetCardVertical({
       <View style={styles.contentWrapper}>
         <View style={styles.mediaContainer}>
           {!mediaLoaded && (
-            <View
+            <LinearGradient
+              colors={["rgba(102, 126, 234, 0.4)", "#000000"]} // 👈 Color con menos opacidad
+              locations={[0, 0.5]}
               style={{
                 position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
-                justifyContent: "center",
-                alignItems: "center",
               }}
-            >
-              <ActivityIndicator size="large" color="#fff" />
-            </View>
+            />
           )}
           {pet.videoUri ? (
             <View style={{ flex: 1 }}>
