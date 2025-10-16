@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { PetPost } from "../types/petPots";
 import { fonts } from "../theme/fonts";
+import { Pressable } from "react-native";
 
 type HealthModalProps = {
   visible: boolean;
@@ -29,8 +30,11 @@ const HealthModalStackScreen: React.FC<HealthModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
-        <View style={styles.modalContent}>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable
+          style={styles.modalContent}
+          onPress={(e) => e.stopPropagation()}
+        >
           <View style={styles.header}>
             <View style={styles.headerDragIndicator} />
             <View style={styles.headerContent}>
@@ -167,8 +171,8 @@ const HealthModalStackScreen: React.FC<HealthModalProps> = ({
               )}
             </View>
           </ScrollView>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 };
