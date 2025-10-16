@@ -9,26 +9,22 @@ import {
   Pressable,
   AppState,
 } from "react-native";
-import { Video, ResizeMode, AVPlaybackStatus } from "expo-av";
+import { Video, ResizeMode, type AVPlaybackStatus } from "expo-av";
 import { useRef, useEffect, useState } from "react";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { PetPost } from "../types/petPots";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { textStyles } from "../theme/textStyles";
 import { fonts } from "../theme/fonts";
 import HeartIcon from "../components/HeartIcon";
 import { SoundOffIcon } from "./SoundOnIcon";
 import { SoundOnIcon } from "./SoundOnIcon";
-import ArrowBigRightIcon from "./ChevronsRightIcon";
-import PrimaryCTA from "../components/PrimaryCTA";
 import { Ionicons } from "@expo/vector-icons";
 import { useMute } from "../contexts/MuteContext";
 import { useLike } from "../hooks/useLike";
 import DoubleTapHeart from "./DoubleTapHeart";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
-import { ActivityIndicator } from "react-native";
 import { useConfettiStore } from "../store/useConfettiStore";
 import LottieView from "lottie-react-native";
 
@@ -416,7 +412,7 @@ export default function PetCardVertical({
         <View style={styles.mediaContainer}>
           {!mediaLoaded && (
             <LinearGradient
-              colors={["rgba(102, 126, 234, 0.4)", "#000000"]} // 👈 Color con menos opacidad
+              colors={["rgba(102, 126, 234, 0.4)", "#000000"]}
               locations={[0, 0.5]}
               style={{
                 position: "absolute",
@@ -433,7 +429,7 @@ export default function PetCardVertical({
                 source={pet.videoUri}
                 style={styles.video}
                 resizeMode={ResizeMode.COVER}
-                isLooping={typeof pet.videoUri === "number"} // Solo loop para mock videos
+                isLooping={typeof pet.videoUri === "number"}
                 isMuted={isMuted}
                 ref={videoRef}
                 onPlaybackStatusUpdate={onPlaybackStatusUpdate}
@@ -621,7 +617,7 @@ export default function PetCardVertical({
       {mostrarConfetti && (
         <LottieView
           ref={confettiRef}
-          source={require("../../assets/animations/confetti.json")} // 👈 Tu ruta
+          source={require("../../assets/animations/confetti.json")}
           style={{
             position: "absolute",
             top: 0,
@@ -682,7 +678,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "rgba(255, 255, 255, 0.9)",
     marginTop: 2,
     marginBottom: 0,
   },
@@ -711,7 +707,7 @@ const styles = StyleSheet.create({
   },
   moreButton: {
     fontSize: 14,
-    color: "#ccc",
+    color: "rgba(255, 255, 255, 0.7)",
     fontWeight: "500",
     textShadowColor: "rgba(0, 0, 0, 0.8)",
     textShadowOffset: { width: 1, height: 1 },
@@ -857,10 +853,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   btnScroll: {
-    backgroundColor: "#a3a2a26c",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     width: "50%",
     paddingVertical: 10,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   link: {
     flexDirection: "row",

@@ -15,6 +15,8 @@ export type PetPost = {
   ownerId: string; // ← ID del usuario dueño
   ownerName: string; // ← Nombre del dueño (para mostrar)
   ownerAvatar?: any;
+  ownerLocation?: string | null;
+  ownerCreatedAt?: Date | string | null;
 
   // Para los likes
   likes?: number;

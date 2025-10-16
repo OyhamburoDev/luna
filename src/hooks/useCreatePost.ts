@@ -66,6 +66,8 @@ export const useCreatePost = (addNewPostLocally?: (post: PetPost) => void) => {
         ownerName:
           `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Usuario",
         ownerAvatar: userInfo.photoUrl || null,
+        ownerLocation: userInfo.location || null,
+        ownerCreatedAt: userInfo.createdAt || null,
         videoUri: videoMedia ? { uri: videoMedia.uri } : undefined,
         imageUris:
           photoMedias.length > 0
@@ -95,6 +97,8 @@ export const useCreatePost = (addNewPostLocally?: (post: PetPost) => void) => {
         ownerName:
           `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Usuario",
         ownerAvatar: userInfo.photoUrl || null,
+        ownerLocation: userInfo.location || null,
+        ownerCreatedAt: userInfo.createdAt || null,
       };
 
       await postService.createPost(completePostData, mediaList, userId);

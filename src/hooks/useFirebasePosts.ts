@@ -66,6 +66,8 @@ export function useFirebasePosts() {
         : undefined,
       breed: data.breed,
       ownerAvatar: data.ownerAvatar,
+      ownerLocation: data.ownerLocation || null,
+      ownerCreatedAt: data.ownerCreatedAt || null,
       thumbnailUri: data.thumbnailUri,
       healthInfo: data.healthInfo,
       isVaccinated: data.isVaccinated,

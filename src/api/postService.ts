@@ -337,6 +337,48 @@ class PostService {
       throw new Error("Error al obtener publicaciones");
     }
   }
+
+  /**
+   * Obtiene la cantidad de posts de un usuario
+   */
+  async getOwnerPostsCount(ownerId: string): Promise<number> {
+    try {
+      const postsQuery = query(
+        collection(db, "posts"),
+        where("userId", "==", ownerId)
+      );
+
+      const snapshot = await getDocs(postsQuery);
+      return snapshot.size;
+    } catch (error) {
+      console.log("Error getting owner posts count:", error);
+      throw new Error("Error al obtener cantidad de publicaciones");
+    }
+  }
+
+  /**
+   * Obtiene la suma total de likes de todos los posts de un usuario
+   */
+  async getOwnerTotalLikes(ownerId: string): Promise<number> {
+    try {
+      const postsQuery = query(
+        collection(db, "posts"),
+        where("userId", "==", ownerId)
+      );
+
+      const snapshot = await getDocs(postsQuery);
+
+      const totalLikes = snapshot.docs.reduce((sum, doc) => {
+        const data = doc.data();
+        return sum + (data.likes || 0);
+      }, 0);
+
+      return totalLikes;
+    } catch (error) {
+      console.log("Error getting owner total likes:", error);
+      throw new Error("Error al obtener likes totales");
+    }
+  }
 }
 
 export const postService = new PostService();

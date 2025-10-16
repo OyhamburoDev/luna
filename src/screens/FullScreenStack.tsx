@@ -157,7 +157,7 @@ export default function FullScreenStack({
             style={[styles.backButton, { marginTop: 20 }]}
           >
             <View style={styles.backButtonCircle}>
-              <Ionicons name="arrow-back" size={24} color="white" />
+              <Ionicons name="chevron-back" size={24} color="white" />
             </View>
           </TouchableOpacity>
         </View>
@@ -181,14 +181,27 @@ export default function FullScreenStack({
           >
             {/* Pet Name con estilo hero */}
             <View style={styles.heroSection}>
-              <Text style={[{ fontFamily: fonts.bold }, styles.petName]}>
-                {pet.petName}
-              </Text>
+              <View style={{ flexDirection: "column" }}>
+                <Text style={[{ fontFamily: fonts.bold }, styles.petName]}>
+                  Conocé a {pet.petName}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: fonts.regular,
+                    fontSize: 12,
+                    color: "#1a191992",
+                  }}
+                >
+                  Aquí podrás ver información detallada
+                </Text>
+              </View>
+
               {/* <View style={styles.heartContainer}>
                 <TouchableOpacity style={styles.heartButton}>
                   <Ionicons name="heart-outline" size={28} color="#ff6b6b" />
                 </TouchableOpacity>
               </View> */}
+              <Ionicons name="chevron-down" size={24} color="black" />
             </View>
             {/* Info Cards con nuevo diseño */}
             <View style={styles.infoCardsGrid}>
@@ -236,7 +249,7 @@ export default function FullScreenStack({
                   </Text>
                   <Text
                     style={[
-                      { fontFamily: fonts.semiBold },
+                      { fontFamily: fonts.regular },
                       styles.infoValueCompact,
                     ]}
                   >
@@ -286,7 +299,7 @@ export default function FullScreenStack({
               </View>
             )}
             {/* Botón ver más */}
-            {hasExtraFields && (
+            {/* {hasExtraFields && (
               <TouchableOpacity
                 onPress={handleToggleMore}
                 style={styles.toggleMoreButton}
@@ -301,7 +314,38 @@ export default function FullScreenStack({
                   {showMore ? "Ver menos" : "Ver más"}
                 </Text>
               </TouchableOpacity>
-            )}
+            )} */}
+            {/* <View style={styles.descriptionSection}>
+              <Text
+                style={[{ fontFamily: fonts.bold }, styles.descriptionTitle]}
+              >
+                Sobre {pet.petName}
+              </Text>
+              <Text
+                key={pet.id + "-" + textLineCount}
+                style={[{ fontFamily: fonts.regular }, styles.description]}
+                numberOfLines={showFullText ? undefined : 2}
+                onTextLayout={(e) => {
+                  const lines = e.nativeEvent.lines.length;
+                  console.log("Líneas reales de descripción:", lines); // 👈 Acá va el log
+                  setTextLineCount(lines);
+                  setTextWasTruncated(lines > 2);
+                }}
+              >
+                {pet.description}
+              </Text>
+
+              {textWasTruncated && (
+                <TouchableOpacity
+                  onPress={() => setShowFullText((prev) => !prev)}
+                  style={{ marginTop: 4 }}
+                >
+                  <Text style={styles.readMoreButton}>
+                    {showFullText ? "Ver menos" : "Leer más"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View> */}
             {/* Owner Section con diseño mejorado */}
             <View style={styles.ownerSection}>
               <View style={styles.ownerCard}>
@@ -351,7 +395,7 @@ export default function FullScreenStack({
               </View>
             </View>
             {/* Description con mejor formato */}
-            <View style={styles.descriptionSection}>
+            {/* <View style={styles.descriptionSection}>
               <Text
                 style={[{ fontFamily: fonts.bold }, styles.descriptionTitle]}
               >
@@ -381,7 +425,7 @@ export default function FullScreenStack({
                   </Text>
                 </TouchableOpacity>
               )}
-            </View>
+            </View> */}
 
             {/* Action Button mejorado */}
             <View style={styles.actionSection}>
@@ -392,14 +436,17 @@ export default function FullScreenStack({
                 }}
               >
                 <View style={styles.adoptButtonGradient}>
-                  <Ionicons
+                  {/* <Ionicons
                     name="heart"
                     size={20}
                     color="white"
                     style={styles.adoptIcon}
-                  />
+                  /> */}
                   <Text
-                    style={[{ fontFamily: fonts.bold }, styles.adoptButtonText]}
+                    style={[
+                      { fontFamily: fonts.semiBold },
+                      styles.adoptButtonText,
+                    ]}
                   >
                     Adoptar a {pet.petName}
                   </Text>
@@ -430,7 +477,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: 0,
-    marginLeft: 20,
+    marginLeft: 15,
   },
   backButtonCircle: {
     width: 40,
@@ -464,7 +511,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
-    paddingTop: 15,
+    paddingTop: 0,
     paddingHorizontal: 0,
   },
   safeTop: {
@@ -479,9 +526,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 15,
     paddingHorizontal: 16,
+
+    paddingVertical: 10,
   },
   petName: {
-    fontSize: 20,
+    fontSize: 15,
     color: "#2d3436",
     flex: 1,
   },
@@ -507,13 +556,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     rowGap: 10,
     columnGap: 6,
-    marginBottom: 15,
-    paddingHorizontal: 16,
+    marginBottom: 0,
+    paddingHorizontal: 15,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#00000012",
   },
   infoCardCompact: {
     alignItems: "center",
     backgroundColor: "white",
-    padding: 12,
+    paddingVertical: 12,
     borderRadius: 12,
     borderTopWidth: 3,
     shadowColor: "#000",
@@ -522,8 +574,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     flex: 1,
-    marginHorizontal: 4,
-    width: "48%",
+    marginHorizontal: 0,
   },
   infoLabelCompact: {
     fontSize: 10,
@@ -532,10 +583,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   infoValueCompact: {
-    fontSize: 14,
-
+    fontSize: 12,
     color: "#2d3436",
-    marginTop: 2,
   },
   infoCardsContainer: {
     marginBottom: 15,
@@ -699,12 +748,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   descriptionTitle: {
-    fontSize: 18,
+    fontSize: 15,
     color: "#2d3436",
     marginBottom: 5,
   },
   description: {
-    fontSize: 16,
+    fontSize: 12,
     lineHeight: 20,
     color: "#636e72",
   },
@@ -717,7 +766,7 @@ const styles = StyleSheet.create({
   },
   actionSection: {
     paddingBottom: 20,
-    paddingHorizontal: 40,
+    paddingHorizontal: 15,
   },
   adoptButton: {
     borderRadius: 10,
@@ -732,8 +781,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 15,
-    paddingHorizontal: 15,
+    paddingVertical: 10,
     backgroundColor: "#667eea",
   },
   adoptIcon: {
@@ -741,6 +789,6 @@ const styles = StyleSheet.create({
   },
   adoptButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 17,
   },
 });

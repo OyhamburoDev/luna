@@ -10,6 +10,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 import { useInitializeMessages } from "../hooks/useInitializeMessages";
 import { useFirebasePosts } from "../hooks/useFirebasePosts";
+import FullScreenStackTest from "../screens/FullScreenStackTest";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -104,11 +105,18 @@ export default function SwipeNavigator() {
                     hasMore={hasMore}
                   />
                 ) : activeTab === "Inicio" && selectedPetIndex !== null ? (
-                  <FullScreenStack
-                    pet={allPets[selectedPetIndex]}
-                    onGoBackToFeed={goToPage0}
-                    setModalVisible={setModalVisible}
-                  />
+                  <>
+                    {/* <FullScreenStack
+                      pet={allPets[selectedPetIndex]}
+                      onGoBackToFeed={goToPage0}
+                      setModalVisible={setModalVisible}
+                    /> */}
+                    <FullScreenStackTest
+                      pet={allPets[selectedPetIndex]}
+                      onGoBackToFeed={goToPage0}
+                      setModalVisible={setModalVisible}
+                    />
+                  </>
                 ) : (
                   <View style={{ flex: 1 }} />
                 )}

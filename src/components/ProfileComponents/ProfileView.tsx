@@ -18,7 +18,6 @@ import { useUserStore } from "../../store/userStore";
 import { ProfileOptionsModal } from "./ProfileOptionsModal";
 import { useProfileOptModal } from "../../hooks/useProfileOptModal";
 import { useAuth } from "../../hooks/useAuth";
-import { authApi } from "../../api/auth.api";
 import useProfilePosts from "../../hooks/useProfilePosts";
 import DeletePostModal from "../DeletePostModal";
 import { useProfileLikes } from "../../hooks/useProfileLikes";
