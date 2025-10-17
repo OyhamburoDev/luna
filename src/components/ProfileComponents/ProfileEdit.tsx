@@ -7,6 +7,8 @@ import { ImagePickerModal } from "./ImagePickerModal";
 import { ImageViewer } from "./ImageViewer";
 import { textStyles } from "../../theme/textStyles";
 import { useUserStore } from "../../store/userStore";
+import { StatusBar } from "expo-status-bar";
+import { useIsFocused } from "@react-navigation/native";
 
 type Props = {
   onBackPress: () => void;
@@ -26,6 +28,7 @@ export default function ProfileEdit({ onBackPress, onFieldEdit }: Props) {
   } = useProfileImage();
 
   const userInfo = useUserStore((state) => state.userInfo);
+  const isFocused = useIsFocused();
 
   const handleFieldEdit = (field: string) => {
     let config;
@@ -81,142 +84,148 @@ export default function ProfileEdit({ onBackPress, onFieldEdit }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.headerBackground}>
-        {/* Header superior */}
-        <View style={styles.editHeader}>
-          <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#2d3436" />
-          </TouchableOpacity>
-          <Text style={[textStyles.title, styles.headerTitle]}>
-            Editar perfil
-          </Text>
-          <View style={styles.headerRight} />
-        </View>
-
-        {/* Header con foto de perfil */}
-        <View style={styles.profileHeader}>
-          <View style={styles.profileImageContainer}>
-            {userInfo.photoUrl ? (
-              <Image
-                source={{ uri: userInfo.photoUrl }}
-                style={styles.profileImage}
-              />
-            ) : (
-              <View style={[styles.profileImage, styles.profilePlaceholder]}>
-                <Ionicons name="person" size={40} color="#ccc" />
-              </View>
-            )}
-            {/* Botón de cámara */}
-            <TouchableOpacity
-              style={styles.editPhotoButton}
-              onPress={showImageOptions}
-            >
-              <Ionicons name="camera" size={16} color="white" />
+    <>
+      {isFocused && (
+        <StatusBar style="dark" translucent backgroundColor="transparent" />
+      )}
+      <SafeAreaView style={styles.container}>
+        <View style={styles.headerBackground}>
+          {/* Header superior */}
+          <View style={styles.editHeader}>
+            <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#2d3436" />
             </TouchableOpacity>
+            <Text style={[textStyles.title, styles.headerTitle]}>
+              Editar perfil
+            </Text>
+            <View style={styles.headerRight} />
           </View>
 
-          <Text style={[textStyles.body, styles.userHandle]}>Cambiar foto</Text>
-        </View>
+          {/* Header con foto de perfil */}
+          <View style={styles.profileHeader}>
+            <View style={styles.profileImageContainer}>
+              {userInfo.photoUrl ? (
+                <Image
+                  source={{ uri: userInfo.photoUrl }}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <View style={[styles.profileImage, styles.profilePlaceholder]}>
+                  <Ionicons name="person" size={40} color="#ccc" />
+                </View>
+              )}
+              {/* Botón de cámara */}
+              <TouchableOpacity
+                style={styles.editPhotoButton}
+                onPress={showImageOptions}
+              >
+                <Ionicons name="camera" size={16} color="white" />
+              </TouchableOpacity>
+            </View>
 
-        {/* <View style={styles.statsContainer}>
+            <Text style={[textStyles.body, styles.userHandle]}>
+              Cambiar foto
+            </Text>
+          </View>
+
+          {/* <View style={styles.statsContainer}>
             <View style={styles.statItemSingle}>
               <Text style={styles.statNumber}>0</Text>
               <Text style={styles.statLabel}>Publicaciones</Text>
             </View>
           </View> */}
-      </View>
+        </View>
 
-      {/* Información del usuario */}
-      <View style={styles.userInfoSection}>
-        <Text style={[textStyles.body, styles.titleInput]}>Acerca de ti</Text>
-        <View style={styles.editForm}>
-          {/* Nombre */}
-          <TouchableOpacity
-            style={styles.inputButton}
-            onPress={() => handleFieldEdit("nombre")}
-          >
-            <Text
-              style={[
-                textStyles.title,
-                styles.inputLabelTitle,
-                { marginBottom: 0 },
-              ]}
+        {/* Información del usuario */}
+        <View style={styles.userInfoSection}>
+          <Text style={[textStyles.body, styles.titleInput]}>Acerca de ti</Text>
+          <View style={styles.editForm}>
+            {/* Nombre */}
+            <TouchableOpacity
+              style={styles.inputButton}
+              onPress={() => handleFieldEdit("nombre")}
             >
-              Nombre
-            </Text>
-            <View style={styles.inputButtonRight}>
-              <Text style={[textStyles.body, styles.inputValue]}>
-                {userInfo.firstName || "Añadir"}
+              <Text
+                style={[
+                  textStyles.title,
+                  styles.inputLabelTitle,
+                  { marginBottom: 0 },
+                ]}
+              >
+                Nombre
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.inputButtonRight}>
+                <Text style={[textStyles.body, styles.inputValue]}>
+                  {userInfo.firstName || "Añadir"}
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </View>
+            </TouchableOpacity>
 
-          {/* Apellido */}
-          <TouchableOpacity
-            style={styles.inputButton}
-            onPress={() => handleFieldEdit("apellido")}
-          >
-            <Text
-              style={[
-                textStyles.title,
-                styles.inputLabelTitle,
-                { marginBottom: 0 },
-              ]}
+            {/* Apellido */}
+            <TouchableOpacity
+              style={styles.inputButton}
+              onPress={() => handleFieldEdit("apellido")}
             >
-              Apellido
-            </Text>
-            <View style={styles.inputButtonRight}>
-              <Text style={[textStyles.body, styles.inputValue]}>
-                {userInfo.lastName || "Añadir"}
+              <Text
+                style={[
+                  textStyles.title,
+                  styles.inputLabelTitle,
+                  { marginBottom: 0 },
+                ]}
+              >
+                Apellido
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.inputButtonRight}>
+                <Text style={[textStyles.body, styles.inputValue]}>
+                  {userInfo.lastName || "Añadir"}
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </View>
+            </TouchableOpacity>
 
-          {/* Email */}
-          <TouchableOpacity style={styles.inputButton} disabled={true}>
-            <Text
-              style={[
-                textStyles.title,
-                styles.inputLabelTitle,
-                { marginBottom: 0 },
-              ]}
+            {/* Email */}
+            <TouchableOpacity style={styles.inputButton} disabled={true}>
+              <Text
+                style={[
+                  textStyles.title,
+                  styles.inputLabelTitle,
+                  { marginBottom: 0 },
+                ]}
+              >
+                Email
+              </Text>
+              <View style={styles.inputButtonRight}>
+                <Text style={[textStyles.body, styles.inputValue]}>
+                  {userInfo.email || "Ejemplo@gmail.com"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Teléfono */}
+            <TouchableOpacity
+              style={styles.inputButton}
+              onPress={() => handleFieldEdit("telefono")}
             >
-              Email
-            </Text>
-            <View style={styles.inputButtonRight}>
-              <Text style={[textStyles.body, styles.inputValue]}>
-                {userInfo.email || "Ejemplo@gmail.com"}
+              <Text
+                style={[
+                  textStyles.title,
+                  styles.inputLabelTitle,
+                  { marginBottom: 0 },
+                ]}
+              >
+                Telefono
               </Text>
-            </View>
-          </TouchableOpacity>
+              <View style={styles.inputButtonRight}>
+                <Text style={[textStyles.body, styles.inputValue]}>
+                  {userInfo.phone || "Añadir"}
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </View>
+            </TouchableOpacity>
 
-          {/* Teléfono */}
-          <TouchableOpacity
-            style={styles.inputButton}
-            onPress={() => handleFieldEdit("telefono")}
-          >
-            <Text
-              style={[
-                textStyles.title,
-                styles.inputLabelTitle,
-                { marginBottom: 0 },
-              ]}
-            >
-              Telefono
-            </Text>
-            <View style={styles.inputButtonRight}>
-              <Text style={[textStyles.body, styles.inputValue]}>
-                {userInfo.phone || "Añadir"}
-              </Text>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
-            </View>
-          </TouchableOpacity>
-
-          {/* Ubicación */}
-          {/* <View style={styles.inputGroup}>
+            {/* Ubicación */}
+            {/* <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Ubicación</Text>
               <TextInput
                 style={styles.textInput}
@@ -227,43 +236,43 @@ export default function ProfileEdit({ onBackPress, onFieldEdit }: Props) {
               />
             </View> */}
 
-          {/* Biografía */}
-          <TouchableOpacity
-            style={styles.inputButton}
-            onPress={() => handleFieldEdit("biografia")}
-          >
-            <View>
-              <Text
-                style={[
-                  textStyles.title,
-                  styles.inputLabelTitle,
-                  { marginBottom: 0 },
-                ]}
-              >
-                Biografía
-              </Text>
-            </View>
-            <View style={styles.inputButtonRight}>
-              <Text
-                style={[textStyles.body, styles.inputValue]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {userInfo.bio
-                  ? userInfo.bio.length > 26
-                    ? `${userInfo.bio.substring(0, 26)}...`
-                    : userInfo.bio
-                  : "Añadir una descripción..."}
-              </Text>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
-            </View>
-          </TouchableOpacity>
+            {/* Biografía */}
+            <TouchableOpacity
+              style={styles.inputButton}
+              onPress={() => handleFieldEdit("biografia")}
+            >
+              <View>
+                <Text
+                  style={[
+                    textStyles.title,
+                    styles.inputLabelTitle,
+                    { marginBottom: 0 },
+                  ]}
+                >
+                  Biografía
+                </Text>
+              </View>
+              <View style={styles.inputButtonRight}>
+                <Text
+                  style={[textStyles.body, styles.inputValue]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {userInfo.bio
+                    ? userInfo.bio.length > 26
+                      ? `${userInfo.bio.substring(0, 26)}...`
+                      : userInfo.bio
+                    : "Añadir una descripción..."}
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </View>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.separatorBtn} />
         </View>
-        <View style={styles.separatorBtn} />
-      </View>
 
-      {/* Botón de registrar mascota */}
-      {/* <TouchableOpacity style={styles.adoptButton} onPress={() => {}}>
+        {/* Botón de registrar mascota */}
+        {/* <TouchableOpacity style={styles.adoptButton} onPress={() => {}}>
           <View style={styles.adoptButtonGradient}>
             <Ionicons
               name="add-circle"
@@ -275,20 +284,21 @@ export default function ProfileEdit({ onBackPress, onFieldEdit }: Props) {
           </View>
         </TouchableOpacity> */}
 
-      <ImagePickerModal
-        visible={isModalVisible}
-        onClose={closeModal}
-        onTakePhoto={takePhoto}
-        onPickFromGallery={pickFromGallery}
-        onViewPhoto={viewPhoto}
-        hasPhoto={!!userInfo.photoUrl}
-      />
-      <ImageViewer
-        visible={isViewerVisible}
-        imageUri={userInfo.photoUrl || null}
-        onClose={closeViewer}
-      />
-    </SafeAreaView>
+        <ImagePickerModal
+          visible={isModalVisible}
+          onClose={closeModal}
+          onTakePhoto={takePhoto}
+          onPickFromGallery={pickFromGallery}
+          onViewPhoto={viewPhoto}
+          hasPhoto={!!userInfo.photoUrl}
+        />
+        <ImageViewer
+          visible={isViewerVisible}
+          imageUri={userInfo.photoUrl || null}
+          onClose={closeViewer}
+        />
+      </SafeAreaView>
+    </>
   );
 }
 

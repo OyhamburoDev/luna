@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "react-native";
+
 import { MOCK_MESSAGES } from "../data/mockMessages";
 import type { MessageType } from "../types/messageType";
 import { useAuthStore } from "../store/auth";
@@ -23,12 +23,15 @@ import { Pressable } from "react-native";
 import { useMessageStore } from "../store/messageStore";
 import { useInitializeMessages } from "../hooks/useInitializeMessages";
 import { AuthRequiredView } from "../components/ProfileComponents/AuthRequiredView";
+import { StatusBar } from "expo-status-bar";
+import { useIsFocused } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
 const FILTERS = ["Todos", "Adopciones", "Perdidos", "Sistema"];
 
 export default function ChatsScreen() {
+  const isFocused = useIsFocused();
   const { isAuthenticated } = useAuthStore();
   const { openModal } = useAuthModalContext();
 
@@ -147,7 +150,9 @@ export default function ChatsScreen() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffffff" />
+      {isFocused && (
+        <StatusBar style="dark" translucent backgroundColor="transparent" />
+      )}
       <SafeAreaView style={styles.container}>
         {/* Header igual */}
         <View style={styles.header}>

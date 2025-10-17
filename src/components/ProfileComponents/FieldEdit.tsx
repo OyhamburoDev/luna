@@ -12,6 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { textStyles } from "../../theme/textStyles";
 import type { KeyboardTypeOptions } from "react-native";
 import { useFieldEdit } from "../../hooks/useFieldEdit";
+import { StatusBar } from "expo-status-bar";
+import { useIsFocused } from "@react-navigation/native";
 
 type Props = {
   title: string;
@@ -40,6 +42,7 @@ export default function FieldEdit({
   onSave,
   onCancel,
 }: Props) {
+  const isFocused = useIsFocused();
   const {
     inputValue,
     error,
@@ -62,79 +65,88 @@ export default function FieldEdit({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onCancelPress} style={styles.cancelButton}>
-          <Text style={[textStyles.subtitle, styles.cancelText]}>Cancelar</Text>
-        </TouchableOpacity>
+    <>
+      {isFocused && (
+        <StatusBar style="dark" translucent backgroundColor="transparent" />
+      )}
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onCancelPress} style={styles.cancelButton}>
+            <Text style={[textStyles.subtitle, styles.cancelText]}>
+              Cancelar
+            </Text>
+          </TouchableOpacity>
 
-        <Text style={[textStyles.title, styles.headerTitle]}>{title}</Text>
+          <Text style={[textStyles.title, styles.headerTitle]}>{title}</Text>
 
-        <TouchableOpacity
-          onPress={onSavePress}
-          disabled={!hasChanges || !!error}
-          style={[
-            styles.saveButton,
-            (!hasChanges || !!error) && styles.saveButtonDisabled,
-          ]}
-        >
-          <Text
+          <TouchableOpacity
+            onPress={onSavePress}
+            disabled={!hasChanges || !!error}
             style={[
-              textStyles.subtitle,
-              styles.saveText,
-              !hasChanges || !!error
-                ? styles.saveTextDisabled
-                : styles.saveTextActive,
+              styles.saveButton,
+              (!hasChanges || !!error) && styles.saveButtonDisabled,
             ]}
           >
-            Guardar
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.inputContainer}>
-          <Text style={[textStyles.subtitle, styles.inputLabel]}>{title}</Text>
-
-          <TextInput
-            style={[
-              textStyles.body,
-              styles.textInput,
-              multiline && styles.textInputMultiline,
-              error && styles.textInputError,
-            ]}
-            value={inputValue}
-            onChangeText={handleInputChange}
-            placeholder={placeholder}
-            placeholderTextColor="#00000094"
-            keyboardType={keyboardType}
-            maxLength={maxLength}
-            multiline={multiline}
-            numberOfLines={multiline ? 4 : 1}
-            textAlignVertical={multiline ? "top" : "center"}
-            autoFocus
-          />
-
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          )}
-
-          {showCounter && (
-            <Text style={[styles.counter]}>
-              {inputValue.length}/{maxLength}
+            <Text
+              style={[
+                textStyles.subtitle,
+                styles.saveText,
+                !hasChanges || !!error
+                  ? styles.saveTextDisabled
+                  : styles.saveTextActive,
+              ]}
+            >
+              Guardar
             </Text>
-          )}
-
-          {description && (
-            <Text style={[textStyles.body, styles.description]}>
-              {description}
-            </Text>
-          )}
+          </TouchableOpacity>
         </View>
-      </View>
-    </SafeAreaView>
+
+        <View style={styles.content}>
+          <View style={styles.inputContainer}>
+            <Text style={[textStyles.subtitle, styles.inputLabel]}>
+              {title}
+            </Text>
+
+            <TextInput
+              style={[
+                textStyles.body,
+                styles.textInput,
+                multiline && styles.textInputMultiline,
+                error && styles.textInputError,
+              ]}
+              value={inputValue}
+              onChangeText={handleInputChange}
+              placeholder={placeholder}
+              placeholderTextColor="#00000094"
+              keyboardType={keyboardType}
+              maxLength={maxLength}
+              multiline={multiline}
+              numberOfLines={multiline ? 4 : 1}
+              textAlignVertical={multiline ? "top" : "center"}
+              autoFocus
+            />
+
+            {error && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+
+            {showCounter && (
+              <Text style={[styles.counter]}>
+                {inputValue.length}/{maxLength}
+              </Text>
+            )}
+
+            {description && (
+              <Text style={[textStyles.body, styles.description]}>
+                {description}
+              </Text>
+            )}
+          </View>
+        </View>
+      </SafeAreaView>
+    </>
   );
 }
 

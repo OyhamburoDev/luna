@@ -24,6 +24,8 @@ import { useProfileLikes } from "../../hooks/useProfileLikes";
 import { likesService } from "../../api/likesService";
 import { useAuthStore } from "../../store/auth";
 import { useFocusEffect } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
+import { useIsFocused } from "@react-navigation/native";
 
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
@@ -56,6 +58,7 @@ export default function ProfileView({
     closeViewer,
   } = useProfileImage();
   const userInfo = useUserStore((state) => state.userInfo);
+  const isFocused = useIsFocused();
 
   const [activeTab, setActiveTab] = useState<"posts" | "likes">("posts");
   const { posts, loading, error, handleDeletePost } = useProfilePosts();
@@ -105,182 +108,188 @@ export default function ProfileView({
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={{ height: 20 }} />
-        <View style={styles.headerBackground}>
-          {/* Header con foto de perfil */}
+    <>
+      {isFocused && (
+        <StatusBar style="dark" translucent backgroundColor="transparent" />
+      )}
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={{ height: 20 }} />
+          <View style={styles.headerBackground}>
+            {/* Header con foto de perfil */}
 
-          <View style={styles.profileHeader}>
-            <TouchableOpacity style={styles.topRightIcon} onPress={open}>
-              <Ionicons
-                name="menu-outline"
-                size={28}
-                color="rgba(133, 129, 129, 0.64)"
-              />
-            </TouchableOpacity>
-            <View style={styles.profileImageContainer}>
-              {userInfo.photoUrl ? (
-                <Image
-                  source={{ uri: userInfo.photoUrl }}
-                  style={styles.profileImage}
+            <View style={styles.profileHeader}>
+              <TouchableOpacity style={styles.topRightIcon} onPress={open}>
+                <Ionicons
+                  name="menu-outline"
+                  size={28}
+                  color="rgba(133, 129, 129, 0.64)"
                 />
-              ) : (
-                <View style={[styles.profileImage, styles.profilePlaceholder]}>
-                  <Ionicons name="person" size={40} color="#ccc" />
-                </View>
-              )}
-              <TouchableOpacity
-                style={styles.editPhotoButton}
-                onPress={showImageOptions}
-              >
-                <Ionicons name="camera" size={16} color="white" />
               </TouchableOpacity>
+              <View style={styles.profileImageContainer}>
+                {userInfo.photoUrl ? (
+                  <Image
+                    source={{ uri: userInfo.photoUrl }}
+                    style={styles.profileImage}
+                  />
+                ) : (
+                  <View
+                    style={[styles.profileImage, styles.profilePlaceholder]}
+                  >
+                    <Ionicons name="person" size={40} color="#ccc" />
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={styles.editPhotoButton}
+                  onPress={showImageOptions}
+                >
+                  <Ionicons name="camera" size={16} color="white" />
+                </TouchableOpacity>
+              </View>
+
+              {userInfo.firstName || userInfo.lastName ? (
+                <Text style={styles.userName}>
+                  {[userInfo.firstName, userInfo.lastName]
+                    .filter(Boolean)
+                    .join(" ")}
+                </Text>
+              ) : (
+                <Text style={[textStyles.title, styles.userNameDefault]}>
+                  Añadir nombre
+                </Text>
+              )}
+
+              {userInfo.bio ? (
+                <Text style={styles.userBio}>{userInfo.bio}</Text>
+              ) : (
+                <TouchableOpacity
+                  style={styles.addBioButton}
+                  onPress={onEditPress}
+                >
+                  <Text
+                    style={[{ fontFamily: fonts.semiBold }, styles.addBioText]}
+                  >
+                    + Añade una biografía
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
 
-            {userInfo.firstName || userInfo.lastName ? (
-              <Text style={styles.userName}>
-                {[userInfo.firstName, userInfo.lastName]
-                  .filter(Boolean)
-                  .join(" ")}
+            {/* Botón de editar perfil */}
+            <TouchableOpacity
+              style={styles.editProfileButton}
+              onPress={onEditPress}
+            >
+              <Text style={[textStyles.subtitle, styles.editProfileButtonText]}>
+                Editar perfil
               </Text>
-            ) : (
-              <Text style={[textStyles.title, styles.userNameDefault]}>
-                Añadir nombre
-              </Text>
-            )}
+            </TouchableOpacity>
+          </View>
 
-            {userInfo.bio ? (
-              <Text style={styles.userBio}>{userInfo.bio}</Text>
-            ) : (
-              <TouchableOpacity
-                style={styles.addBioButton}
-                onPress={onEditPress}
+          {/* Información de contacto compacta */}
+          <View style={styles.contactSection}>
+            <View style={styles.contactItem}>
+              <Ionicons name="mail-outline" size={16} color="#667eea" />
+              <Text style={[textStyles.body, styles.contactText]}>
+                {userInfo.email || "Email no configurado"}
+              </Text>
+            </View>
+            <View style={styles.contactItem}>
+              <Ionicons name="call-outline" size={16} color="#ff6b6b" />
+              <Text style={[textStyles.body, styles.contactText]}>
+                {userInfo.phone || "Teléfono no configurado"}
+              </Text>
+            </View>
+            <View style={styles.contactItem}>
+              <Ionicons name="location-outline" size={16} color="#43e97b" />
+              <Text style={[textStyles.body, styles.contactText]}>
+                {userInfo.location || "Ubicación no configurada"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Tabs para publicaciones y likes */}
+          <View style={styles.tabsContainer}>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "posts" && styles.activeTab]}
+              onPress={() => setActiveTab("posts")}
+            >
+              <Ionicons
+                name="grid-outline"
+                size={20}
+                color={activeTab === "posts" ? "#667eea" : "#999"}
+              />
+              <Text
+                style={[
+                  textStyles.title,
+                  styles.tabText,
+                  activeTab === "posts" && styles.activeTabText,
+                ]}
               >
-                <Text
-                  style={[{ fontFamily: fonts.semiBold }, styles.addBioText]}
-                >
-                  + Añade una biografía
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Botón de editar perfil */}
-          <TouchableOpacity
-            style={styles.editProfileButton}
-            onPress={onEditPress}
-          >
-            <Text style={[textStyles.subtitle, styles.editProfileButtonText]}>
-              Editar perfil
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Información de contacto compacta */}
-        <View style={styles.contactSection}>
-          <View style={styles.contactItem}>
-            <Ionicons name="mail-outline" size={16} color="#667eea" />
-            <Text style={[textStyles.body, styles.contactText]}>
-              {userInfo.email || "Email no configurado"}
-            </Text>
-          </View>
-          <View style={styles.contactItem}>
-            <Ionicons name="call-outline" size={16} color="#ff6b6b" />
-            <Text style={[textStyles.body, styles.contactText]}>
-              {userInfo.phone || "Teléfono no configurado"}
-            </Text>
-          </View>
-          <View style={styles.contactItem}>
-            <Ionicons name="location-outline" size={16} color="#43e97b" />
-            <Text style={[textStyles.body, styles.contactText]}>
-              {userInfo.location || "Ubicación no configurada"}
-            </Text>
-          </View>
-        </View>
-
-        {/* Tabs para publicaciones y likes */}
-        <View style={styles.tabsContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "posts" && styles.activeTab]}
-            onPress={() => setActiveTab("posts")}
-          >
-            <Ionicons
-              name="grid-outline"
-              size={20}
-              color={activeTab === "posts" ? "#667eea" : "#999"}
-            />
-            <Text
-              style={[
-                textStyles.title,
-                styles.tabText,
-                activeTab === "posts" && styles.activeTabText,
-              ]}
+                Publicaciones
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "likes" && styles.activeTab]}
+              onPress={() => setActiveTab("likes")}
             >
-              Publicaciones
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "likes" && styles.activeTab]}
-            onPress={() => setActiveTab("likes")}
-          >
-            <Ionicons
-              name="heart-outline"
-              size={20}
-              color={activeTab === "likes" ? "#ff6b6b" : "#999"}
-            />
-            <Text
-              style={[
-                textStyles.title,
-                styles.tabText,
-                activeTab === "likes" && styles.activeTabText,
-              ]}
-            >
-              Me gusta
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <Ionicons
+                name="heart-outline"
+                size={20}
+                color={activeTab === "likes" ? "#ff6b6b" : "#999"}
+              />
+              <Text
+                style={[
+                  textStyles.title,
+                  styles.tabText,
+                  activeTab === "likes" && styles.activeTabText,
+                ]}
+              >
+                Me gusta
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Grid de contenido o estado vacío */}
-        {(activeTab === "posts" ? posts : likedPosts).length > 0 ? (
-          <View
-            style={styles.contentGrid}
-            key={`${activeTab}-${
-              (activeTab === "posts" ? posts : likedPosts).length
-            }`}
-          >
-            {(activeTab === "posts" ? posts : likedPosts).map((post) => (
-              <View key={post.id} style={styles.postItem}>
-                <Image
-                  source={{
-                    uri: post.thumbnailUri || post.imageUris?.[0]?.uri,
-                  }}
-                  style={styles.postImage}
-                />
-                {activeTab === "posts" && (
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDeletePress(post)}
-                  >
-                    <Ionicons name="close" size={18} color="white" />
-                  </TouchableOpacity>
-                )}
-                <View style={styles.postOverlay}>
-                  <Ionicons name="heart" size={16} color="white" />
-                  <Text style={styles.postLikes}>{post.likes}</Text>
+          {/* Grid de contenido o estado vacío */}
+          {(activeTab === "posts" ? posts : likedPosts).length > 0 ? (
+            <View
+              style={styles.contentGrid}
+              key={`${activeTab}-${
+                (activeTab === "posts" ? posts : likedPosts).length
+              }`}
+            >
+              {(activeTab === "posts" ? posts : likedPosts).map((post) => (
+                <View key={post.id} style={styles.postItem}>
+                  <Image
+                    source={{
+                      uri: post.thumbnailUri || post.imageUris?.[0]?.uri,
+                    }}
+                    style={styles.postImage}
+                  />
+                  {activeTab === "posts" && (
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDeletePress(post)}
+                    >
+                      <Ionicons name="close" size={18} color="white" />
+                    </TouchableOpacity>
+                  )}
+                  <View style={styles.postOverlay}>
+                    <Ionicons name="heart" size={16} color="white" />
+                    <Text style={styles.postLikes}>{post.likes}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            {activeTab === "posts" ? (
-              <>
-                {/* <Ionicons name="paw-outline" size={50} color="#ccc" /> */}
-                <Text style={[textStyles.title, styles.emptyTitle]}>
-                  Aún no has compartido con otros usuarios una publicación
-                </Text>
-                {/* <TouchableOpacity
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              {activeTab === "posts" ? (
+                <>
+                  {/* <Ionicons name="paw-outline" size={50} color="#ccc" /> */}
+                  <Text style={[textStyles.title, styles.emptyTitle]}>
+                    Aún no has compartido con otros usuarios una publicación
+                  </Text>
+                  {/* <TouchableOpacity
                   style={styles.uploadButton}
                   onPress={onPublishPress}
                 >
@@ -293,60 +302,61 @@ export default function ProfileView({
                     Publicar
                   </Text>
                 </TouchableOpacity> */}
-              </>
-            ) : (
-              <>
-                <Text
-                  style={[{ fontFamily: fonts.bold }, styles.emptyLikeTitle]}
-                >
-                  Aún no has dado "Me gusta" a ninguna publicación
-                </Text>
-                {/* <Text style={styles.emptySubtitle}>
+                </>
+              ) : (
+                <>
+                  <Text
+                    style={[{ fontFamily: fonts.bold }, styles.emptyLikeTitle]}
+                  >
+                    Aún no has dado "Me gusta" a ninguna publicación
+                  </Text>
+                  {/* <Text style={styles.emptySubtitle}>
                   Aquí aparecerán todas las fotos y videos que te gusten de
                   otros usuarios
                 </Text> */}
-              </>
-            )}
-          </View>
-        )}
-      </ScrollView>
+                </>
+              )}
+            </View>
+          )}
+        </ScrollView>
 
-      <ProfileOptionsModal
-        visible={visible}
-        onClose={close}
-        onEditProfile={editProfile}
-        onCloseAccount={closeAccount}
-      />
+        <ProfileOptionsModal
+          visible={visible}
+          onClose={close}
+          onEditProfile={editProfile}
+          onCloseAccount={closeAccount}
+        />
 
-      <ImagePickerModal
-        visible={isModalVisible}
-        onClose={closeModal}
-        onTakePhoto={takePhoto}
-        onPickFromGallery={pickFromGallery}
-        onViewPhoto={viewPhoto}
-        hasPhoto={!!userInfo.photoUrl}
-      />
-      <ImageViewer
-        visible={isViewerVisible}
-        imageUri={userInfo.photoUrl || null}
-        onClose={closeViewer}
-      />
-      <DeletePostModal
-        visible={deleteModalVisible}
-        onClose={() => setDeleteModalVisible(false)}
-        onConfirm={async () => {
-          if (selectedPost) {
-            await handleDeletePost(
-              selectedPost.id,
-              selectedPost.mediaUrls || [],
-              selectedPost.thumbnailUri
-            );
-          }
-          setDeleteModalVisible(false);
-        }}
-        petName={selectedPost?.petName || ""}
-      />
-    </SafeAreaView>
+        <ImagePickerModal
+          visible={isModalVisible}
+          onClose={closeModal}
+          onTakePhoto={takePhoto}
+          onPickFromGallery={pickFromGallery}
+          onViewPhoto={viewPhoto}
+          hasPhoto={!!userInfo.photoUrl}
+        />
+        <ImageViewer
+          visible={isViewerVisible}
+          imageUri={userInfo.photoUrl || null}
+          onClose={closeViewer}
+        />
+        <DeletePostModal
+          visible={deleteModalVisible}
+          onClose={() => setDeleteModalVisible(false)}
+          onConfirm={async () => {
+            if (selectedPost) {
+              await handleDeletePost(
+                selectedPost.id,
+                selectedPost.mediaUrls || [],
+                selectedPost.thumbnailUri
+              );
+            }
+            setDeleteModalVisible(false);
+          }}
+          petName={selectedPost?.petName || ""}
+        />
+      </SafeAreaView>
+    </>
   );
 }
 
