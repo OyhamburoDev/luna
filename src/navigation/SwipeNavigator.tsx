@@ -1,5 +1,11 @@
 import React from "react";
-import { FlatList, View, Dimensions, ActivityIndicator } from "react-native";
+import {
+  FlatList,
+  View,
+  Dimensions,
+  ActivityIndicator,
+  BackHandler,
+} from "react-native";
 import {
   NavigationContainer,
   NavigationIndependentTree,
@@ -37,6 +43,31 @@ export default function SwipeNavigator() {
     return firebasePosts || [];
   }, [firebasePosts]);
 
+  // Manejar el botón de retroceso del sistema
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => backHandler.remove();
+  }, [currentIndex, activeTab, selectedPetIndex]);
+
+  const handleBackPress = () => {
+    // Si estamos en la segunda pantalla (FullScreenStack) y volvemos atrás
+    if (
+      currentIndex === 1 &&
+      activeTab === "Inicio" &&
+      selectedPetIndex !== null
+    ) {
+      goToPage0();
+      return true; // Prevenir el comportamiento por defecto (salir de la app)
+    }
+
+    // Para cualquier otra situación, permitir el comportamiento normal
+    return false;
+  };
+
   // Para saber que tabbar esta activa
   const handleTabChange = (
     tabName: "Inicio" | "Mapa" | "Crear" | "Mensajes" | "Perfil"
@@ -59,7 +90,10 @@ export default function SwipeNavigator() {
 
   // debe ser para volver a la page principal
   const goToPage0 = () => {
-    flatListRef.current?.scrollToIndex({ index: 0, animated: true });
+    setSelectedPetIndex(null); // Resetear primero
+    setTimeout(() => {
+      flatListRef.current?.scrollToIndex({ index: 0, animated: true });
+    }, 10);
   };
 
   if (loading || !firebasePosts || firebasePosts.length === 0) {

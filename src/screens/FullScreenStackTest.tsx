@@ -6,12 +6,14 @@ import {
   StyleSheet,
   ScrollView,
   Image,
+  Animated,
+  Platform,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { PetPost } from "../types/petPots";
-import { StatusBar } from "react-native"; // 👈 importá StatusBar
+// import { StatusBar } from "react-native";
 import { fonts } from "../theme/fonts";
 import PetMediaCarouselTest from "../components/PetMediaCarouselText";
 import HealthModalStackScreen from "../components/HealthModalStackScreen";
@@ -19,6 +21,7 @@ import BehaviorModalStackScreen from "../components/BehaviorModalStackScreen";
 import useOwnerStats from "../hooks/useOwnerStats";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 type Props = {
   pet: PetPost;
@@ -41,9 +44,18 @@ export default function FullScreenStackTest({
   const [healthModalVisible, setHealthModalVisible] = useState(false);
   const [behaviorModalVisible, setBehaviorModalVisible] = useState(false);
 
-  const insets = useSafeAreaInsets();
+  // Estados para el botón flotante
+  // const [showFloatingButton, setShowFloatingButton] = useState(false);
+  // const buttonAnimation = useRef(new Animated.Value(0)).current;
+  // const lastScrollY = useRef(0);
 
+  const insets = useSafeAreaInsets();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const buttonHeight = 60;
   const scrollViewRef = useRef<ScrollView>(null);
+
+  // Calcular padding inferior
+  const scrollPaddingBottom = buttonHeight + insets.bottom + 16;
 
   useEffect(() => {
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
@@ -55,6 +67,44 @@ export default function FullScreenStackTest({
       refreshStats();
     }, [refreshStats])
   );
+
+  // Función para manejar el scroll
+  // const handleScroll = (event: any) => {
+  //   const currentScrollY = event.nativeEvent.contentOffset.y;
+
+  //   // Mostrar botón cuando scrolleas hacia abajo (después de 100px)
+  //   // Ocultar cuando volvés arriba
+  //   if (currentScrollY > 1 && !showFloatingButton) {
+  //     setShowFloatingButton(true);
+  //     // ENTRADA con timing
+  //     Animated.timing(buttonAnimation, {
+  //       toValue: 1,
+  //       duration: 250, // misma duración que salida
+  //       useNativeDriver: true,
+  //     }).start();
+  //   } else if (currentScrollY <= 5 && showFloatingButton) {
+  //     setShowFloatingButton(false);
+  //     // SALIDA con timing
+  //     Animated.timing(buttonAnimation, {
+  //       toValue: 0,
+  //       duration: 250,
+  //       useNativeDriver: true,
+  //     }).start();
+  //   }
+
+  //   lastScrollY.current = currentScrollY;
+  // };
+
+  // Animaciones para el botón
+  // const buttonTranslateY = buttonAnimation.interpolate({
+  //   inputRange: [0, 1],
+  //   outputRange: [20, 0], // 👈 respeta el área segura
+  // });
+
+  // const buttonOpacity = buttonAnimation.interpolate({
+  //   inputRange: [0, 1],
+  //   outputRange: [0, 1],
+  // });
 
   // Verificar si hay datos de salud
   const hasHealthInfo =
@@ -71,237 +121,291 @@ export default function FullScreenStackTest({
     pet.needsWalks ||
     pet.energyLevel;
 
+  const buttonTranslateY = scrollY.interpolate({
+    inputRange: [0, 70],
+    outputRange: [buttonHeight + 16, 0],
+    extrapolate: "clamp",
+  });
+
   return (
     <>
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f5f5f5" }}
-        edges={["bottom"]}
+      {/* <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5" }} edges={["bottom"]} > */}
+      <StatusBar style="light" />
+      <Animated.ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        style={styles.container}
+        contentContainerStyle={{
+          paddingBottom: scrollPaddingBottom,
+        }}
+        // onScroll={handleScroll}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
       >
-        <StatusBar barStyle="light-content" backgroundColor="black" />
-        <ScrollView
-          ref={scrollViewRef}
-          showsVerticalScrollIndicator={false}
-          style={styles.container}
-        >
-          <View>
-            <View
-              style={[
-                styles.headerGradient,
-                { paddingTop: insets.top, height: 72 + insets.top },
-              ]}
+        <View>
+          <View
+            style={[
+              styles.headerGradient,
+              { paddingTop: insets.top, height: 72 + insets.top },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={onGoBackToFeed}
+              style={[styles.backButton, { marginTop: 15 }]}
             >
-              <TouchableOpacity
-                onPress={onGoBackToFeed}
-                style={[styles.backButton, { marginTop: 15 }]}
-              >
-                <View style={styles.backButtonCircle}>
-                  <Ionicons name="arrow-back" size={26} color="white" />
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.headerBackground}>
-              <PetMediaCarouselTest pet={pet} />
-            </View>
-            <View style={styles.contentContainer}>
-              <View style={styles.card}>
-                <Text style={styles.petName}>{pet.petName}</Text>
-                <Text style={styles.petSubtitle}>
-                  {pet.age} años • {pet.size} • Disponible
-                </Text>
-                <Text
-                  style={styles.bioText}
-                  numberOfLines={isDescriptionExpanded ? undefined : 2}
-                >
-                  {pet.description}
-                </Text>
-                {pet.description.length > 50 && (
-                  <TouchableOpacity
-                    onPress={() =>
-                      setIsDescriptionExpanded(!isDescriptionExpanded)
-                    }
-                    style={styles.readMoreButton}
-                  >
-                    <Text style={styles.readMoreText}>
-                      {isDescriptionExpanded ? "Ver menos" : "Ver más"}
-                    </Text>
-                  </TouchableOpacity>
-                )}
+              <View style={styles.backButtonCircle}>
+                <Ionicons name="arrow-back" size={26} color="white" />
               </View>
-              <View style={styles.card}>
-                <View style={styles.infoRow}>
-                  <View style={styles.infoItem}>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.headerBackground}>
+            <PetMediaCarouselTest pet={pet} />
+          </View>
+          <View style={styles.contentContainer}>
+            <View style={styles.card}>
+              <Text style={styles.petName}>{pet.petName}</Text>
+              <Text style={styles.petSubtitle}>
+                {pet.age} años • {pet.size} • Disponible
+              </Text>
+              <Text
+                style={styles.bioText}
+                numberOfLines={isDescriptionExpanded ? undefined : 2}
+              >
+                {pet.description}
+              </Text>
+              {pet.description.length > 50 && (
+                <TouchableOpacity
+                  onPress={() =>
+                    setIsDescriptionExpanded(!isDescriptionExpanded)
+                  }
+                  style={styles.readMoreButton}
+                >
+                  <Text style={styles.readMoreText}>
+                    {isDescriptionExpanded ? "Ver menos" : "Ver más"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <View style={styles.card}>
+              <View style={styles.infoRow}>
+                <View style={styles.infoItem}>
+                  <Ionicons
+                    name="male-female-outline"
+                    size={28}
+                    color="#1F2937"
+                  />
+                  <Text style={styles.infoLabel}>Género</Text>
+                </View>
+                <Text style={styles.infoValue}>{pet.gender}</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.infoRow}>
+                <View style={styles.infoItem}>
+                  <Ionicons name="resize-outline" size={28} color="#1F2937" />
+                  <Text style={styles.infoLabel}>Tamaño</Text>
+                </View>
+                <Text style={styles.infoValue}>{pet.size}</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.infoRow}>
+                <View style={styles.infoItem}>
+                  <Ionicons name="paw-outline" size={28} color="#1F2937" />
+                  <Text style={styles.infoLabel}>Especie</Text>
+                </View>
+                <Text style={styles.infoValue}>{pet.species}</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.infoRow}>
+                <View style={styles.infoItem}>
+                  <Ionicons name="heart-outline" size={28} color="#1F2937" />
+                  <Text style={styles.infoLabel}>Raza</Text>
+                </View>
+                <Text style={styles.infoValue}>{pet.breed}</Text>
+              </View>
+            </View>
+            <View style={styles.card}>
+              <View style={styles.shelterHeader}>
+                <View style={styles.shelterAvatarContainer}>
+                  <View style={styles.shelterAvatar}>
+                    <Image
+                      source={
+                        pet.ownerAvatar &&
+                        typeof pet.ownerAvatar === "string" &&
+                        pet.ownerAvatar.startsWith("http")
+                          ? { uri: pet.ownerAvatar }
+                          : pet.ownerAvatar
+                          ? pet.ownerAvatar
+                          : require("../../assets/media/avatars/default-avatar.jpg")
+                      }
+                      style={styles.shelterAvatarImage}
+                    />
+                  </View>
+                  <View style={styles.shelterOnlineIndicator} />
+                </View>
+                <View style={styles.shelterInfo}>
+                  <Text style={styles.shelterName}>{pet.ownerName}</Text>
+                  <Text style={styles.shelterLocation}>
+                    {pet.ownerLocation || "Buenos Aires, Argentina"}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.shelterStats}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    {statsLoading ? "..." : postsCount}
+                  </Text>
+                  <Text style={styles.statLabel}>Publicaciones</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    {statsLoading ? "..." : totalLikes}
+                  </Text>
+                  <Text style={styles.statLabel}>Likes</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    {pet.ownerCreatedAt
+                      ? new Date(pet.ownerCreatedAt).getFullYear()
+                      : "..."}
+                  </Text>
+                  <Text style={styles.statLabel}>Miembro</Text>
+                </View>
+              </View>
+            </View>
+            {/* INFORMACION DE SALUD */}
+            {hasHealthInfo && (
+              <TouchableOpacity
+                style={[styles.card, styles.interactiveCard]}
+                onPress={() => setHealthModalVisible(true)}
+              >
+                <View style={styles.cardHeader}>
+                  <View style={styles.cardHeaderLeft}>
                     <Ionicons
-                      name="male-female-outline"
-                      size={28}
+                      name="medical-outline"
+                      size={32}
                       color="#1F2937"
                     />
-                    <Text style={styles.infoLabel}>Género</Text>
-                  </View>
-                  <Text style={styles.infoValue}>{pet.gender}</Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.infoRow}>
-                  <View style={styles.infoItem}>
-                    <Ionicons name="resize-outline" size={28} color="#1F2937" />
-                    <Text style={styles.infoLabel}>Tamaño</Text>
-                  </View>
-                  <Text style={styles.infoValue}>{pet.size}</Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.infoRow}>
-                  <View style={styles.infoItem}>
-                    <Ionicons name="paw-outline" size={28} color="#1F2937" />
-                    <Text style={styles.infoLabel}>Especie</Text>
-                  </View>
-                  <Text style={styles.infoValue}>{pet.species}</Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.infoRow}>
-                  <View style={styles.infoItem}>
-                    <Ionicons name="heart-outline" size={28} color="#1F2937" />
-                    <Text style={styles.infoLabel}>Raza</Text>
-                  </View>
-                  <Text style={styles.infoValue}>{pet.breed}</Text>
-                </View>
-              </View>
-              <View style={styles.card}>
-                <View style={styles.shelterHeader}>
-                  <View style={styles.shelterAvatarContainer}>
-                    <View style={styles.shelterAvatar}>
-                      <Image
-                        source={
-                          pet.ownerAvatar &&
-                          typeof pet.ownerAvatar === "string" &&
-                          pet.ownerAvatar.startsWith("http")
-                            ? { uri: pet.ownerAvatar }
-                            : pet.ownerAvatar
-                            ? pet.ownerAvatar
-                            : require("../../assets/media/avatars/default-avatar.jpg")
-                        }
-                        style={styles.shelterAvatarImage}
-                      />
+                    <View style={styles.cardTextContainer}>
+                      <Text style={styles.cardTitle}>Información de salud</Text>
+                      <Text style={styles.cardSubtitle}>
+                        Vacunas, esterilización y más
+                      </Text>
                     </View>
-                    <View style={styles.shelterOnlineIndicator} />
                   </View>
-                  <View style={styles.shelterInfo}>
-                    <Text style={styles.shelterName}>{pet.ownerName}</Text>
-                    <Text style={styles.shelterLocation}>
-                      {pet.ownerLocation || "Buenos Aires, Argentina"}
-                    </Text>
-                  </View>
+                  <Ionicons name="chevron-forward" size={24} color="#9CA3AF" />
                 </View>
-                <View style={styles.shelterStats}>
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
-                      {statsLoading ? "..." : postsCount}
-                    </Text>
-                    <Text style={styles.statLabel}>Publicaciones</Text>
+              </TouchableOpacity>
+            )}
+            {/* modal para la informacion de salud: */}
+            <HealthModalStackScreen
+              visible={healthModalVisible}
+              onClose={() => setHealthModalVisible(false)}
+              pet={pet}
+            />
+            {/* INFORMACION DE CONVIVENCIA  */}
+            {hasBehaviorInfo && (
+              <TouchableOpacity
+                style={[styles.card, styles.interactiveCard]}
+                onPress={() => setBehaviorModalVisible(true)}
+              >
+                <View style={styles.cardHeader}>
+                  <View style={styles.cardHeaderLeft}>
+                    <Ionicons name="happy-outline" size={32} color="#1F2937" />
+                    <View style={styles.cardTextContainer}>
+                      <Text style={styles.cardTitle}>
+                        Comportamiento y convivencia
+                      </Text>
+                      <Text style={styles.cardSubtitle}>
+                        Personalidad, energía y compatibilidad
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
-                      {statsLoading ? "..." : totalLikes}
-                    </Text>
-                    <Text style={styles.statLabel}>Likes</Text>
-                  </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
-                      {pet.ownerCreatedAt
-                        ? new Date(pet.ownerCreatedAt).getFullYear()
-                        : "..."}
-                    </Text>
-                    <Text style={styles.statLabel}>Miembro</Text>
-                  </View>
+                  <Ionicons name="chevron-forward" size={24} color="#9CA3AF" />
                 </View>
-              </View>
-              {/* INFORMACION DE SALUD */}
-              {hasHealthInfo && (
-                <TouchableOpacity
-                  style={[styles.card, styles.interactiveCard]}
-                  onPress={() => setHealthModalVisible(true)}
-                >
-                  <View style={styles.cardHeader}>
-                    <View style={styles.cardHeaderLeft}>
-                      <Ionicons
-                        name="medical-outline"
-                        size={32}
-                        color="#1F2937"
-                      />
-                      <View style={styles.cardTextContainer}>
-                        <Text style={styles.cardTitle}>
-                          Información de salud
-                        </Text>
-                        <Text style={styles.cardSubtitle}>
-                          Vacunas, esterilización y más
-                        </Text>
-                      </View>
-                    </View>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={24}
-                      color="#9CA3AF"
-                    />
-                  </View>
-                </TouchableOpacity>
-              )}
-              {/* modal para la informacion de salud: */}
-              <HealthModalStackScreen
-                visible={healthModalVisible}
-                onClose={() => setHealthModalVisible(false)}
-                pet={pet}
-              />
-              {/* INFORMACION DE CONVIVENCIA  */}
-              {hasBehaviorInfo && (
-                <TouchableOpacity
-                  style={[styles.card, styles.interactiveCard]}
-                  onPress={() => setBehaviorModalVisible(true)}
-                >
-                  <View style={styles.cardHeader}>
-                    <View style={styles.cardHeaderLeft}>
-                      <Ionicons
-                        name="happy-outline"
-                        size={32}
-                        color="#1F2937"
-                      />
-                      <View style={styles.cardTextContainer}>
-                        <Text style={styles.cardTitle}>
-                          Comportamiento y convivencia
-                        </Text>
-                        <Text style={styles.cardSubtitle}>
-                          Personalidad, energía y compatibilidad
-                        </Text>
-                      </View>
-                    </View>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={24}
-                      color="#9CA3AF"
-                    />
-                  </View>
-                </TouchableOpacity>
-              )}
-              {/* Modal para la información de convivencia */}
-              <BehaviorModalStackScreen
-                visible={behaviorModalVisible}
-                onClose={() => setBehaviorModalVisible(false)}
-                pet={pet}
-              />
-            </View>
+              </TouchableOpacity>
+            )}
+            {/* Modal para la información de convivencia */}
+            <BehaviorModalStackScreen
+              visible={behaviorModalVisible}
+              onClose={() => setBehaviorModalVisible(false)}
+              pet={pet}
+            />
           </View>
-        </ScrollView>
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.adoptButton} onPress={() => {}}>
+        </View>
+      </Animated.ScrollView>
+      {/* <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.adoptButton}
+            onPress={() => setModalVisible(true)}
+          >
             <Text style={styles.adoptButtonText}>Adoptar a {pet.petName}</Text>
           </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+        </View> */}
+      {/* <Animated.View
+        style={[
+          styles.floatingButtonContainer,
+          {
+            bottom: insets.bottom + 20,
+            transform: [{ translateY: buttonTranslateY }],
+            opacity: buttonOpacity,
+          },
+        ]}
+        pointerEvents={showFloatingButton ? "auto" : "none"}
+      >
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.9}
+        >
+          <Ionicons name="heart" size={24} color="white" />
+          <Text style={styles.floatingButtonText}>Adoptar a {pet.petName}</Text>
+        </TouchableOpacity>
+      </Animated.View> */}
+      {/* </SafeAreaView> */}
+      {/* Barra de navegación simulada (opaca) */}
+      {Platform.OS === "android" && (
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: insets.bottom,
+            backgroundColor: "#f5f5f5",
+            zIndex: 2, // que quede por encima de todo
+          }}
+        />
+      )}
+      {/* Botón animado */}
+      <Animated.View
+        style={[
+          styles.buttonContainer,
+          {
+            bottom: insets.bottom + 20, // espacio arriba de la barra
+            transform: [{ translateY: buttonTranslateY }],
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.9}
+        >
+          <Ionicons name="heart" size={18} color="white" />
+          <Text style={styles.floatingButtonText}>Adoptar a {pet.petName}</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </>
   );
 }
@@ -319,6 +423,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: 62,
     zIndex: 100,
+    elevation: 10,
   },
   backButton: {
     marginTop: 0,
@@ -392,7 +497,6 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontFamily: fonts.bold,
-
     fontSize: 15,
     color: "#2d3436",
   },
@@ -522,7 +626,61 @@ const styles = StyleSheet.create({
   },
   adoptButtonText: {
     fontSize: 16,
+    fontFamily: fonts.semiBold,
+    fontWeight: "500",
+    color: "white",
+  },
+  floatingButtonContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 50,
+    elevation: 5,
+  },
+  floatingButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#667eea",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 28,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    gap: 8,
+  },
+  floatingButtonText: {
+    fontSize: 15,
     fontFamily: fonts.bold,
     color: "white",
+  },
+  buttonContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 1, // debajo de la barra simulada
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#667eea",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 28,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    gap: 2,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

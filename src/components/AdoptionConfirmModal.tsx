@@ -5,9 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Pressable,
 } from "react-native";
 import { navigate } from "../navigation/NavigationService";
 import type { PetPost } from "../types/petPots";
+import { fonts } from "../theme/fonts";
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,31 +35,41 @@ export default function AdoptionConfirmModal({
       petName: pet.petName,
       ownerId: pet.ownerId,
       ownerName: pet.ownerName,
-      ownerEmail: pet.ownerEmail,
     });
   };
 
   return (
     <View style={styles.overlay}>
-      <View style={styles.modalContent}>
-        <Text style={styles.title}>¿Querés adoptar a {pet.petName}?</Text>
-        <Text style={styles.subtitle}>
-          Estás a punto de iniciar una solicitud de adopción.
-        </Text>
+      <Pressable style={styles.overlayPressable} onPress={onCancel}>
+        <View style={styles.modal}>
+          <Text style={[{ fontFamily: fonts.bold }, styles.title]}>
+            ¿Querés adoptar a {pet.petName}?
+          </Text>
 
-        <View style={styles.buttonsRow}>
-          <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
-            <Text style={styles.cancelText}>Cancelar</Text>
-          </TouchableOpacity>
+          <Text style={[{ fontFamily: fonts.semiBold }, styles.description]}>
+            Estás a punto de iniciar una solicitud de adopción.
+          </Text>
 
-          <TouchableOpacity
-            onPress={goToFormAdoption}
-            style={styles.confirmButton}
-          >
-            <Text style={styles.confirmText}>Confirmar</Text>
-          </TouchableOpacity>
+          <View style={styles.buttons}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+              <Text style={[{ fontFamily: fonts.semiBold }, styles.cancelText]}>
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={goToFormAdoption}
+            >
+              <Text
+                style={[{ fontFamily: fonts.semiBold }, styles.confirmText]}
+              >
+                Confirmar
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 }
@@ -69,56 +81,61 @@ const styles = StyleSheet.create({
     left: 0,
     width,
     height,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 999,
   },
-  modalContent: {
-    backgroundColor: "white",
-    width: width * 0.8,
-    padding: 24,
+  overlayPressable: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    width: "75%",
+    backgroundColor: "#fff",
     borderRadius: 20,
-    elevation: 6,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    padding: 20,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
+    fontSize: 17,
     color: "#2d3436",
-    marginBottom: 8,
+    textAlign: "center",
+    marginBottom: 6,
   },
-  subtitle: {
-    fontSize: 14,
+  description: {
+    fontSize: 13,
     color: "#636e72",
-    marginBottom: 24,
+    textAlign: "center",
+    marginBottom: 20,
   },
-  buttonsRow: {
+  buttons: {
     flexDirection: "row",
-    justifyContent: "center",
     gap: 12,
   },
   cancelButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
     backgroundColor: "#f1f3f4",
+    alignItems: "center",
   },
   cancelText: {
+    fontSize: 15,
+    fontWeight: "500",
     color: "#636e72",
-    fontWeight: "600",
   },
   confirmButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: "#667eea",
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: "#667eea", // Color azul conservado
+    alignItems: "center",
   },
   confirmText: {
-    color: "white",
-    fontWeight: "700",
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#fff",
   },
 });
