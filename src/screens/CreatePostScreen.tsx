@@ -400,8 +400,18 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f0f0f0",
   },
   optionContent: { flex: 1, marginLeft: 12 },
-  optionTitle: { fontSize: 16, color: "#000", fontWeight: "400" },
-  optionSubtitle: { fontSize: 13, color: "#666", marginTop: 2 },
+  optionTitle: {
+    fontFamily: fonts.semiBold,
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "400",
+  },
+  optionSubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: "#666",
+    marginTop: 2,
+  },
   footer: {
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -413,11 +423,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 70,
     borderRadius: 10,
-    backgroundColor: "#6366F1",
+    backgroundColor: "#667eea",
     alignItems: "center",
   },
   publishButtonDisabled: { backgroundColor: "#ffaaaa" },
-  publishButtonText: { fontSize: 16, color: "white", fontWeight: "600" },
+  publishButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    color: "white",
+  },
   loadingOverlay: {
     position: "absolute",
     top: 0,

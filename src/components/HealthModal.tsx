@@ -3,6 +3,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import PetHealthInfo from "./PetHealthInfo";
+import { fonts } from "../theme/fonts";
 
 type PetHealthData = {
   isVaccinated: string;
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   title: {
+    fontFamily: fonts.bold,
     fontSize: 18,
     fontWeight: "600",
     color: "#000",

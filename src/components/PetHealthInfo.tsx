@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { fonts } from "../theme/fonts";
 
 type PetHealthData = {
   isVaccinated: string;
@@ -100,11 +101,13 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   optionTitle: {
+    fontFamily: fonts.semiBold,
     fontSize: 16,
     color: "#000",
     fontWeight: "400",
   },
   optionSubtitle: {
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: "#666",
     marginTop: 2,

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { fonts } from "../theme/fonts";
 
 type PetFormData = {
   petName: string;
@@ -244,6 +245,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   input: {
+    fontFamily: fonts.semiBold,
     fontSize: 16,
     color: "#000",
     minHeight: 50,
@@ -291,6 +293,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   optionTitle: {
+    fontFamily: fonts.semiBold,
     fontSize: 16,
     color: "#000",
     fontWeight: "400",
@@ -299,6 +302,7 @@ const styles = StyleSheet.create({
     color: "#EF4444",
   },
   optionSubtitle: {
+    fontFamily: fonts.regular,
     paddingRight: 15,
     fontSize: 13,
     color: "#666",

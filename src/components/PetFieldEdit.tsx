@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { textStyles } from "../theme/textStyles";
 import type { KeyboardTypeOptions } from "react-native";
 import { PetPost } from "../types/petPots";
+import { fonts } from "../theme/fonts";
 
 type PetFieldType = keyof PetPost;
 
@@ -543,8 +544,9 @@ const styles = StyleSheet.create({
 
   // Estilos para el selector de especies
   selectorTitle: {
+    fontFamily: fonts.bold,
     fontSize: 14,
-    fontWeight: "700",
+
     color: "#00000094",
     marginBottom: 16,
     paddingHorizontal: 16,
@@ -563,6 +565,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF5F7",
   },
   optionText: {
+    fontFamily: fonts.semiBold,
     fontSize: 16,
     color: "#2d3436",
   },

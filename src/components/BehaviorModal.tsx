@@ -3,6 +3,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import PetBehaviorInfo from "./PetBehaviorInfo";
+import { fonts } from "../theme/fonts";
 
 type PetBehaviorData = {
   goodWithKids: string;
@@ -35,7 +36,7 @@ const BehaviorModal: React.FC<BehaviorModalProps> = ({
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
-            <Text style={styles.title}>Comportamiento y Convivencia</Text>
+            <Text style={styles.title}>Comportamiento y convivencia</Text>
             <View style={styles.placeholder} />
           </View>
 
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   title: {
+    fontFamily: fonts.bold,
     fontSize: 18,
     fontWeight: "600",
     color: "#000",

@@ -16,6 +16,7 @@ import {
   validateVideoMedia,
   validatePhotoMedia,
 } from "../utils/mediaValidation";
+import { fonts } from "../theme/fonts";
 
 type MediaItem = {
   uri: string;
@@ -308,17 +309,21 @@ const PostMediaManager: React.FC<PostMediaManagerProps> = ({
 
           {/* Contador y límites con nuevo diseño */}
           <View style={styles.mediaInfo}>
-            <Text style={styles.mediaCounter}>
+            <Text style={[{ fontFamily: fonts.bold }, styles.mediaCounter]}>
               {mediaList.length} archivos agregados (máx: 1 video + 5 fotos)
             </Text>
             <View style={styles.mediaLimitsRow}>
               <View style={styles.limitItem}>
                 <Ionicons name="videocam" size={14} color="#666" />
-                <Text style={styles.mediaLimits}>{videoCount}/1</Text>
+                <Text style={[{ fontFamily: fonts.bold }, styles.mediaLimits]}>
+                  {videoCount}/1
+                </Text>
               </View>
               <View style={styles.limitItem}>
                 <Ionicons name="image" size={14} color="#666" />
-                <Text style={styles.mediaLimits}>{photoCount}/5</Text>
+                <Text style={[{ fontFamily: fonts.bold }, styles.mediaLimits]}>
+                  {photoCount}/5
+                </Text>
               </View>
             </View>
           </View>
