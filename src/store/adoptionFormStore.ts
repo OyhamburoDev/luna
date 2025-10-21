@@ -3,7 +3,7 @@ import type { AdoptionFormData } from "../types/forms";
 
 type AdoptionFormStore = {
   form: Partial<Omit<AdoptionFormData, "petId">>;
-  setFormField: (field: string, value: string) => void;
+  setFormField: (field: string, value: string | boolean | number) => void;
   resetForm: () => void;
 };
 

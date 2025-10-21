@@ -3,17 +3,93 @@ import { Alert } from "react-native";
 import type { AdoptionFormData } from "../types/forms";
 import { useAdoptionFormStore } from "../store/adoptionFormStore";
 import { useAuthStore } from "../store/auth";
-import { navigate } from "../navigation/NavigationService";
 import { AdoptionService } from "../api/adoptionServiceApplication";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/RootNavigator";
 
 type AdoptionFormErrors = {
-  fullName: boolean;
+  name: boolean;
+  whatsapp: boolean;
+  whatsappMessage?: string;
+  instagram: boolean;
   email: boolean;
-  phone: boolean;
-  address: boolean;
-  hasPets: boolean;
+  emailMessage?: string;
+  facebook: boolean;
   housingType: boolean;
+  availableTime: boolean;
   reason: boolean;
+  contactRequired: boolean;
+};
+
+const isValidInstagram = (instagram: string): boolean => {
+  if (!instagram?.trim()) return true;
+
+  const username = instagram.trim().replace(/^@/, ""); // Remover @ inicial si existe
+
+  // 1. Validar longitud
+  if (username.length < 1 || username.length > 30) {
+    return false;
+  }
+
+  // 2. Bloquear caracteres potencialmente peligrosos
+  const dangerousChars = /[<>{}\[\]\\|&;`$'"\x00-\x1F\x7F]/;
+  if (dangerousChars.test(username)) {
+    return false;
+  }
+
+  return true;
+};
+
+const isValidFacebook = (facebook: string): boolean => {
+  if (!facebook?.trim()) return true;
+
+  const username = facebook.trim();
+
+  // Validar longitud
+  if (username.length < 5) {
+    return false;
+  }
+
+  // Bloquear caracteres peligrosos
+  const dangerousChars = /[<>{}\[\]\\|&;`$'"\x00-\x1F\x7F]/;
+  if (dangerousChars.test(username)) {
+    return false;
+  }
+
+  return true;
+};
+
+const isValidWhatsApp = (whatsapp: string): boolean => {
+  if (!whatsapp?.trim()) return true;
+
+  const number = whatsapp.trim();
+
+  // Verificar que solo tenga caracteres permitidos
+  const whatsappRegex = /^[\d\s+\-()]{10,20}$/;
+  if (!whatsappRegex.test(number)) {
+    return false;
+  }
+
+  // Contar dígitos reales (excluyendo espacios, +, -, etc.)
+  const digitCount = (number.match(/\d/g) || []).length;
+
+  // WhatsApp necesita al menos 10 dígitos (números nacionales/internacionales)
+  return digitCount >= 10;
+};
+
+const isValidEmail = (email: string): boolean => {
+  if (!email?.trim()) return true;
+
+  const emailValue = email.trim();
+
+  // Bloquear caracteres peligrosos además de la validación de email
+  const dangerousChars = /[<>{}\[\]\\|&;`$'"\x00-\x1F\x7F]/;
+  if (dangerousChars.test(emailValue)) {
+    return false;
+  }
+
+  return /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(emailValue);
 };
 
 export function useAdoptionRequest(
@@ -26,20 +102,24 @@ export function useAdoptionRequest(
   const { form, setFormField, resetForm } = useAdoptionFormStore();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [showLocalModal, setShowLocalModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+  const navigation = useNavigation<NavigationProp>();
 
   const [errors, setErrors] = useState<AdoptionFormErrors>({
-    fullName: false,
+    name: false,
+    whatsapp: false,
+    instagram: false,
     email: false,
-    phone: false,
-    address: false,
-    hasPets: false,
+    facebook: false,
     housingType: false,
+    availableTime: false,
     reason: false,
+    contactRequired: false,
   });
 
   const pendingSubmission = useRef<boolean>(false);
 
-  // Detectar cuando el usuario se autentica y hay una intención pendiente
   useEffect(() => {
     if (isAuthenticated && pendingSubmission.current) {
       pendingSubmission.current = false;
@@ -47,53 +127,104 @@ export function useAdoptionRequest(
     }
   }, [isAuthenticated]);
 
-  const handleChange = (field: keyof typeof form, value: string) => {
+  const handleChange = (field: keyof typeof form, value: string | boolean) => {
+    console.log("🔴 handleChange llamado:", field, "valor:", value);
     setFormField(field, value);
+
+    // Limpiar error específico cuando el usuario interactúe con el campo
+    setErrors((prev) => ({
+      ...prev,
+      [field]: false,
+      ...(field === "whatsapp" ||
+      field === "instagram" ||
+      field === "email" ||
+      field === "facebook"
+        ? { contactRequired: false }
+        : {}),
+    }));
   };
 
-  // subir al servidor
-  const handleSubmit = async () => {
-    const errors: AdoptionFormErrors = {
-      fullName: !form.fullName?.trim(),
-      email: !form.email?.trim(),
-      phone: !form.phone?.trim(),
-      address: !form.address?.trim(),
-      hasPets: !form.hasPets?.trim(),
-      housingType: !form.housingType?.trim(),
+  const validateForm = (): boolean => {
+    const hasAtLeastOneContact =
+      !!form.whatsapp?.trim() ||
+      !!form.instagram?.trim() ||
+      !!form.email?.trim() ||
+      !!form.facebook?.trim();
+
+    const newErrors: AdoptionFormErrors = {
+      name: !form.name?.trim() || /\d/.test(form.name),
+      whatsapp: !isValidWhatsApp(form.whatsapp || ""),
+      whatsappMessage:
+        form.whatsapp && !isValidWhatsApp(form.whatsapp)
+          ? "El WhatsApp debe tener al menos 10 números"
+          : undefined,
+      instagram: !isValidInstagram(form.instagram || ""),
+      email: !isValidEmail(form.email || ""),
+      emailMessage:
+        form.email && !isValidEmail(form.email)
+          ? "Email inválido. Asegurate de incluir @ y un dominio válido (ej: .com)"
+          : undefined,
+      facebook: !isValidFacebook(form.facebook || ""),
+      housingType: !form.housingType,
+      availableTime: !form.availableTime?.trim(),
       reason: !form.reason?.trim(),
+      contactRequired: !hasAtLeastOneContact,
     };
 
-    setErrors(errors);
+    setErrors(newErrors);
+    return !Object.values(newErrors).some((e) => e);
+  };
 
-    const hasErrors = Object.values(errors).some((e) => e);
+  const handleSubmit = async () => {
+    const isValid = validateForm();
 
-    // No continuar si faltan campos
-    if (hasErrors) {
-      Alert.alert("Faltan campos", "Completá los obligatorios.");
+    if (!isValid) {
       return;
     }
 
     if (isAuthenticated) {
       try {
+        // Crear una copia del form y ELIMINAR campos vacíos
+        const cleanedForm = { ...form };
+
+        // Campos que pueden ser opcionales - ELIMINAR si están vacíos
+        const optionalFields: (keyof typeof cleanedForm)[] = [
+          "whatsapp",
+          "instagram",
+          "email",
+          "facebook",
+          "housingDetails",
+          "petTypes",
+          "comments",
+        ];
+
+        optionalFields.forEach((field) => {
+          if (cleanedForm[field] === "") {
+            delete cleanedForm[field]; // ← ELIMINAR el campo
+          }
+        });
+
         const payload: AdoptionFormData = {
-          ...(form as AdoptionFormData),
+          ...(cleanedForm as AdoptionFormData),
           petId,
           petName,
           ownerId,
-          ownerName,
-          ownerEmail,
           applicantId: useAuthStore.getState().user?.uid!,
         };
 
         await AdoptionService.submitAdoptionRequest(payload);
-        Alert.alert("Éxito", "Tu solicitud fue enviada");
+        setShowSuccess(true);
         resetForm();
+        setTimeout(() => {
+          navigation.navigate("Swipe"); // o el nombre real de tu ruta
+        }, 2500); // espera a que el toast desaparezca
       } catch (error) {
+        console.error("Error submitting adoption:", error);
         Alert.alert("Error", "No se pudo enviar tu solicitud");
       }
     } else {
+      pendingSubmission.current = true;
       setShowLocalModal(true);
-      return;
     }
   };
 
@@ -102,7 +233,10 @@ export function useAdoptionRequest(
     handleChange,
     handleSubmit,
     errors,
+    setErrors,
     setShowLocalModal,
     showLocalModal,
+    showSuccess,
+    setShowSuccess,
   };
 }

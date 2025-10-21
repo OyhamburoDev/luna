@@ -519,7 +519,9 @@ export default function PetCardVertical({
                 size={32}
                 color="rgba(255, 255, 255, 0.82)"
               />
-              <Text style={[textStyles.subtitle, styles.detalleText]}>
+              <Text
+                style={[{ fontFamily: fonts.semiBold }, styles.detalleText]}
+              >
                 Info
               </Text>
             </View>
@@ -591,7 +593,7 @@ export default function PetCardVertical({
               <Text
                 style={[
                   styles.description,
-                  textStyles.body,
+                  { fontFamily: fonts.semiBold },
                   shouldShowMoreButton && !isExpanded
                     ? styles.descriptionWithButton
                     : null,
@@ -606,7 +608,9 @@ export default function PetCardVertical({
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.moreButtonContainer}
               >
-                <Text style={[textStyles.body, styles.moreButton]}>
+                <Text
+                  style={[{ fontFamily: fonts.semiBold }, styles.moreButton]}
+                >
                   {isExpanded ? "menos" : "más"}
                 </Text>
               </TouchableOpacity>
@@ -666,7 +670,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 12,
-    paddingLeft: 17,
+    paddingLeft: 11,
     paddingBottom: 10,
   },
   name: {
@@ -677,10 +681,11 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   description: {
-    fontSize: 14,
+    fontSize: 15,
     color: "rgba(255, 255, 255, 0.9)",
     marginTop: 2,
     marginBottom: 0,
+    letterSpacing: -0.2,
   },
   playButton: {
     position: "absolute",
@@ -695,20 +700,18 @@ const styles = StyleSheet.create({
   descriptionContainer: {
     flexDirection: "row",
     marginTop: 0,
-    width: "85%",
+    width: "89%",
   },
   descriptionWithButton: {
-    paddingRight: 10,
+    paddingRight: 2,
   },
   moreButtonContainer: {
     justifyContent: "flex-end",
-    alignItems: "flex-end",
     marginBottom: 0,
   },
   moreButton: {
-    fontSize: 14,
+    fontSize: 15,
     color: "rgba(255, 255, 255, 0.7)",
-    fontWeight: "500",
     textShadowColor: "rgba(0, 0, 0, 0.8)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
@@ -781,7 +784,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   detalleText: {
-    fontSize: 11,
+    fontSize: 13,
     color: "rgba(255, 255, 255, 0.87)",
     textShadowRadius: 1,
   },
@@ -868,10 +871,10 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#ffffffe7",
     textAlign: "center",
-    fontSize: 14,
+    fontSize: 15,
   },
   linkTextTwo: {
     color: "#FE2C55",
-    fontSize: 14,
+    fontSize: 15,
   },
 });

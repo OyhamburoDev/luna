@@ -402,7 +402,7 @@ export default function FullScreenStackTest({
           onPress={() => setModalVisible(true)}
           activeOpacity={0.9}
         >
-          <Ionicons name="heart" size={18} color="white" />
+          <Ionicons name="heart" size={17} color="white" />
           <Text style={styles.floatingButtonText}>Adoptar a {pet.petName}</Text>
         </TouchableOpacity>
       </Animated.View>
