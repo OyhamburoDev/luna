@@ -29,12 +29,15 @@ import { LocalAuthModal } from "../components/LocalAuthModal";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { fonts } from "../theme/fonts";
 import SuccessModal from "../components/SuccessModal";
+import { useAuthModalContext } from "../contexts/AuthModalContext";
 
 type AdoptionFormRouteProp = RouteProp<RootStackParamList, "AdoptionFormPet">;
 
 export default function AdoptionFormScreen() {
   const route = useRoute<AdoptionFormRouteProp>();
   const { petId, petName, ownerId, ownerName, ownerEmail } = route.params;
+
+  const { requireAuth } = useAuthModalContext();
 
   const {
     form,
@@ -49,7 +52,9 @@ export default function AdoptionFormScreen() {
   } = useAdoptionRequest(petId, petName, ownerId, ownerName, ownerEmail);
 
   const handleSubmitWithAuth = () => {
-    handleSubmit(); // ← que el hook maneje TODAS las validaciones
+    requireAuth(async () => {
+      handleSubmit(); // ← que el hook maneje TODAS las validaciones
+    });
   };
 
   const navigation = useNavigation();
@@ -108,17 +113,6 @@ export default function AdoptionFormScreen() {
                 </Text>
                 <View style={styles.headerRight} />
               </View>
-
-              {/* Info de la mascota */}
-              {/* <View style={styles.petInfoCard}>
-                <Ionicons name="paw" size={24} color="#000000" />
-                <View style={styles.petInfoText}>
-                  <Text style={styles.petInfoLabel}>
-                    Solicitud para adoptar a:
-                  </Text>
-                  <Text style={styles.petInfoName}>{petName}</Text>
-                </View>
-              </View> */}
 
               <View style={styles.formContent}>
                 {/* Sección: Información personal */}
@@ -690,15 +684,6 @@ export default function AdoptionFormScreen() {
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </SafeAreaView>
-
-      <LocalAuthModal
-        visible={showLocalModal}
-        onClose={() => setShowLocalModal(false)}
-        onSuccess={() => {
-          setTimeout(() => handleSubmit(), 100);
-        }}
-        initialMode="login"
-      />
 
       <SuccessModal
         visible={showSuccess}
