@@ -28,7 +28,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LocalAuthModal } from "../components/LocalAuthModal";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { fonts } from "../theme/fonts";
-import SuccessModal from "../components/SuccessModal";
+import ToastMessage from "../components/ToastMessage";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 
 type AdoptionFormRouteProp = RouteProp<RootStackParamList, "AdoptionFormPet">;
@@ -49,6 +49,8 @@ export default function AdoptionFormScreen() {
     showLocalModal,
     showSuccess,
     setShowSuccess,
+    toastMessage,
+    toastType,
   } = useAdoptionRequest(petId, petName, ownerId, ownerName, ownerEmail);
 
   const handleSubmitWithAuth = () => {
@@ -685,10 +687,11 @@ export default function AdoptionFormScreen() {
         </KeyboardAvoidingView>
       </SafeAreaView>
 
-      <SuccessModal
+      <ToastMessage
         visible={showSuccess}
         onClose={() => setShowSuccess(false)}
-        message="¡Solicitud enviada con éxito!"
+        message={toastMessage}
+        type={toastType}
       />
     </>
   );

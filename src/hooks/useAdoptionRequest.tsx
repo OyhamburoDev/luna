@@ -103,6 +103,8 @@ export function useAdoptionRequest(
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [showLocalModal, setShowLocalModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("success");
   type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
   const navigation = useNavigation<NavigationProp>();
 
@@ -179,13 +181,21 @@ export function useAdoptionRequest(
     const isValid = validateForm();
 
     if (!isValid) {
+      setToastType("error");
+      setToastMessage("Revisá los campos marcados con rojo");
+      setShowSuccess(true);
       return;
     }
 
     if (isAuthenticated) {
       try {
         // Crear una copia del form y ELIMINAR campos vacíos
-        const cleanedForm = { ...form };
+        const cleanedForm = {
+          hasYard: false,
+          hasPets: false,
+          hasChildren: false,
+          ...form,
+        };
 
         // Campos que pueden ser opcionales - ELIMINAR si están vacíos
         const optionalFields: (keyof typeof cleanedForm)[] = [
@@ -213,14 +223,18 @@ export function useAdoptionRequest(
         };
 
         await AdoptionService.submitAdoptionRequest(payload);
+        setToastType("success");
+        setToastMessage("¡Solicitud enviada con éxito!");
         setShowSuccess(true);
         resetForm();
         setTimeout(() => {
-          navigation.navigate("Swipe"); // o el nombre real de tu ruta
+          navigation.navigate("Swipe");
         }, 2500); // espera a que el toast desaparezca
       } catch (error) {
-        console.error("Error submitting adoption:", error);
-        Alert.alert("Error", "No se pudo enviar tu solicitud");
+        const err = error as Error;
+        setToastType("error");
+        setToastMessage(err.message || "Ocurrió un error inesperado 😕");
+        setShowSuccess(true);
       }
     } else {
       pendingSubmission.current = true;
@@ -238,5 +252,7 @@ export function useAdoptionRequest(
     showLocalModal,
     showSuccess,
     setShowSuccess,
+    toastMessage,
+    toastType,
   };
 }

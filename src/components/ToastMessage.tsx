@@ -7,20 +7,24 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   message: string;
+  type?: "success" | "error";
 };
 
-export default function SuccessModal({ visible, onClose, message }: Props) {
+export default function ToastModal({
+  visible,
+  onClose,
+  message,
+  type = "success",
+}: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
-      // Animación de aparición
       Animated.timing(opacity, {
         toValue: 1,
         duration: 200,
         useNativeDriver: true,
       }).start(() => {
-        // Espera 2.5 segundos y desaparece
         setTimeout(() => {
           Animated.timing(opacity, {
             toValue: 0,
@@ -34,10 +38,21 @@ export default function SuccessModal({ visible, onClose, message }: Props) {
 
   if (!visible) return null;
 
+  const isError = type === "error";
+
   return (
     <Animated.View style={[styles.overlay, { opacity }]}>
-      <View style={styles.toastContainer}>
-        <Ionicons name="checkmark-circle" size={22} color="#fff" />
+      <View
+        style={[
+          styles.toastContainer,
+          { backgroundColor: isError ? "#C62828" : "rgba(0,0,0,0.8)" }, // rojo o negro
+        ]}
+      >
+        <Ionicons
+          name={isError ? "alert-circle" : "checkmark-circle"}
+          size={22}
+          color="#fff"
+        />
         <Text style={[styles.text, { fontFamily: fonts.semiBold }]}>
           {message}
         </Text>
@@ -49,10 +64,10 @@ export default function SuccessModal({ visible, onClose, message }: Props) {
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
-    bottom: 100, // lo podés mover más arriba o más abajo
+    bottom: 100,
     alignSelf: "center",
-    width: "100%",
     alignItems: "center",
+    width: "100%",
   },
   toastContainer: {
     flexDirection: "row",
@@ -62,6 +77,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 30,
     gap: 8,
+    maxWidth: "90%", // 🔹 evita tocar los bordes laterales
   },
   text: {
     color: "#fff",
