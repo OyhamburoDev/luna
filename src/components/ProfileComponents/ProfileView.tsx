@@ -414,8 +414,8 @@ const styles = StyleSheet.create({
     borderColor: "white",
   },
   userName: {
+    fontFamily: fonts.bold,
     fontSize: 20,
-    fontWeight: "700",
     color: "#2d3436",
     marginBottom: 8,
   },
