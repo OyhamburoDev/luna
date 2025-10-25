@@ -3,6 +3,7 @@ import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { AdoptionFormDataWithId } from "../types/forms";
 import { AppNotification } from "../types/notifications";
+import { getUserImage } from "./userProfileService";
 
 class NotificationsService {
   /**
@@ -28,7 +29,6 @@ class NotificationsService {
 
   async getUserNotification(): Promise<AppNotification[]> {
     const userId = await this.getCurrentUserId();
-    console.log("UID actual:", userId);
 
     const q = query(
       collection(db, "adoption_requests"),
@@ -37,25 +37,26 @@ class NotificationsService {
     );
 
     const snapshot = await getDocs(q);
-    console.log(
-      "docs snapshot:",
-      snapshot.docs.map((doc) => doc.data())
+
+    const notifications: AppNotification[] = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const data = doc.data() as AdoptionFormDataWithId;
+        // Obtener la foto del SOLICITANTE (applicantId)
+        const applicantPhoto = await getUserImage(data.applicantId);
+
+        return {
+          id: doc.id,
+          type: "adoption_request",
+          title: "Nueva solicitud de adopción",
+          subtitle: `${data.name} quiere adoptar a ${data.petName}`,
+          userPhoto: applicantPhoto || undefined,
+          icon: "paw",
+          color: "#4ECDC4",
+          createdAt: data.submittedAt?.toDate?.() || new Date(),
+          read: false,
+        };
+      })
     );
-
-    const notifications: AppNotification[] = snapshot.docs.map((doc) => {
-      const data = doc.data() as AdoptionFormDataWithId;
-
-      return {
-        id: doc.id,
-        type: "adoption_request",
-        title: "Nueva solicitud de adopción",
-        subtitle: `${data.name} quiere adoptar a ${data.petName}`,
-        icon: "paw",
-        color: "#4CAF50",
-        createdAt: data.submittedAt?.toDate?.() || new Date(),
-        read: false,
-      };
-    });
     console.log("notifications creadas:", notifications);
     return notifications;
   }

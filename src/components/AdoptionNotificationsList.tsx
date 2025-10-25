@@ -5,6 +5,16 @@ import { AppNotification } from "../types/notifications";
 import { fonts } from "../theme/fonts";
 import DefaultAvatar from "../../assets/media/avatars/default-avatar.jpg";
 
+const getRelativeTime = (date: Date): string => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Ahora";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} h`;
+  return `${Math.floor(diffInSeconds / 86400)} d`;
+};
+
 type Props = {
   notifications: AppNotification[];
   onPressItem?: (notification: AppNotification) => void;
@@ -29,11 +39,11 @@ export const AdoptionNotificationsList = ({
           <View style={styles.notificationContent}>
             {/* Avatar o icono */}
             <View style={styles.avatarContainer}>
-              {notification.userImage ? (
+              {notification.userPhoto ? (
                 <Image
                   source={
-                    notification.userImage
-                      ? { uri: notification.userImage }
+                    notification.userPhoto
+                      ? { uri: notification.userPhoto }
                       : DefaultAvatar
                   }
                   style={styles.avatar}
@@ -80,7 +90,7 @@ export const AdoptionNotificationsList = ({
             {/* Timestamp y dot no leído */}
             <View style={styles.rightContainer}>
               <Text style={styles.timestamp}>
-                {notification.createdAt.toLocaleTimeString()}
+                {getRelativeTime(notification.createdAt)}
               </Text>
               {!notification.read && <View style={styles.unreadDot} />}
             </View>

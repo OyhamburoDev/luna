@@ -106,3 +106,14 @@ export async function uploadProfileImage(
     throw new Error(`Error subiendo imagen: ${error.message}`);
   }
 }
+
+// Obtener solo la imagen del usuario
+export async function getUserImage(userId: string): Promise<string | null> {
+  try {
+    const userProfile = await getUserProfile(userId);
+    return userProfile?.photoUrl || null;
+  } catch (error) {
+    console.error("Error obteniendo imagen del usuario:", error);
+    return null;
+  }
+}

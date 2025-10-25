@@ -210,16 +210,16 @@ export default function NotificationsScreen() {
         </View>
 
         {/* Lista de notificaciones */}
-        <ScrollView
+        {/* <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
           {MOCK_NOTIFICATIONS.map((notification) =>
             renderNotificationItem(notification)
           )}
-        </ScrollView>
+        </ScrollView> */}
 
-        {/* <ScrollView
+        <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
@@ -231,7 +231,7 @@ export default function NotificationsScreen() {
               console.log("Tocó:", notification.id)
             }
           />
-        </ScrollView> */}
+        </ScrollView>
       </SafeAreaView>
     </>
   );

@@ -9,5 +9,5 @@ export type AppNotification = {
   color: string; // color del icono
   createdAt: Date; // fecha
   read: boolean; // si la notificación fue vista o no
-  userImage?: string;
+  userPhoto?: string;
 };
