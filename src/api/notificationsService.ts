@@ -11,7 +11,11 @@ import {
 import { db } from "../config/firebase";
 import { AdoptionFormDataWithId } from "../types/forms";
 import { AppNotification } from "../types/notifications";
-import { getUserImage } from "./userProfileService";
+import {
+  getUserImage,
+  getUserProfile,
+  isProfileComplete,
+} from "./userProfileService";
 
 class NotificationsService {
   /**
@@ -46,36 +50,48 @@ class NotificationsService {
 
       const snapshot = await getDocs(q);
 
-      const savedNotifications: AppNotification[] = snapshot.docs.map((doc) => {
-        const data = doc.data();
+      // Mapear con Promise.all para obtener fotos de usuarios
+      const savedNotifications: AppNotification[] = await Promise.all(
+        snapshot.docs.map(async (doc) => {
+          const data = doc.data();
 
-        return {
-          id: doc.id,
-          type: data.type || "system",
-          title: data.title || "",
-          subtitle: data.subtitle || "",
-          userPhoto: undefined,
-          icon: data.icon || "notifications",
-          color: data.color || "#A78BFA",
-          createdAt: data.createdAt?.toDate?.() || new Date(),
-          read: data.read || false,
-        };
-      });
+          // Si es un like, obtener la foto del usuario que dio like
+          let userPhoto: string | undefined = undefined;
+
+          if (data.type === "like" && data.likerUserId) {
+            console.log(
+              "🔍 Obteniendo foto para likerUserId:",
+              data.likerUserId
+            );
+            userPhoto = (await getUserImage(data.likerUserId)) || undefined;
+            console.log("📸 Foto obtenida:", userPhoto);
+          }
+
+          return {
+            id: doc.id,
+            type: data.type || "system",
+            title: data.title || "",
+            subtitle: data.subtitle || "",
+            userPhoto: userPhoto,
+            icon: data.icon || "notifications",
+            color: data.color || "#A78BFA",
+            createdAt: data.createdAt?.toDate?.() || new Date(),
+            read: data.read || false,
+          };
+        })
+      );
 
       // 2. Generar notificaciones dinámicas
       const dynamicNotifications: AppNotification[] = [];
 
       // Verificar si el perfil está incompleto
-      const { getUserProfile, isProfileComplete } = await import(
-        "./userProfileService"
-      );
       const userProfile = await getUserProfile(userId);
 
       if (userProfile && !isProfileComplete(userProfile)) {
         dynamicNotifications.push({
           id: "dynamic_incomplete_profile",
           type: "system",
-          title: "Completa tu perfil",
+          title: "Completa tu perfil 📝",
           subtitle:
             "Agrega tu foto, nombre completo y biografía para recibir más solicitudes",
           userPhoto: undefined,
@@ -95,10 +111,7 @@ class NotificationsService {
   }
 
   async getUserNotification(): Promise<AppNotification[]> {
-    console.log("🚀 Iniciando getUserNotification...");
-
     const userId = await this.getCurrentUserId();
-    console.log("👤 UserId obtenido:", userId);
 
     // 1. Traer notificaciones de adopción
     const adoptionQuery = query(
@@ -108,7 +121,6 @@ class NotificationsService {
     );
 
     const adoptionSnapshot = await getDocs(adoptionQuery);
-    console.log("📋 Adopciones encontradas:", adoptionSnapshot.size);
 
     const adoptionNotifications: AppNotification[] = await Promise.all(
       adoptionSnapshot.docs.map(async (doc) => {
@@ -130,20 +142,14 @@ class NotificationsService {
     );
 
     // 2. Traer notificaciones del sistema
-    console.log("🔍 Llamando a getSystemNotifications...");
+
     const systemNotifications = await this.getSystemNotifications(userId);
-    console.log(
-      "✅ System notifications recibidas:",
-      systemNotifications.length
-    );
 
     // 3. Unir ambas y ordenar por fecha
     const allNotifications = [
       ...adoptionNotifications,
       ...systemNotifications,
     ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-    console.log("📬 Total notificaciones:", allNotifications.length);
 
     return allNotifications;
   }
@@ -170,8 +176,6 @@ class NotificationsService {
         ...notification,
         userId: userId, // ← Agregamos el userId como campo
       });
-
-      console.log("✅ Notificación de primera publicación creada");
     } catch (error) {
       console.log("Error creando notificación:", error);
       // No lanzamos error para que no afecte la creación del post
@@ -194,8 +198,6 @@ class NotificationsService {
       };
 
       await addDoc(collection(db, "system_notifications"), notification);
-
-      console.log("✅ Notificación de bienvenida creada");
     } catch (error) {
       console.log("❌ Error creando notificación de bienvenida:", error);
     }
@@ -217,10 +219,60 @@ class NotificationsService {
       };
 
       await addDoc(collection(db, "system_notifications"), notification);
-
-      console.log("✅ Notificación de perfil incompleto creada");
     } catch (error) {
       console.log("❌ Error creando notificación de perfil incompleto:", error);
+    }
+  }
+
+  /* Notificación para cuando alguien da like a un post */
+  async createLikeNotification(
+    postOwnerId: string,
+    likerUserId: string,
+    likerName: string,
+    postId: string,
+    petName: string
+  ): Promise<void> {
+    try {
+      // No crear notificación si el usuario se da like a sí mismo
+      if (postOwnerId === likerUserId) {
+        return;
+      }
+
+      // Verificar si ya existe una notificación de este usuario para este post
+      const q = query(
+        collection(db, "system_notifications"),
+        where("userId", "==", postOwnerId),
+        where("type", "==", "like"),
+        where("postId", "==", postId),
+        where("likerUserId", "==", likerUserId)
+      );
+
+      const snapshot = await getDocs(q);
+
+      // Si ya existe, no crear otra
+      if (!snapshot.empty) {
+        console.log("⚠️ Ya existe notificación de like, no se crea duplicada");
+        return;
+      }
+
+      const notification = {
+        userId: postOwnerId, // El dueño del post recibe la notificación
+        type: "like",
+        title: "Nueva actividad",
+        subtitle: `A ${likerName} le gustó tu publicación de ${petName}`,
+        icon: "heart",
+        color: "#FF6B9D",
+        createdAt: serverTimestamp(),
+        read: false,
+        postId: postId, // Para poder abrir el post cuando haga click
+        likerUserId: likerUserId, // Para obtener la foto del que dio like
+      };
+
+      await addDoc(collection(db, "system_notifications"), notification);
+
+      console.log("✅ Notificación de like creada");
+    } catch (error) {
+      console.log("❌ Error creando notificación de like:", error);
     }
   }
 }

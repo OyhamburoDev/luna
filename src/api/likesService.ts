@@ -1,5 +1,7 @@
 import { doc, writeBatch, increment, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
+import { getUserProfile } from "./userProfileService";
+import { notificationsService } from "./notificationsService";
 
 class LikesService {
   /**
@@ -37,10 +39,29 @@ class LikesService {
         batch.update(userLikesRef, {
           [`likedPosts.${postId}`]: null,
         });
+
+        // Ejecutar batch para quitar like
+        await batch.commit();
       } else {
         // ✅ DAR LIKE
 
-        // Verificar si el documento del usuario existe
+        // 1. Obtener información del post
+        const postDoc = await getDoc(postRef);
+
+        if (!postDoc.exists()) {
+          console.error("Post no encontrado");
+          return false;
+        }
+
+        const postData = postDoc.data();
+        const postOwnerId = postData.userId || postData.ownerId;
+        const petName = postData.petName || "tu mascota";
+
+        // 2. Obtener nombre del usuario que da like
+        const userProfile = await getUserProfile(userId);
+        const likerName = userProfile?.firstName || "Alguien";
+
+        // 3. Verificar si el documento del usuario existe
         const userLikesDoc = await getDoc(userLikesRef);
 
         if (!userLikesDoc.exists()) {
@@ -57,18 +78,28 @@ class LikesService {
           });
         }
 
-        // Incrementar contador en post
+        // 4. Incrementar contador en post
         batch.update(postRef, {
           likes: increment(1),
         });
-      }
 
-      // Ejecutar todas las operaciones de forma atómica
-      await batch.commit();
+        // 5. Ejecutar batch para dar like
+        await batch.commit();
+
+        // 6. Crear notificación de like
+        await notificationsService.createLikeNotification(
+          postOwnerId,
+          userId,
+          likerName,
+          postId,
+          petName
+        );
+      }
 
       console.log(
         `✅ Like ${isCurrentlyLiked ? "removed" : "added"} successfully`
       );
+
       return true;
     } catch (error) {
       console.error("Error toggling like:", error);

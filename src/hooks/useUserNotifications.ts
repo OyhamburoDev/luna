@@ -16,12 +16,8 @@ export const useUserNotifications = () => {
 
       const userNotifications =
         await notificationsService.getUserNotification();
-      console.log("Datos que devuelve el servicio:", userNotifications);
+
       setNotifications(userNotifications);
-      console.log(
-        "🔹 Estado notifications después de setNotifications:",
-        userNotifications
-      );
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -37,8 +33,6 @@ export const useUserNotifications = () => {
   useEffect(() => {
     fetchNotifications();
   }, []);
-
-  console.log("🔹 Hook retorna notifications:", notifications);
 
   return {
     notifications,
