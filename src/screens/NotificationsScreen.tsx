@@ -9,13 +9,22 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 import { fonts } from "../theme/fonts";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { notificationsService } from "../api/notificationsService"; // ajusta la ruta
 import { useUserNotifications } from "../hooks/useUserNotifications";
 import { AdoptionNotificationsList } from "../components/AdoptionNotificationsList";
 import { useNotificationsStore } from "../store/notificationsStore";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/RootNavigator";
+import { navigationRef } from "../navigation/NavigationService";
+
+type NavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "NotificationDetail"
+>;
 
 // Mock data para las notificaciones
 // const MOCK_NOTIFICATIONS = [
@@ -178,13 +187,15 @@ export default function NotificationsScreen() {
   //     </TouchableOpacity>
   //   );
   // };
-  const { notifications, loading, error, refetch } = useUserNotifications();
+  const { notifications: _, loading, error, refetch } = useUserNotifications();
+  const notifications = useNotificationsStore((state) => state.notifications);
 
   useEffect(() => {
     useNotificationsStore.getState().setNotifications(notifications);
   }, [notifications]);
 
   const isFocused = useIsFocused();
+  const navigation = useNavigation<NavigationProp>();
 
   // Estado para el tab activo
   const [activeTab, setActiveTab] = useState<"all" | "adoptions" | "alerts">(
@@ -204,11 +215,11 @@ export default function NotificationsScreen() {
     return notifications;
   }, [notifications, activeTab]);
 
-  useEffect(() => {
-    if (isFocused) {
+  useFocusEffect(
+    useCallback(() => {
       refetch();
-    }
-  }, [isFocused]);
+    }, [])
+  );
 
   return (
     <>
@@ -287,9 +298,11 @@ export default function NotificationsScreen() {
         >
           <AdoptionNotificationsList
             notifications={filteredNotifications}
-            onPressItem={(notification) =>
-              console.log("Tocó:", notification.id)
-            }
+            onPressItem={(notification) => {
+              if (navigationRef.isReady()) {
+                navigationRef.navigate("NotificationDetail", { notification });
+              }
+            }}
           />
         </ScrollView>
       </SafeAreaView>

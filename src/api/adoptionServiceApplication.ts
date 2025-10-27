@@ -67,6 +67,7 @@ export class AdoptionService {
         ...formData,
         submittedAt: serverTimestamp(),
         status: "pending",
+        viewedByUser: false,
       });
 
       // 🔹 4. Actualizar o crear el contador

@@ -7,6 +7,8 @@ import {
   orderBy,
   addDoc,
   serverTimestamp,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { AdoptionFormDataWithId } from "../types/forms";
@@ -136,7 +138,7 @@ class NotificationsService {
           icon: "paw",
           color: "#4ECDC4",
           createdAt: data.submittedAt?.toDate?.() || new Date(),
-          read: false,
+          read: data.viewedByUser === true,
         };
       })
     );
@@ -273,6 +275,34 @@ class NotificationsService {
       console.log("✅ Notificación de like creada");
     } catch (error) {
       console.log("❌ Error creando notificación de like:", error);
+    }
+  }
+
+  /* Marcar notificación como leída en Firebase */
+  async markAsRead(notificationId: string): Promise<void> {
+    try {
+      // Intentar primero en system_notifications
+      try {
+        const systemRef = doc(db, "system_notifications", notificationId);
+        await updateDoc(systemRef, {
+          read: true,
+          readAt: serverTimestamp(),
+        });
+        console.log("✅ System notification marcada");
+        return;
+      } catch (err) {
+        // Si falla, es adoption_request
+      }
+
+      // Intentar en adoption_requests (usa viewedByUser en lugar de read)
+      const adoptionRef = doc(db, "adoption_requests", notificationId);
+      await updateDoc(adoptionRef, {
+        viewedByUser: true,
+        readAt: serverTimestamp(),
+      });
+      console.log("✅ Adoption request marcada");
+    } catch (error) {
+      console.error("❌ Error marcando:", error);
     }
   }
 }

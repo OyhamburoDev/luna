@@ -68,4 +68,5 @@ export type AdoptionFormDataWithId = AdoptionFormData & {
   id: string; // ID del documento
   submittedAt?: any; // Enviado en
   status?: "pending" | "approved" | "rejected"; // Estado
+  viewedByUser: boolean;
 };

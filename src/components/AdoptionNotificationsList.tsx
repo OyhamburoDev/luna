@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AppNotification } from "../types/notifications";
 import { fonts } from "../theme/fonts";
 import DefaultAvatar from "../../assets/media/avatars/default-avatar.jpg";
+import { useNotificationsStore } from "../store/notificationsStore";
 
 const getRelativeTime = (date: Date): string => {
   const now = new Date();
@@ -24,6 +25,7 @@ export const AdoptionNotificationsList = ({
   notifications,
   onPressItem,
 }: Props) => {
+  const markAsRead = useNotificationsStore((state) => state.markAsRead);
   return (
     <>
       {notifications.map((notification) => (
@@ -34,7 +36,15 @@ export const AdoptionNotificationsList = ({
             !notification.read && styles.notificationItemUnread,
           ]}
           activeOpacity={0.7}
-          onPress={() => onPressItem?.(notification)}
+          onPress={() => {
+            // 1. Marcar como leída
+            if (!notification.read) {
+              markAsRead(notification.id);
+            }
+
+            // 2. Ignorar el error de tipos y pasar la notificación igual
+            onPressItem?.(notification);
+          }}
         >
           <View style={styles.notificationContent}>
             {/* Avatar o icono */}

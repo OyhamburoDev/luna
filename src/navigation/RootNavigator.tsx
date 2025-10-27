@@ -8,6 +8,7 @@ import CreatePostScreen from "../screens/CreatePostScreen";
 import SwipeNavigator from "./SwipeNavigator";
 import PetRegisterScreen from "../screens/PetRegisterFormScreen";
 import AdoptionFormScreen from "../screens/AdoptionFormScreen";
+import NotificationDetailScreen from "../screens/NotificationDetailScreen";
 
 import ChatsScreen from "../screens/ChatsScreen";
 import { useNavigation } from "@react-navigation/native";
@@ -26,6 +27,7 @@ export type RootStackParamList = {
   AdoptionFormPet: undefined;
   ChatsList: undefined; // ← Agregar
   Perfil: undefined;
+  NotificationDetail: { notification: any };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +48,10 @@ export default function RootNavigator() {
       <Stack.Screen name="AdoptionFormPet" component={AdoptionFormScreen} />
       <Stack.Screen name="ChatsList" component={ChatsScreen} />
       <Stack.Screen name="Perfil" component={ProfileScreen} />
+      <Stack.Screen
+        name="NotificationDetail"
+        component={NotificationDetailScreen}
+      />
     </Stack.Navigator>
   );
 }

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { AppNotification } from "../types/notifications";
+import { notificationsService } from "../api/notificationsService";
 
 interface NotificationsStore {
   // Estado
@@ -29,14 +30,23 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
   },
 
   // Marcar como leída
-  markAsRead: (notificationId) => {
-    set((state) => ({
-      notifications: state.notifications.map((notif) =>
-        notif.id === notificationId ? { ...notif, read: true } : notif
-      ),
-    }));
-    // Actualizar contador
-    get().updateUnreadCount();
+  markAsRead: async (notificationId) => {
+    try {
+      // 1. Actualizar localmente
+      set((state) => ({
+        notifications: state.notifications.map((notif) =>
+          notif.id === notificationId ? { ...notif, read: true } : notif
+        ),
+      }));
+
+      // 2. Actualizar en Firebase
+      await notificationsService.markAsRead(notificationId);
+
+      // 3. Actualizar contador
+      get().updateUnreadCount();
+    } catch (error) {
+      console.error("Error marcando como leída:", error);
+    }
   },
 
   // Actualizar contador de no leídas
