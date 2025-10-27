@@ -15,6 +15,7 @@ import { useEffect, useState, useMemo } from "react";
 import { notificationsService } from "../api/notificationsService"; // ajusta la ruta
 import { useUserNotifications } from "../hooks/useUserNotifications";
 import { AdoptionNotificationsList } from "../components/AdoptionNotificationsList";
+import { useNotificationsStore } from "../store/notificationsStore";
 
 // Mock data para las notificaciones
 // const MOCK_NOTIFICATIONS = [
@@ -178,6 +179,10 @@ export default function NotificationsScreen() {
   //   );
   // };
   const { notifications, loading, error, refetch } = useUserNotifications();
+
+  useEffect(() => {
+    useNotificationsStore.getState().setNotifications(notifications);
+  }, [notifications]);
 
   const isFocused = useIsFocused();
 

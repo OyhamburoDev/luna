@@ -8,13 +8,14 @@ import MapScreen from "../screens/MapScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 import CameraScreen from "../screens/CamaraScreen";
 import { PetPost } from "../types/petPots";
-import { useMessageStore } from "../store/messageStore";
+
 import { textStyles } from "../theme/textStyles";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabsStore } from "../store/tabsStore";
 import { fonts } from "../theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNotificationsStore } from "../store/notificationsStore";
 
 const Tab = createBottomTabNavigator();
 
@@ -44,7 +45,7 @@ export default function TabsNavigator({
   const hideBottomTabs = useTabsStore((state) => state.hideBottomTabs);
   const insets = useSafeAreaInsets();
   const bottomPad = Math.max(insets.bottom, 16);
-  const unreadCount = useMessageStore((state) => state.unreadCount);
+  const unreadCount = useNotificationsStore((state) => state.unreadCount);
   const { isVisible } = useAuthModalContext();
 
   // Estado para trackear la pantalla actual
