@@ -72,7 +72,6 @@ export default function SwipeNavigator() {
   const handleTabChange = (
     tabName: "Inicio" | "Mapa" | "Crear" | "Mensajes" | "Perfil"
   ) => {
-    console.log("🔥 Tab activa desde FeedTabs:", tabName);
     setActiveTab(tabName);
   };
 

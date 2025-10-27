@@ -117,3 +117,13 @@ export async function getUserImage(userId: string): Promise<string | null> {
     return null;
   }
 }
+
+// Verificar si el perfil sel usuario está completo
+export function isProfileComplete(profile: UserInfo): boolean {
+  return !!(
+    profile.firstName &&
+    profile.lastName &&
+    profile.bio &&
+    profile.photoUrl
+  );
+}

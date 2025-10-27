@@ -135,17 +135,6 @@ export default function PetCardVertical({
     };
   }, [pet.videoUri, isActive]);
 
-  // 🔍 LOG: Detectar tipo de media al renderizar
-  useEffect(() => {
-    if (pet.videoUri) {
-      console.log("📹 Renderizando video:", pet.videoUri);
-    } else if (pet.imageUris?.length) {
-      console.log("🖼️ No video URI, mostrando imagen de fallback");
-    } else {
-      console.log("⚠️ No hay media disponible para:", pet.petName);
-    }
-  }, [pet.videoUri, pet.imageUris, pet.petName]);
-
   // 🔍 LOG: Control principal de reproducción con debugging completo
   useEffect(() => {
     const controlPlayback = async () => {

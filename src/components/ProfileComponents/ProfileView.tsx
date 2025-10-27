@@ -71,7 +71,6 @@ export default function ProfileView({
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const userId = useAuthStore((state) => state.user?.uid);
-  console.log("🔍 ProfileView render - likedPosts:", likedPosts.length);
 
   useFocusEffect(
     React.useCallback(() => {

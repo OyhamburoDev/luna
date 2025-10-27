@@ -181,6 +181,13 @@ export default function NotificationsScreen() {
   console.log("notifications desde hook:", notifications);
   const isFocused = useIsFocused();
 
+  useEffect(() => {
+    if (isFocused) {
+      console.log("🔄 Pantalla enfocada, refrescando notificaciones...");
+      refetch();
+    }
+  }, [isFocused]);
+
   return (
     <>
       {isFocused && (
@@ -224,9 +231,7 @@ export default function NotificationsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <AdoptionNotificationsList
-            notifications={notifications.filter(
-              (n) => n.type === "adoption_request"
-            )}
+            notifications={notifications} // ← SIN filtro, todas
             onPressItem={(notification) =>
               console.log("Tocó:", notification.id)
             }

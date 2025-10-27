@@ -89,10 +89,6 @@ export const AuthModal: React.FC = () => {
       const success = await register(email, password);
       if (success) {
         handleClose(); // Cerrar primero
-        Alert.alert(
-          "Cuenta creada con éxito",
-          "Ahara puedes usar todas las funciones"
-        );
         setPassword(""); // Limpiar después
       } else {
         Alert.alert("Error", "No se pudo crear la cuenta");

@@ -21,6 +21,7 @@ import { getAuth } from "firebase/auth"; // ✅ NUEVO
 import { db, storage } from "../config/firebase";
 import { PetPost } from "../types/petPots";
 import * as VideoThumbnails from "expo-video-thumbnails";
+import { notificationsService } from "./notificationsService";
 
 type MediaItem = {
   uri: string;
@@ -175,6 +176,17 @@ class PostService {
       const docRef = await addDoc(collection(db, "posts"), completePostData);
 
       console.log("Post created with ID:", docRef.id);
+
+      const userPostsCount = await this.getOwnerPostsCount(userId);
+
+      if (userPostsCount === 1) {
+        // Es su primera publicación, crear notificación
+        await notificationsService.createFirstPetNotification(
+          userId,
+          postData.petName || "tu mascota"
+        );
+      }
+
       return docRef.id;
     } catch (error) {
       if (error instanceof Error) {

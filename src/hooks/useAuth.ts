@@ -5,6 +5,7 @@ import { navigate } from "../navigation/NavigationService";
 import { ensureUserDoc } from "../api/userProfileService";
 import { useUserStore } from "../store/userStore";
 import { useMessageStore } from "../store/messageStore";
+import { notificationsService } from "../api/notificationsService";
 
 export function useAuth() {
   const loginStore = useAuthStore((state) => state.login);
@@ -50,6 +51,9 @@ export function useAuth() {
       const { user, token } = await authApi.register(email, password);
 
       await ensureUserDoc(user.uid, user.email ?? "");
+
+      // Crear notificación de bienvenida
+      await notificationsService.createWelcomeNotification(user.uid);
 
       // auth store
       loginStore(user, token);
