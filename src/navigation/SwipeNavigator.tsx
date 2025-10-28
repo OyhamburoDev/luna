@@ -14,9 +14,10 @@ import TabsNavigator from "./TabsNavigator";
 import FullScreenStack from "../screens/FullScreenStack";
 import { useState, useRef, useEffect, useMemo } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
-import { useInitializeMessages } from "../hooks/useInitializeMessages";
 import { useFirebasePosts } from "../hooks/useFirebasePosts";
 import FullScreenStackTest from "../screens/FullScreenStackTest";
+import { useUserNotifications } from "../hooks/useUserNotifications";
+import { useAuthStore } from "../store/auth";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -35,7 +36,15 @@ export default function SwipeNavigator() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  useInitializeMessages();
+  const { refetch } = useUserNotifications();
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refetch(); // Cargar notificaciones automáticamente al estar logueado
+    }
+  }, [isAuthenticated]);
+
   const { firebasePosts, loading, error, loadMore, hasMore, loadingMore } =
     useFirebasePosts();
 
