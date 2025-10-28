@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   dangerText: {
-    color: "#ff3b30", // rojo sutil para "Cerrar cuenta"
+    color: "#ff6b6b", // rojo sutil para "Cerrar cuenta"
   },
   separatorBtn: {
     height: 1,

@@ -1,17 +1,18 @@
+"use client";
+
 import React from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
+  type ScrollView,
   Image,
   Animated,
   Platform,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import type { PetPost } from "../types/petPots";
 // import { StatusBar } from "react-native";
 import { fonts } from "../theme/fonts";
@@ -353,14 +354,7 @@ export default function FullScreenStackTest({
           </TouchableOpacity>
         </View> */}
       {/* <Animated.View
-        style={[
-          styles.floatingButtonContainer,
-          {
-            bottom: insets.bottom + 20,
-            transform: [{ translateY: buttonTranslateY }],
-            opacity: buttonOpacity,
-          },
-        ]}
+        style={[styles.floatingButtonContainer, { bottom: insets.bottom + 20, transform: [{ translateY: buttonTranslateY }], opacity: buttonOpacity }]}
         pointerEvents={showFloatingButton ? "auto" : "none"}
       >
         <TouchableOpacity
@@ -392,7 +386,7 @@ export default function FullScreenStackTest({
         style={[
           styles.buttonContainer,
           {
-            bottom: insets.bottom + 20, // espacio arriba de la barra
+            bottom: insets.bottom + 20,
             transform: [{ translateY: buttonTranslateY }],
           },
         ]}
@@ -432,8 +426,6 @@ const styles = StyleSheet.create({
   backButtonCircle: {
     width: 40,
     height: 40,
-    // borderRadius: 20,
-    // backgroundColor: "rgba(0, 0, 0, 0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -444,8 +436,8 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
+    padding: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -453,7 +445,7 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   petName: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: fonts.bold,
     color: "#111827",
     marginBottom: 6,
@@ -483,7 +475,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
   infoItem: {
     flexDirection: "row",
@@ -508,7 +500,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   shelterAvatarContainer: {
     position: "relative",
@@ -521,7 +513,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6",
     justifyContent: "center",
     alignItems: "center",
-    overflow: "hidden", // Importante para que la imagen respete el borderRadius
+    overflow: "hidden",
   },
   shelterAvatarImage: {
     width: "100%",
@@ -543,7 +535,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   shelterName: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: fonts.bold,
     color: "#111827",
   },
@@ -566,7 +558,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: fonts.bold,
     color: "#667eea",
   },
@@ -618,8 +610,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   adoptButton: {
-    paddingVertical: 15,
-    borderRadius: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
     backgroundColor: "#667eea",
     alignItems: "center",
     justifyContent: "center",
@@ -643,8 +635,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#667eea",
     paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 28,
+    paddingVertical: 12,
+    borderRadius: 24,
     shadowColor: "#667eea",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
@@ -662,15 +654,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: "center",
-    zIndex: 1, // debajo de la barra simulada
+    zIndex: 1,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#667eea",
-    paddingVertical: 15,
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 28,
+    borderRadius: 24,
     shadowColor: "#667eea",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,

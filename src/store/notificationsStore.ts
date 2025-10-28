@@ -11,6 +11,7 @@ interface NotificationsStore {
   // Acciones
   setNotifications: (notifications: AppNotification[]) => void;
   markAsRead: (notificationId: string) => void;
+  removeNotification: (notificationId: string) => void;
   updateUnreadCount: () => void;
   setLoading: (loading: boolean) => void;
   reset: () => void;
@@ -47,6 +48,14 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
     } catch (error) {
       console.error("Error marcando como leída:", error);
     }
+  },
+
+  // Eliminar notificación
+  removeNotification: (notificationId) => {
+    set((state) => ({
+      notifications: state.notifications.filter((n) => n.id !== notificationId),
+    }));
+    get().updateUnreadCount();
   },
 
   // Actualizar contador de no leídas
