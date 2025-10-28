@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 import { fonts } from "../theme/fonts";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useAuthModalContext } from "../contexts/AuthModalContext";
+import { useAuthStore } from "../store/auth";
+import { AuthRequiredView } from "../components/ProfileComponents/AuthRequiredView";
+import { useEffect, useMemo, useCallback } from "react";
 import { notificationsService } from "../api/notificationsService"; // ajusta la ruta
 import { useUserNotifications } from "../hooks/useUserNotifications";
 import { AdoptionNotificationsList } from "../components/AdoptionNotificationsList";
@@ -187,12 +191,12 @@ export default function NotificationsScreen() {
   //     </TouchableOpacity>
   //   );
   // };
+  const { isAuthenticated } = useAuthStore();
+  const { openModal } = useAuthModalContext();
   const { notifications, loading, error, refetch } = useUserNotifications();
-
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProp>();
 
-  // Estado para el tab activo
   const [activeTab, setActiveTab] = useState<"all" | "adoptions" | "alerts">(
     "all"
   );
@@ -211,10 +215,31 @@ export default function NotificationsScreen() {
   }, [notifications, activeTab]);
 
   useFocusEffect(
+    React.useCallback(() => {
+      if (!isAuthenticated) {
+        setTimeout(() => {
+          openModal();
+        }, 100);
+      }
+    }, [isAuthenticated, openModal])
+  );
+
+  useFocusEffect(
     useCallback(() => {
       refetch();
     }, [])
   );
+
+  if (!isAuthenticated) {
+    return (
+      <AuthRequiredView
+        title="Notificaciones"
+        icon="lock-closed"
+        description=" Inicia sesión para ver tus notificaciones"
+        buttonLabel="Iniciar sesión"
+      />
+    );
+  }
 
   return (
     <>
