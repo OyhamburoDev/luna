@@ -187,12 +187,7 @@ export default function NotificationsScreen() {
   //     </TouchableOpacity>
   //   );
   // };
-  const { notifications: _, loading, error, refetch } = useUserNotifications();
-  const notifications = useNotificationsStore((state) => state.notifications);
-
-  useEffect(() => {
-    useNotificationsStore.getState().setNotifications(notifications);
-  }, [notifications]);
+  const { notifications, loading, error, refetch } = useUserNotifications();
 
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProp>();

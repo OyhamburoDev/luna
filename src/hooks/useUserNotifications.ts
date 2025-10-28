@@ -3,9 +3,13 @@ import { useState, useEffect } from "react";
 import { notificationsService } from "../api/notificationsService";
 import { AdoptionFormData } from "../types/forms";
 import { AppNotification } from "../types/notifications";
+import { useNotificationsStore } from "../store/notificationsStore";
 
 export const useUserNotifications = () => {
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const setNotifications = useNotificationsStore(
+    (state) => state.setNotifications
+  );
+  const notifications = useNotificationsStore((state) => state.notifications);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -83,29 +83,36 @@ class NotificationsService {
         })
       );
 
-      // 2. Generar notificaciones dinámicas
-      const dynamicNotifications: AppNotification[] = [];
-
-      // Verificar si el perfil está incompleto
+      // 2. Verificar si el perfil está incompleto
       const userProfile = await getUserProfile(userId);
 
       if (userProfile && !isProfileComplete(userProfile)) {
-        dynamicNotifications.push({
-          id: "dynamic_incomplete_profile",
-          type: "system",
-          title: "Completa tu perfil 📝",
-          subtitle:
-            "Agrega tu foto, nombre completo y biografía para recibir más solicitudes",
-          userPhoto: undefined,
-          icon: "person-circle",
-          color: "#A78BFA",
-          createdAt: new Date(),
-          read: false,
-        });
+        // Ver si ya existe la notificación en Firebase
+        const hasProfileNotification = savedNotifications.some(
+          (n) => n.title === "Completa tu perfil 📝"
+        );
+
+        // Si NO existe, crearla en Firebase
+        if (!hasProfileNotification) {
+          console.log("📝 Creando notificación de perfil...");
+          await this.createIncompleteProfileNotification(userId);
+        }
       }
 
-      // 3. Unir ambas
-      return [...savedNotifications, ...dynamicNotifications];
+      // 3. Filtrar la notificación de perfil si ya está completo
+      const filteredNotifications = savedNotifications.filter((notif) => {
+        // Si es la notificación de perfil Y el perfil está completo, no la mostramos
+        if (
+          notif.title === "Completa tu perfil 📝" &&
+          userProfile &&
+          isProfileComplete(userProfile)
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      return filteredNotifications;
     } catch (error) {
       console.log("Error obteniendo notificaciones del sistema:", error);
       return [];
