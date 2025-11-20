@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Dimensions, View, Image, StyleSheet, Text } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { mockPets } from "../data/mockPetsData";
+
 import Props from "react-native-paper";
 import { PetPost } from "../types/petPots";
 import * as VideoThumbnails from "expo-video-thumbnails";
@@ -65,8 +65,6 @@ export default function PetMediaCarousel({ pet }: Props) {
 
     return items;
   }, [videoThumbnail, pet.imageUris]);
-
-  console.log("🧪 mediaItems:", mediaItems);
 
   if (isLoadingMedia) {
     return (

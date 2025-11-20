@@ -75,132 +75,30 @@ export default function PetCardVertical({
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const lastTapRef = useRef<number>(0);
 
-  // 🔍 LOG: Validación inicial del componente
-  useEffect(() => {
-    console.log("🔍 PetCardVertical Mount/Update:", {
-      petId: pet.id || pet.petName,
-      hasVideoUri: !!pet.videoUri,
-      videoUri: pet.videoUri,
-      videoUriType: typeof pet.videoUri,
-      isLocalAsset: typeof pet.videoUri === "number",
-      isFirebaseUrl:
-        typeof pet.videoUri === "string" && pet.videoUri.includes("firebase"),
-      isValidUrl:
-        typeof pet.videoUri === "string" &&
-        (pet.videoUri.startsWith("http") || pet.videoUri.startsWith("file")),
-      alturaCard,
-      isActive,
-    });
-
-    // 🔍 Verificar si es una URL de Firebase válida
-    if (typeof pet.videoUri === "string" && pet.videoUri.includes("firebase")) {
-      try {
-        const url = new URL(pet.videoUri);
-        console.log("🔍 Firebase URL Analysis:", {
-          protocol: url.protocol,
-          hostname: url.hostname,
-          pathname: url.pathname,
-          hasToken: url.searchParams.has("token"),
-          tokenLength: url.searchParams.get("token")?.length,
-          fullUrl: pet.videoUri,
-        });
-      } catch (urlError: unknown) {
-        console.error("💥 INVALID FIREBASE URL:", {
-          uri: pet.videoUri,
-          error:
-            urlError instanceof Error ? urlError.message : String(urlError),
-        });
-      }
-    }
-  }, [pet.videoUri, isActive, alturaCard]);
-
-  // 🔍 LOG: Monitoreo de memoria
-  useEffect(() => {
-    const handleMemoryWarning = () => {
-      console.warn("⚠️ MEMORY WARNING - Video might be too large:", {
-        petId: pet.id || pet.petName,
-        videoUri: pet.videoUri,
-        isActive,
-        currentTime: Date.now(),
-      });
-    };
-
-    const subscription = AppState.addEventListener(
-      "memoryWarning",
-      handleMemoryWarning
-    );
-
-    return () => {
-      subscription?.remove();
-    };
-  }, [pet.videoUri, isActive]);
-
-  // 🔍 LOG: Control principal de reproducción con debugging completo
   useEffect(() => {
     const controlPlayback = async () => {
-      // 🔍 LOG: Estado inicial
-      console.log("🎬 CONTROL PLAYBACK:", {
-        isActive,
-        hasVideoRef: !!videoRef.current,
-        videoUri: pet.videoUri,
-        videoUriType: typeof pet.videoUri,
-        isLocalAsset: typeof pet.videoUri === "number",
-        isFirebaseUrl:
-          typeof pet.videoUri === "string" && pet.videoUri.includes("firebase"),
-        petId: pet.id || pet.petName,
-        timestamp: Date.now(),
-      });
-
-      if (!videoRef.current) {
-        console.log("❌ No video ref available");
-        return;
-      }
+      if (!videoRef.current) return;
 
       try {
         if (isActive) {
-          // 🔍 LOG: Intentando reproducir
-          console.log("▶️ Intentando PLAY:", {
-            currentTime: Date.now(),
-            videoUri: pet.videoUri,
-            isMuted,
-          });
-
           await videoRef.current.playAsync();
           setIsPlaying(true);
-
-          // 🔍 LOG: Play exitoso
-          console.log("✅ PLAY exitoso para:", pet.petName);
         } else {
-          // 🔍 LOG: Pausando video
-          console.log("⏸️ Pausando video:", pet.petName);
-
           await videoRef.current.pauseAsync();
           setIsPlaying(false);
           setShowControls(false);
-
-          console.log("✅ PAUSE exitoso");
         }
       } catch (error: unknown) {
-        // 🔍 LOG: Error detallado
-        console.error("💥 ERROR controlando reproducción:", {
-          error: error instanceof Error ? error.message : String(error),
-          errorCode:
-            error instanceof Error && "code" in error
-              ? (error as any).code
-              : "unknown",
-          errorStack: error instanceof Error ? error.stack : undefined,
-          isActive,
-          videoUri: pet.videoUri,
-          petId: pet.id || pet.petName,
-          timestamp: Date.now(),
-        });
+        console.error(
+          "Error controlando video:",
+          error instanceof Error ? error.message : String(error)
+        );
       }
     };
 
     controlPlayback();
 
     return () => {
-      console.log("🧹 Cleanup PetCardVertical:", pet.petName);
       if (controlTimeoutRef.current) {
         clearTimeout(controlTimeoutRef.current);
       }
@@ -208,19 +106,9 @@ export default function PetCardVertical({
   }, [isActive]);
 
   useEffect(() => {
-    console.log("🔍 useEffect ejecutado:", {
-      mediaLoaded,
-      mostrarConfetti,
-      index,
-    });
-
     if (mediaLoaded && mostrarConfetti && index === 0 && confettiRef.current) {
-      // 👈 Agregá index === 0
-      console.log("🎊 DISPARANDO confetti");
       confettiRef.current.play();
-
       setTimeout(() => {
-        console.log("♻️ Reseteando confetti");
         resetConfetti();
       }, 3000);
     }
@@ -233,7 +121,6 @@ export default function PetCardVertical({
 
     // Detectar doble tap
     if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-      console.log("❤️ Doble tap detectado");
       if (!userId) {
         openModal();
         return;
@@ -256,26 +143,19 @@ export default function PetCardVertical({
     setTimeout(async () => {
       // Si pasó el tiempo y no hubo doble tap, ejecutar play/pause
       if (now === lastTapRef.current) {
-        console.log("👆 Single tap - play/pause video");
-
         try {
           if (!videoRef.current) {
-            console.log("❌ No video ref on press");
             return;
           }
 
           if (isPlaying) {
-            console.log("⏸️ Manual pause...");
             await videoRef.current.pauseAsync();
             setIsPlaying(false);
             setShowControls(true);
-            console.log("✅ Manual pause success");
           } else {
-            console.log("▶️ Manual play...");
             await videoRef.current.playAsync();
             setIsPlaying(true);
             setShowControls(true);
-            console.log("✅ Manual play success");
 
             controlTimeoutRef.current = setTimeout(() => {
               setShowControls(false);

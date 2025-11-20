@@ -125,4 +125,27 @@ export class AdoptionService {
       throw error;
     }
   }
+
+  // ✅ Obtener UNA solicitud completa por ID
+  static async getAdoptionRequestById(
+    requestId: string
+  ): Promise<AdoptionFormDataWithId | null> {
+    try {
+      const docRef = doc(db, "adoption_requests", requestId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        console.log("❌ No existe la solicitud:", requestId);
+        return null;
+      }
+
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
+      } as AdoptionFormDataWithId;
+    } catch (error) {
+      console.error("Error obteniendo solicitud:", error);
+      throw error;
+    }
+  }
 }

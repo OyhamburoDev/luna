@@ -11,6 +11,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { UserInfo } from "../types/user"; // ajustá ruta
+import { postService } from "./postService";
 
 // Lee users/{uid}. Si no existe, devuelve null.
 export async function getUserProfile(uid: string): Promise<UserInfo | null> {
@@ -69,7 +70,40 @@ export async function ensureUserDoc(uid: string, email: string) {
 // Actualiza campos del perfil
 type Updatable = Partial<Omit<UserInfo, "uid" | "email" | "createdAt">>;
 export async function updateUserProfile(uid: string, patch: Updatable) {
+  // 1. Actualizar el perfil del usuario en Firestore
   await updateDoc(doc(db, "users", uid), patch);
+
+  // 2. Si cambió firstName, lastName o photoUrl → actualizar sus posts
+  if (
+    patch.firstName !== undefined ||
+    patch.lastName !== undefined ||
+    patch.photoUrl !== undefined
+  ) {
+    try {
+      // Obtener el perfil completo actualizado para tener firstName y lastName
+      const updatedProfile = await getUserProfile(uid);
+
+      if (updatedProfile) {
+        const displayName =
+          `${updatedProfile.firstName} ${updatedProfile.lastName}`.trim() ||
+          "Usuario";
+
+        await postService.updateUserDataInAllPosts(uid, {
+          displayName: displayName,
+          photoUrl:
+            patch.photoUrl !== undefined
+              ? patch.photoUrl
+              : updatedProfile.photoUrl,
+          location: patch.location,
+        });
+
+        console.log("✅ Posts actualizados con los nuevos datos del usuario");
+      }
+    } catch (error) {
+      console.error("⚠️ Error actualizando posts del usuario:", error);
+      // No lanzamos el error para que el update del perfil no falle
+    }
+  }
 }
 
 // Subir imagen de perfil a Firebase Storage

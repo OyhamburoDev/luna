@@ -10,6 +10,7 @@ import {
   deleteDoc,
   doc,
   documentId,
+  updateDoc,
 } from "firebase/firestore";
 import {
   ref,
@@ -389,6 +390,64 @@ class PostService {
     } catch (error) {
       console.log("Error getting owner total likes:", error);
       throw new Error("Error al obtener likes totales");
+    }
+  }
+
+  /**
+   * Actualiza los datos del usuario en todos sus posts
+   */
+  async updateUserDataInAllPosts(
+    userId: string,
+    userData: {
+      displayName?: string;
+      photoUrl?: string | null;
+      location?: string | null;
+    }
+  ): Promise<void> {
+    try {
+      // 1. Buscar todos los posts del usuario
+      const postsQuery = query(
+        collection(db, "posts"),
+        where("userId", "==", userId)
+      );
+
+      const snapshot = await getDocs(postsQuery);
+
+      // Si no tiene posts, no hacer nada
+      if (snapshot.empty) {
+        console.log("👤 Usuario no tiene posts para actualizar");
+        return;
+      }
+
+      // 2. Preparar los updates
+      const updatePromises = snapshot.docs.map(async (postDoc) => {
+        const updateData: any = {
+          updatedAt: serverTimestamp(),
+        };
+
+        // Solo actualizar los campos que cambiaron
+        if (userData.displayName !== undefined) {
+          updateData.ownerName = userData.displayName || "Usuario";
+        }
+        if (userData.photoUrl !== undefined) {
+          updateData.ownerAvatar = userData.photoUrl;
+        }
+        if (userData.location !== undefined) {
+          updateData.ownerLocation = userData.location;
+        }
+
+        // 3. Actualizar el post
+        const postRef = doc(db, "posts", postDoc.id);
+        return updateDoc(postRef, updateData);
+      });
+
+      // 4. Ejecutar todos los updates
+
+      await Promise.all(updatePromises);
+
+      console.log(`✅ Actualizados ${snapshot.size} posts del usuario`);
+    } catch (error) {
+      throw new Error("Error al actualizar datos en publicaciones");
     }
   }
 }

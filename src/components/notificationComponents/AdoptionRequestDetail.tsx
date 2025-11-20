@@ -1,4 +1,3 @@
-import React from "react";
 import {
   View,
   Text,
@@ -7,12 +6,16 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
+  Image,
 } from "react-native";
+import { useState, useEffect } from "react";
+import { ActivityIndicator } from "react-native";
+import type { AdoptionFormDataWithId } from "../../types/forms";
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../../theme/fonts";
 import { AdoptionService } from "../../api/adoptionServiceApplication";
 import { useNotificationsStore } from "../../store/notificationsStore";
-import { AppNotification } from "../../types/notifications";
+import type { AppNotification } from "../../types/notifications";
 
 type Props = {
   notification: AppNotification;
@@ -20,27 +23,87 @@ type Props = {
 };
 
 export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
-  // TODO: Acá va todo el contenido
-  const MOCK_ADOPTION_DATA = {
-    applicantName: "María González",
-    petName: "Luna",
-    submittedAt: "Hace 2 horas",
-    whatsapp: "+54 9 11 2345-6789",
-    instagram: "mariagonzalez",
-    email: "maria.gonzalez@email.com",
-    facebook: "María González",
-    housingType: "Casa",
-    hasYard: true,
-    housingDetails:
-      "Casa de 3 ambientes con patio amplio y cerco perimetral seguro.",
-    hasPets: true,
-    petTypes: "Tengo 2 perros (Golden Retriever y Beagle) y 1 gato.",
-    hasChildren: true,
-    childrenAges: "8 y 12 años",
-    availableTime: "4-6 horas diarias",
-    reason: "Siempre he amado a los animales...",
-    comments: "Tenemos experiencia previa con adopciones...",
+  const [adoptionData, setAdoptionData] =
+    useState<AdoptionFormDataWithId | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar datos reales al montar el componente
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const data = await AdoptionService.getAdoptionRequestById(
+          notification.id
+        );
+        setAdoptionData(data);
+      } catch (error) {
+        console.error("Error cargando solicitud:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [notification.id]);
+
+  // Mostrar loading mientras carga
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#667eea" />
+        <Text style={styles.loadingText}>Cargando solicitud...</Text>
+      </View>
+    );
+  }
+
+  // Si no hay datos
+  if (!adoptionData) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="alert-circle" size={48} color="#999" />
+        <Text style={styles.loadingText}>No se encontró la solicitud</Text>
+      </View>
+    );
+  }
+
+  // Calcular tiempo relativo
+  const getRelativeTime = (date: any) => {
+    // Convertir Firestore Timestamp a Date si es necesario
+    const dateObj = date?.toDate ? date.toDate() : new Date(date);
+
+    const now = new Date();
+    const diffMs = now.getTime() - dateObj.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) return "Justo ahora";
+    if (diffMins < 60) return `Hace ${diffMins} min`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `Hace ${diffHours} h`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `Hace ${diffDays} d`;
   };
+
+  // TODO: Acá va todo el contenido
+  // const MOCK_ADOPTION_DATA = {
+  //   applicantName: "María González",
+  //   petName: "Luna",
+  //   submittedAt: "Hace 2 horas",
+  //   whatsapp: "+54 9 11 2345-6789",
+  //   instagram: "mariagonzalez",
+  //   email: "maria.gonzalez@email.com",
+  //   facebook: "María González",
+  //   housingType: "Casa",
+  //   hasYard: true,
+  //   housingDetails:
+  //     "Casa de 3 ambientes con patio amplio y cerco perimetral seguro.",
+  //   hasPets: true,
+  //   petTypes: "Tengo 2 perros (Golden Retriever y Beagle) y 1 gato.",
+  //   hasChildren: true,
+  //   childrenAges: "8 y 12 años",
+  //   availableTime: "4-6 horas diarias",
+  //   reason: "Siempre he amado a los animales...",
+  //   comments: "Tenemos experiencia previa con adopciones...",
+  // };
 
   return (
     <ScrollView
@@ -51,78 +114,104 @@ export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
       <View style={styles.profileCard}>
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={40} color="#666" />
+            {notification.userPhoto ? (
+              <Image
+                source={{ uri: notification.userPhoto }}
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 32,
+                }}
+              />
+            ) : (
+              <Ionicons name="person" size={40} color="#666" />
+            )}
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>
-              {MOCK_ADOPTION_DATA.applicantName}
-            </Text>
+            <Text style={styles.profileName}>{adoptionData.name}</Text>
             <Text style={styles.profileSubtitle}>
-              Quiere adoptar a {MOCK_ADOPTION_DATA.petName}
+              Quiere adoptar a {adoptionData.petName}
             </Text>
             <Text style={styles.timestamp}>
-              {MOCK_ADOPTION_DATA.submittedAt}
+              {getRelativeTime(adoptionData.submittedAt)}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* Contacto Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Contacto</Text>
-        <View style={styles.contactList}>
-          {/* WhatsApp - Clickeable */}
-          <TouchableOpacity
-            style={styles.contactRow}
-            onPress={() => {
-              const phone = MOCK_ADOPTION_DATA.whatsapp.replace(/[^\d]/g, "");
-              Linking.openURL(`whatsapp://send?phone=${phone}`);
-            }}
-          >
-            <View style={[styles.contactIcon, { backgroundColor: "#E7F9F5" }]}>
-              <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
-            </View>
-            <Text style={styles.contactText}>
-              {MOCK_ADOPTION_DATA.whatsapp}
-            </Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity>
+      {/* Contacto Section - Solo si hay al menos un método */}
+      {(adoptionData.whatsapp ||
+        adoptionData.instagram ||
+        adoptionData.email ||
+        adoptionData.facebook) && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Contacto</Text>
+          <View style={styles.contactList}>
+            {/* WhatsApp */}
+            {adoptionData.whatsapp && (
+              <TouchableOpacity
+                style={styles.contactRow}
+                onPress={() => {
+                  const phone = adoptionData.whatsapp!.replace(/[^\d]/g, "");
+                  Linking.openURL(`whatsapp://send?phone=${phone}`);
+                }}
+              >
+                <View
+                  style={[styles.contactIcon, { backgroundColor: "#E7F9F5" }]}
+                >
+                  <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+                </View>
+                <Text style={styles.contactText}>{adoptionData.whatsapp}</Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </TouchableOpacity>
+            )}
 
-          {/* Instagram - No clickeable */}
-          <View style={styles.contactRow}>
-            <View style={[styles.contactIcon, { backgroundColor: "#FFF0F5" }]}>
-              <Ionicons name="logo-instagram" size={20} color="#E4405F" />
-            </View>
-            <Text style={styles.contactText}>
-              @{MOCK_ADOPTION_DATA.instagram}
-            </Text>
-          </View>
+            {/* Instagram */}
+            {adoptionData.instagram && (
+              <View style={styles.contactRow}>
+                <View
+                  style={[styles.contactIcon, { backgroundColor: "#FFF0F5" }]}
+                >
+                  <Ionicons name="logo-instagram" size={20} color="#E4405F" />
+                </View>
+                <Text style={styles.contactText}>
+                  @{adoptionData.instagram}
+                </Text>
+              </View>
+            )}
 
-          {/* Email - Clickeable */}
-          <TouchableOpacity
-            style={styles.contactRow}
-            onPress={() => {
-              Linking.openURL(`mailto:${MOCK_ADOPTION_DATA.email}`);
-            }}
-          >
-            <View style={[styles.contactIcon, { backgroundColor: "#F5F5F5" }]}>
-              <Ionicons name="mail" size={20} color="#666" />
-            </View>
-            <Text style={styles.contactText}>{MOCK_ADOPTION_DATA.email}</Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity>
+            {/* Email */}
+            {adoptionData.email && (
+              <TouchableOpacity
+                style={styles.contactRow}
+                onPress={() => {
+                  Linking.openURL(`mailto:${adoptionData.email}`);
+                }}
+              >
+                <View
+                  style={[styles.contactIcon, { backgroundColor: "#F5F5F5" }]}
+                >
+                  <Ionicons name="mail" size={20} color="#666" />
+                </View>
+                <Text style={styles.contactText}>{adoptionData.email}</Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </TouchableOpacity>
+            )}
 
-          {/* Facebook - No clickeable */}
-          <View style={styles.contactRow}>
-            <View style={[styles.contactIcon, { backgroundColor: "#EBF3FF" }]}>
-              <Ionicons name="logo-facebook" size={20} color="#1877F2" />
-            </View>
-            <Text style={styles.contactText}>
-              {MOCK_ADOPTION_DATA.facebook}
-            </Text>
+            {/* Facebook */}
+            {adoptionData.facebook && (
+              <View style={styles.contactRow}>
+                <View
+                  style={[styles.contactIcon, { backgroundColor: "#EBF3FF" }]}
+                >
+                  <Ionicons name="logo-facebook" size={20} color="#1877F2" />
+                </View>
+                <Text style={styles.contactText}>{adoptionData.facebook}</Text>
+              </View>
+            )}
           </View>
         </View>
-      </View>
+      )}
 
       {/* Vivienda Section */}
       <View style={styles.section}>
@@ -131,7 +220,11 @@ export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Tipo de vivienda</Text>
             <Text style={styles.infoValue}>
-              {MOCK_ADOPTION_DATA.housingType}
+              {adoptionData.housingType === "house"
+                ? "Casa"
+                : adoptionData.housingType === "apartment"
+                ? "Departamento"
+                : "Otro"}
             </Text>
           </View>
           <View style={styles.divider} />
@@ -140,25 +233,29 @@ export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
             <View
               style={[
                 styles.badge,
-                MOCK_ADOPTION_DATA.hasYard ? styles.badgeYes : styles.badgeNo,
+                adoptionData.hasYard ? styles.badgeYes : styles.badgeNo,
               ]}
             >
               <Text
                 style={[
                   styles.badgeText,
-                  MOCK_ADOPTION_DATA.hasYard
+                  adoptionData.hasYard
                     ? styles.badgeTextYes
                     : styles.badgeTextNo,
                 ]}
               >
-                {MOCK_ADOPTION_DATA.hasYard ? "Sí" : "No"}
+                {adoptionData.hasYard ? "Sí" : "No"}
               </Text>
             </View>
           </View>
-          <View style={styles.divider} />
-          <Text style={styles.detailsText}>
-            {MOCK_ADOPTION_DATA.housingDetails}
-          </Text>
+          {adoptionData.housingDetails && (
+            <>
+              <View style={styles.divider} />
+              <Text style={styles.detailsText}>
+                {adoptionData.housingDetails}
+              </Text>
+            </>
+          )}
         </View>
       </View>
 
@@ -171,23 +268,27 @@ export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
             <View
               style={[
                 styles.badge,
-                MOCK_ADOPTION_DATA.hasPets ? styles.badgeYes : styles.badgeNo,
+                adoptionData.hasPets ? styles.badgeYes : styles.badgeNo,
               ]}
             >
               <Text
                 style={[
                   styles.badgeText,
-                  MOCK_ADOPTION_DATA.hasPets
+                  adoptionData.hasPets
                     ? styles.badgeTextYes
                     : styles.badgeTextNo,
                 ]}
               >
-                {MOCK_ADOPTION_DATA.hasPets ? "Sí" : "No"}
+                {adoptionData.hasPets ? "Sí" : "No"}
               </Text>
             </View>
           </View>
-          <View style={styles.divider} />
-          <Text style={styles.detailsText}>{MOCK_ADOPTION_DATA.petTypes}</Text>
+          {adoptionData.petTypes && (
+            <>
+              <View style={styles.divider} />
+              <Text style={styles.detailsText}>{adoptionData.petTypes}</Text>
+            </>
+          )}
         </View>
       </View>
 
@@ -200,40 +301,26 @@ export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
             <View
               style={[
                 styles.badge,
-                MOCK_ADOPTION_DATA.hasChildren
-                  ? styles.badgeYes
-                  : styles.badgeNo,
+                adoptionData.hasChildren ? styles.badgeYes : styles.badgeNo,
               ]}
             >
               <Text
                 style={[
                   styles.badgeText,
-                  MOCK_ADOPTION_DATA.hasChildren
+                  adoptionData.hasChildren
                     ? styles.badgeTextYes
                     : styles.badgeTextNo,
                 ]}
               >
-                {MOCK_ADOPTION_DATA.hasChildren ? "Sí" : "No"}
+                {adoptionData.hasChildren ? "Sí" : "No"}
               </Text>
             </View>
           </View>
-          {MOCK_ADOPTION_DATA.hasChildren && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Edades</Text>
-                <Text style={styles.infoValue}>
-                  {MOCK_ADOPTION_DATA.childrenAges}
-                </Text>
-              </View>
-            </>
-          )}
+
           <View style={styles.divider} />
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Tiempo disponible</Text>
-            <Text style={styles.infoValue}>
-              {MOCK_ADOPTION_DATA.availableTime}
-            </Text>
+            <Text style={styles.infoValue}>{adoptionData.availableTime}</Text>
           </View>
         </View>
       </View>
@@ -242,17 +329,19 @@ export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>¿Por qué quiere adoptar?</Text>
         <View style={styles.messageCard}>
-          <Text style={styles.messageText}>{MOCK_ADOPTION_DATA.reason}</Text>
+          <Text style={styles.messageText}>{adoptionData.reason}</Text>
         </View>
       </View>
 
-      {/* Comentarios Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Comentarios adicionales</Text>
-        <View style={styles.messageCard}>
-          <Text style={styles.messageText}>{MOCK_ADOPTION_DATA.comments}</Text>
+      {/* Comentarios Section - Solo si existe */}
+      {adoptionData.comments && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Comentarios adicionales</Text>
+          <View style={styles.messageCard}>
+            <Text style={styles.messageText}>{adoptionData.comments}</Text>
+          </View>
         </View>
-      </View>
+      )}
 
       {/* Action Button */}
       <View style={styles.actionSection}>
@@ -269,17 +358,12 @@ export const AdoptionRequestDetail = ({ notification, onGoBack }: Props) => {
                   style: "destructive",
                   onPress: async () => {
                     try {
-                      // 1. Eliminar de Firebase
                       await AdoptionService.deleteAdoptionRequest(
                         notification.id
                       );
-
-                      // 2. Actualizar el store local
                       const removeNotification =
                         useNotificationsStore.getState().removeNotification;
                       removeNotification(notification.id);
-
-                      // 3. Volver atrás
                       onGoBack();
                     } catch (error) {
                       Alert.alert("Error", "No se pudo eliminar la solicitud");
@@ -345,14 +429,14 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 8,
   },
   sectionTitle: {
     fontFamily: fonts.bold,
     fontSize: 15,
     color: "#000000",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   contactList: {
     gap: 0,
@@ -360,19 +444,20 @@ const styles = StyleSheet.create({
   contactRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: "#F0F0F0",
   },
   contactIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 10,
   },
   contactText: {
+    flex: 1,
     fontFamily: fonts.regular,
     fontSize: 15,
     color: "#000000",
@@ -461,5 +546,17 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  loadingText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: "#999",
+    marginTop: 12,
   },
 });
