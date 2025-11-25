@@ -28,13 +28,13 @@ export const MapWebView: React.FC<MapWebViewProps> = ({
     #map { height:100vh; width:100vw; }
 
     .photo-marker .card {
-      position: relative;
-      width: 84px; height: 84px;
-      border-radius: 14px; overflow: hidden;
-      border: 2px solid #fff;
-      box-shadow: 0 6px 16px rgba(0,0,0,.25);
-      background: #eee;
-    }
+  position: relative;
+  width: 56px; height: 56px;       
+  border-radius: 50%; overflow: hidden;  
+  border: 2px solid #fff;
+  box-shadow: 0 6px 16px rgba(0,0,0,.25);
+  background: #eee;
+}
     .photo-marker .card img { width:100%; height:100%; object-fit:cover; display:block; }
     .photo-marker .badge {
       position: absolute; left: 6px; right: 6px; bottom: 6px;
@@ -100,7 +100,7 @@ var pins = Array.from({ length: 8 }, (_, i) => {
     // Desactivamos el zoom por defecto y lo reponemos abajo-izquierda
     var map = L.map('map', { zoomControl: false, attributionControl: false })
       .setView([lat, lng], 15);
-    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    // L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
     // Recentrar mapa desde React Native
 window._recenter = function (la, ln) {

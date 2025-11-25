@@ -39,7 +39,7 @@ export const MapSearchBar: React.FC<MapSearchBarProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <View style={styles.searchRow}>
+      {/* <View style={styles.searchRow}>
         <View style={styles.searchInputWrap}>
           <Ionicons
             name="search"
@@ -71,7 +71,7 @@ export const MapSearchBar: React.FC<MapSearchBarProps> = ({
             <Ionicons name="locate" size={18} color="#333" />
           )}
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Dropdown de sugerencias */}
       {showSuggestions && (
