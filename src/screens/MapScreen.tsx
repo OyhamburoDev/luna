@@ -15,11 +15,10 @@ import { BottomCard } from "../components/mapComponents/BottomCard";
 import { MapNative, MapNativeRef } from "../components/mapComponents/MapNative";
 import { useFabMenu } from "../hooks/useFabMenu";
 import { usePinsManager } from "../hooks/usePinsManager";
+import { useCardNavigation } from "../hooks/useCardNavigation";
 
 export default function MapScreen() {
-  const [cardState, setCardState] = useState<
-    "MINI" | "CREAR" | "BUSCAR" | "RUTA" | "BUSCAR_UBICACION"
-  >("MINI");
+  const cardNav = useCardNavigation();
   const pinsManager = usePinsManager();
 
   const fabMenu = useFabMenu();
@@ -86,13 +85,13 @@ export default function MapScreen() {
     console.log("Moviendo mapa a:", lat, lng);
 
     // Si estamos en BUSCAR_UBICACION, guardar como reportLocation
-    if (cardState === "BUSCAR_UBICACION") {
+    if (cardNav.cardState === "BUSCAR_UBICACION") {
       setReportLocation({ lat, lng, name });
     }
     // Si estamos en BUSCAR, guardar como searchedLocation
-    else if (cardState === "BUSCAR") {
+    else if (cardNav.cardState === "BUSCAR") {
       setSearchedLocation({ lat, lng, name });
-      setCardState("MINI");
+      cardNav.goToMini();
     }
 
     mapRef.current?.animateToLocation(lat, lng);
@@ -101,7 +100,6 @@ export default function MapScreen() {
   // Función para mostrar ruta
   const handleShowRoute = () => {
     if (pinsManager.selectedPin) {
-      console.log("Mostrando ruta a:", pinsManager.selectedPin.calle);
       setRouteDestination({
         lat: pinsManager.selectedPin.lat,
         lng: pinsManager.selectedPin.lng,
@@ -111,7 +109,7 @@ export default function MapScreen() {
         duration: 0,
         destinationName: pinsManager.selectedPin.calle,
       });
-      setCardState("RUTA");
+      cardNav.goToRoute();
       pinsManager.closeDetailCard();
     }
   };
@@ -132,7 +130,7 @@ export default function MapScreen() {
   const handleCloseRoute = () => {
     setRouteDestination(null);
     setRouteInfo(null);
-    setCardState("MINI");
+    cardNav.goToMini();
   };
 
   // Función para centrar el mapa
@@ -163,7 +161,7 @@ export default function MapScreen() {
     const newPin = pinsManager.addPin(reportData);
 
     // Coordinación (MapScreen se encarga de esto)
-    setCardState("MINI");
+    cardNav.goToMini();
     setSearchedLocation(null);
     setReportLocation(null);
 
@@ -192,7 +190,7 @@ export default function MapScreen() {
         )}
 
         {/*  FAB Menu expandible */}
-        {cardState === "MINI" && (
+        {cardNav.cardState === "MINI" && (
           <View style={mapScreenStyles.fabContainer}>
             {/* Botón Dark Mode */}
             <Animated.View
@@ -274,8 +272,8 @@ export default function MapScreen() {
           userPins={pinsManager.userPins}
         />
         <BottomCard
-          state={cardState}
-          onChangeState={setCardState}
+          state={cardNav.cardState}
+          onChangeState={cardNav.setCardState}
           selectedPin={null}
           onLocationSelect={handleLocationSelect}
           onClearSearchLocation={handleClearSearchLocation}
