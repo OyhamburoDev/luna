@@ -16,6 +16,7 @@ import { MapNative, MapNativeRef } from "../components/mapComponents/MapNative";
 import { useFabMenu } from "../hooks/useFabMenu";
 import { usePinsManager } from "../hooks/usePinsManager";
 import { useCardNavigation } from "../hooks/useCardNavigation";
+import { useRouteManager } from "../hooks/useRouteManager";
 
 export default function MapScreen() {
   const cardNav = useCardNavigation();
@@ -30,18 +31,8 @@ export default function MapScreen() {
     name: string;
   } | null>(null);
 
-  // Estado para la ruta
-  const [routeDestination, setRouteDestination] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-
-  //  Info de la ruta
-  const [routeInfo, setRouteInfo] = useState<{
-    distance: number;
-    duration: number;
-    destinationName: string;
-  } | null>(null);
+  // Hook para gestionar rutas
+  const routeManager = useRouteManager();
 
   // Ubicación para el reporte
   const [reportLocation, setReportLocation] = useState<{
@@ -97,39 +88,21 @@ export default function MapScreen() {
     mapRef.current?.animateToLocation(lat, lng);
   };
 
-  // Función para mostrar ruta
+  // Mostrar ruta - coordina entre hooks
   const handleShowRoute = () => {
-    if (pinsManager.selectedPin) {
-      setRouteDestination({
-        lat: pinsManager.selectedPin.lat,
-        lng: pinsManager.selectedPin.lng,
-      });
-      setRouteInfo({
-        distance: 0,
-        duration: 0,
-        destinationName: pinsManager.selectedPin.calle,
-      });
-      cardNav.goToRoute();
-      pinsManager.closeDetailCard();
-    }
+    routeManager.startRoute(pinsManager.selectedPin);
+    cardNav.goToRoute();
+    pinsManager.closeDetailCard();
   };
 
-  // Función para recibir info de la ruta
+  // Actualizar info cuando la ruta está lista
   const handleRouteReady = (distance: number, duration: number) => {
-    console.log("Ruta calculada:", distance, "km", duration, "min");
-    if (routeInfo) {
-      setRouteInfo({
-        ...routeInfo,
-        distance,
-        duration,
-      });
-    }
+    routeManager.updateRouteInfo(distance, duration);
   };
 
-  //  Función para cerrar la ruta
+  // Cerrar ruta - coordina entre hooks
   const handleCloseRoute = () => {
-    setRouteDestination(null);
-    setRouteInfo(null);
+    routeManager.clearRoute();
     cardNav.goToMini();
   };
 
@@ -180,7 +153,7 @@ export default function MapScreen() {
         }}
       >
         {/* Header con flecha back (solo cuando hay ruta) */}
-        {routeDestination && (
+        {routeManager.routeDestination && (
           <TouchableOpacity
             onPress={handleCloseRoute}
             style={mapScreenStyles.backButtonFloating}
@@ -265,7 +238,7 @@ export default function MapScreen() {
           onMarkerPress={pinsManager.selectPin}
           searchedLocation={searchedLocation}
           reportLocation={reportLocation}
-          routeDestination={routeDestination}
+          routeDestination={routeManager.routeDestination}
           googleMapsApiKey={googleMapsApiKey}
           onRouteReady={handleRouteReady}
           isDarkMode={isDarkMode}
@@ -278,7 +251,7 @@ export default function MapScreen() {
           onLocationSelect={handleLocationSelect}
           onClearSearchLocation={handleClearSearchLocation}
           onClearReportLocation={handleClearReportLocation}
-          routeInfo={routeInfo}
+          routeInfo={routeManager.routeInfo}
           onPublishReport={handlePublishReport}
           currentLocation={{
             lat: mapLogic.currentLat,
