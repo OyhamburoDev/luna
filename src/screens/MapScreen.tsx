@@ -13,6 +13,7 @@ import { useMapDetails } from "../hooks/useMapDetails";
 import { PetMapDetailCard } from "../components/mapComponents/PetMapDetailCard";
 import { BottomCard } from "../components/mapComponents/BottomCard";
 import { MapNative, MapNativeRef } from "../components/mapComponents/MapNative";
+import { useFabMenu } from "../hooks/useFabMenu";
 
 export default function MapScreen() {
   const [cardState, setCardState] = useState<
@@ -20,6 +21,7 @@ export default function MapScreen() {
   >("MINI");
   const [selectedPin, setSelectedPin] = useState<any>(null);
   const [showDetailCard, setShowDetailCard] = useState(false);
+  const fabMenu = useFabMenu();
 
   // Guardar la ubicación buscada
   const [searchedLocation, setSearchedLocation] = useState<{
@@ -50,10 +52,6 @@ export default function MapScreen() {
 
   // Estado para dark mode
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Estados para el FAB menu
-  const [isFabOpen, setIsFabOpen] = useState(false);
-  const fabAnimation = useRef(new Animated.Value(0)).current;
 
   //  Estado para pins creados por el usuario
   const [userPins, setUserPins] = useState<any[]>([]);
@@ -201,52 +199,6 @@ export default function MapScreen() {
     );
   };
 
-  // Toggle del menú FAB con animación
-  const toggleFabMenu = () => {
-    const toValue = isFabOpen ? 0 : 1;
-
-    Animated.spring(fabAnimation, {
-      toValue,
-      friction: 8,
-      tension: 40,
-      useNativeDriver: false,
-    }).start();
-
-    setIsFabOpen(!isFabOpen);
-  };
-
-  // Función para ejecutar acción y cerrar menú
-  const handleFabAction = (action: () => void) => {
-    action();
-    toggleFabMenu();
-  };
-
-  // Calcular rotación y posiciones
-  const fabRotation = fabAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "90deg"], // Rota 45 grados cuando se abre
-  });
-
-  const darkModeButtonTranslate = fabAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 60], // Se mueve 60px hacia abajo
-  });
-
-  const centerButtonTranslate = fabAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 120], // Se mueve 120px hacia abajo
-  });
-
-  const buttonScale = fabAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1], // Aparece con efecto scale
-  });
-
-  const buttonOpacity = fabAnimation.interpolate({
-    inputRange: [0, 0.8, 1],
-    outputRange: [0, 1, 1], // Aparece rápido, se mantiene visible
-  });
-
   return (
     <>
       <StatusBar barStyle="default" />
@@ -266,25 +218,26 @@ export default function MapScreen() {
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
         )}
+
         {/*  FAB Menu expandible */}
         {cardState === "MINI" && (
           <View style={mapScreenStyles.fabContainer}>
             {/* Botón Dark Mode */}
             <Animated.View
-              pointerEvents={isFabOpen ? "auto" : "none"}
+              pointerEvents={fabMenu.isFabOpen ? "auto" : "none"}
               style={[
                 mapScreenStyles.fabOption,
                 {
                   transform: [
-                    { translateY: darkModeButtonTranslate },
-                    { scale: buttonScale },
+                    { translateY: fabMenu.darkModeButtonTranslate },
+                    { scale: fabMenu.buttonScale },
                   ],
-                  opacity: buttonOpacity,
+                  opacity: fabMenu.buttonOpacity,
                 },
               ]}
             >
               <TouchableOpacity
-                onPress={() => handleFabAction(handleToggleDarkMode)}
+                onPress={() => fabMenu.handleFabAction(handleToggleDarkMode)}
                 style={mapScreenStyles.fabButton}
               >
                 <Ionicons
@@ -297,20 +250,20 @@ export default function MapScreen() {
 
             {/* Botón Centrar */}
             <Animated.View
-              pointerEvents={isFabOpen ? "auto" : "none"}
+              pointerEvents={fabMenu.isFabOpen ? "auto" : "none"}
               style={[
                 mapScreenStyles.fabOption,
                 {
                   transform: [
-                    { translateY: centerButtonTranslate },
-                    { scale: buttonScale },
+                    { translateY: fabMenu.centerButtonTranslate },
+                    { scale: fabMenu.buttonScale },
                   ],
-                  opacity: buttonOpacity,
+                  opacity: fabMenu.buttonOpacity,
                 },
               ]}
             >
               <TouchableOpacity
-                onPress={() => handleFabAction(handleCenterMap)}
+                onPress={() => fabMenu.handleFabAction(handleCenterMap)}
                 style={mapScreenStyles.fabButton}
               >
                 <Ionicons name="locate" size={20} color="#000" />
@@ -318,13 +271,15 @@ export default function MapScreen() {
             </Animated.View>
 
             {/* Botón Principal FAB */}
-            <Animated.View style={{ transform: [{ rotate: fabRotation }] }}>
+            <Animated.View
+              style={{ transform: [{ rotate: fabMenu.fabRotation }] }}
+            >
               <TouchableOpacity
-                onPress={toggleFabMenu}
+                onPress={fabMenu.toggleFabMenu}
                 style={mapScreenStyles.fabMainButton}
               >
                 <Ionicons
-                  name={isFabOpen ? "close" : "settings-outline"}
+                  name={fabMenu.isFabOpen ? "close" : "settings-outline"}
                   size={22}
                   color="#000"
                 />
