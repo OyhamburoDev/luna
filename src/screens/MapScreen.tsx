@@ -284,6 +284,7 @@ export default function MapScreen() {
             lat: mapLogic.currentLat,
             lng: mapLogic.currentLng,
           }}
+          searchedLocation={searchedLocation}
         />
 
         {/* Detail card para mostrar detalles de mascota */}

@@ -33,6 +33,7 @@ interface BottomCardProps {
   currentLocation?: { lat: number; lng: number };
   onClearSearchLocation?: () => void;
   onClearReportLocation?: () => void;
+  searchedLocation?: { lat: number; lng: number; name: string } | null;
 }
 
 export const BottomCard: React.FC<BottomCardProps> = ({
@@ -43,6 +44,8 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   onPublishReport,
   currentLocation,
   onClearReportLocation,
+  onClearSearchLocation,
+  searchedLocation,
 }) => {
   // Hook para manejar el formulario de reporte
   const reportForm = useReportForm();
@@ -106,6 +109,8 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     <BottomCardMini
       onSearchFocus={() => onChangeState("BUSCAR")}
       onReportPress={() => onChangeState("CREAR")}
+      searchedLocation={searchedLocation}
+      onClearSearchLocation={onClearSearchLocation}
     />
   );
 };

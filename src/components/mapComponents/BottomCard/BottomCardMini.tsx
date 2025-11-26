@@ -6,31 +6,61 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { Search } from "lucide-react-native";
+import { Search, X } from "lucide-react-native";
 import { fonts } from "../../../theme/fonts";
 
 interface BottomCardMiniProps {
   onSearchFocus: () => void;
   onReportPress: () => void;
+  searchedLocation?: { lat: number; lng: number; name: string } | null;
+  onClearSearchLocation?: () => void;
 }
 
 export const BottomCardMini: React.FC<BottomCardMiniProps> = ({
   onSearchFocus,
   onReportPress,
+  searchedLocation,
+  onClearSearchLocation,
 }) => {
+  // Función para formatear la dirección (solo primeras 2 partes)
+  const formatAddress = (fullAddress: string) => {
+    const parts = fullAddress.split(",").map((p) => p.trim());
+    return parts.slice(0, 2).join(", ");
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>¿Dónde buscás?</Text>
 
-      <View style={styles.searchContainer}>
+      {/* Hacer todo el contenedor clickeable */}
+      <TouchableOpacity
+        style={styles.searchContainer}
+        onPress={onSearchFocus}
+        activeOpacity={0.7}
+      >
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar dirección o barrio"
           placeholderTextColor="#999"
-          onFocus={onSearchFocus}
+          value={
+            searchedLocation?.name ? formatAddress(searchedLocation.name) : ""
+          }
+          editable={false}
+          pointerEvents="none" // ← Importante: evita que el TextInput capture el touch
         />
-        <Search size={18} color="#999" style={{ marginRight: 10 }} />
-      </View>
+
+        {searchedLocation ? (
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation(); // ← Evita que dispare onSearchFocus
+              onClearSearchLocation?.();
+            }}
+          >
+            <X size={18} color="#999" style={{ marginRight: 10 }} />
+          </TouchableOpacity>
+        ) : (
+          <Search size={18} color="#999" style={{ marginRight: 10 }} />
+        )}
+      </TouchableOpacity>
 
       {/* Botón para reportar */}
       <TouchableOpacity style={styles.reportButton} onPress={onReportPress}>
