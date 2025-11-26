@@ -9,6 +9,7 @@ import {
   pickAndProcessImage,
   generatePinImage,
 } from "../../utils/imageProcessor";
+import { useReportForm } from "../../hooks/useReportForm";
 
 type CardState = "MINI" | "CREAR" | "BUSCAR" | "RUTA" | "BUSCAR_UBICACION";
 
@@ -43,22 +44,8 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   currentLocation,
   onClearReportLocation,
 }) => {
-  // ========== ESTADOS PARA EL FORMULARIO DE CREAR ==========
-  const [selectedType, setSelectedType] = useState<
-    "PERDIDO" | "AVISTADO" | "ENCONTRADO" | null
-  >(null);
-
-  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
-  const [generatedPinUri, setGeneratedPinUri] = useState<string | null>(null);
-  const [description, setDescription] = useState("");
-
-  const [selectedLocation, setSelectedLocation] = useState<{
-    lat: number;
-    lng: number;
-    address: string;
-  } | null>(null);
-
-  const pinRef = useRef<View>(null);
+  // Hook para manejar el formulario de reporte
+  const reportForm = useReportForm();
 
   // ========== ESTADO RUTA ==========
   if (state === "RUTA") {
@@ -70,7 +57,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     return (
       <BottomCardBuscarUbicacion
         onLocationSelect={(lat, lng, address) => {
-          setSelectedLocation({ lat, lng, address });
+          reportForm.setSelectedLocation({ lat, lng, address });
           onLocationSelect?.(lat, lng, address);
         }}
         onBack={() => onChangeState("CREAR")}
@@ -84,41 +71,17 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     return (
       <BottomCardCrear
         currentLocation={currentLocation}
-        selectedLocation={selectedLocation}
-        selectedType={selectedType}
-        onTypeChange={setSelectedType}
-        selectedImageUri={selectedImageUri}
-        generatedPinUri={generatedPinUri}
-        onSelectPhoto={async () => {
-          const borderColor =
-            selectedType === "PERDIDO"
-              ? "#ef4444"
-              : selectedType === "AVISTADO"
-              ? "#3b82f6"
-              : "#10b981";
-
-          const uri = await pickAndProcessImage(borderColor);
-          if (uri) {
-            setSelectedImageUri(uri);
-
-            setTimeout(async () => {
-              const pinUri = await generatePinImage(uri, borderColor, pinRef);
-              if (pinUri) {
-                setGeneratedPinUri(pinUri);
-                console.log("✅ Pin generado:", pinUri);
-              }
-            }, 1000);
-          }
-        }}
-        description={description}
-        onDescriptionChange={setDescription}
-        pinRef={pinRef}
+        selectedLocation={reportForm.selectedLocation}
+        selectedType={reportForm.selectedType}
+        onTypeChange={reportForm.setSelectedType}
+        selectedImageUri={reportForm.selectedImageUri}
+        generatedPinUri={reportForm.generatedPinUri}
+        onSelectPhoto={reportForm.handleSelectPhoto}
+        description={reportForm.description}
+        onDescriptionChange={reportForm.setDescription}
+        pinRef={reportForm.pinRef}
         onClose={() => {
-          setSelectedType(null);
-          setSelectedImageUri(null);
-          setGeneratedPinUri(null);
-          setDescription("");
-          setSelectedLocation(null);
+          reportForm.resetForm();
           onClearReportLocation?.();
           onChangeState("MINI");
         }}
