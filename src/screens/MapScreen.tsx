@@ -207,9 +207,9 @@ export default function MapScreen() {
 
     Animated.spring(fabAnimation, {
       toValue,
-      friction: 5,
+      friction: 8,
       tension: 40,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
 
     setIsFabOpen(!isFabOpen);
@@ -242,6 +242,11 @@ export default function MapScreen() {
     outputRange: [0, 1], // Aparece con efecto scale
   });
 
+  const buttonOpacity = fabAnimation.interpolate({
+    inputRange: [0, 0.8, 1],
+    outputRange: [0, 1, 1], // Aparece rápido, se mantiene visible
+  });
+
   return (
     <>
       <StatusBar barStyle="default" />
@@ -266,6 +271,7 @@ export default function MapScreen() {
           <View style={mapScreenStyles.fabContainer}>
             {/* Botón Dark Mode */}
             <Animated.View
+              pointerEvents={isFabOpen ? "auto" : "none"}
               style={[
                 mapScreenStyles.fabOption,
                 {
@@ -273,7 +279,7 @@ export default function MapScreen() {
                     { translateY: darkModeButtonTranslate },
                     { scale: buttonScale },
                   ],
-                  opacity: fabAnimation,
+                  opacity: buttonOpacity,
                 },
               ]}
             >
@@ -291,6 +297,7 @@ export default function MapScreen() {
 
             {/* Botón Centrar */}
             <Animated.View
+              pointerEvents={isFabOpen ? "auto" : "none"}
               style={[
                 mapScreenStyles.fabOption,
                 {
@@ -298,7 +305,7 @@ export default function MapScreen() {
                     { translateY: centerButtonTranslate },
                     { scale: buttonScale },
                   ],
-                  opacity: fabAnimation,
+                  opacity: buttonOpacity,
                 },
               ]}
             >
