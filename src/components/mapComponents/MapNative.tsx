@@ -1,6 +1,6 @@
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import MapView, { Marker, PROVIDER_GOOGLE, Circle } from "react-native-maps";
-import { StyleSheet, Image, View } from "react-native";
+import { StyleSheet, Image } from "react-native";
 import MapViewDirections from "react-native-maps-directions";
 
 interface MapNativeProps {
@@ -13,23 +13,21 @@ interface MapNativeProps {
     name: string;
   } | null;
   reportLocation?: {
-    // ← NUEVO
     lat: number;
     lng: number;
     name: string;
   } | null;
   routeDestination?: {
-    // ← NUEVO
     lat: number;
     lng: number;
   } | null;
-  googleMapsApiKey: string; // ← NUEVO
+  googleMapsApiKey: string;
   onRouteReady?: (distance: number, duration: number) => void;
   isDarkMode?: boolean;
   userPins?: any[];
 }
 
-// ← NUEVO: Interface para los métodos que exponemos
+// Interface para los métodos que exponemos
 export interface MapNativeRef {
   animateToLocation: (lat: number, lng: number) => void;
 }
@@ -83,7 +81,7 @@ const silverMapStyle = [
   },
 ];
 
-// ← NUEVO: Estilo modo oscuro
+// Estilo modo oscuro
 const darkMapStyle = [
   { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -105,7 +103,7 @@ const darkMapStyle = [
   },
 ];
 
-// ← NUEVO: Usamos forwardRef para poder usar ref desde afuera
+// Usamos forwardRef para poder usar ref desde afuera
 export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
   (
     {
@@ -124,7 +122,7 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
   ) => {
     const mapRef = useRef<MapView>(null);
 
-    // ← NUEVO: Exponemos la función para mover el mapa
+    // Exponemos la función para mover el mapa
     useImperativeHandle(ref, () => ({
       animateToLocation: (lat: number, lng: number) => {
         mapRef.current?.animateToRegion(
@@ -141,7 +139,7 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
 
     return (
       <MapView
-        ref={mapRef} // ← NUEVO: Agregamos la ref
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         customMapStyle={isDarkMode ? darkMapStyle : silverMapStyle}
@@ -171,9 +169,9 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
               latitude: searchedLocation.lat,
               longitude: searchedLocation.lng,
             }}
-            radius={350} // ← Más grande (de 200 a 350 metros)
-            fillColor="rgba(59, 130, 246, 0.2)" // Azul con 20% opacidad
-            strokeColor="rgba(59, 130, 246, 0.3)" // ← Borde más suave (de 0.6 a 0.3)
+            radius={350}
+            fillColor="rgba(59, 130, 246, 0.2)"
+            strokeColor="rgba(59, 130, 246, 0.3)"
             strokeWidth={2}
           />
         )}
@@ -187,7 +185,7 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
             }}
           >
             <Image
-              source={require("../../../assets/media/images/marker.png")} // ← Reemplazá con tu ruta
+              source={require("../../../assets/media/images/marker.png")}
               style={{
                 width: 40,
                 height: 40,
@@ -197,7 +195,7 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
           </Marker>
         )}
 
-        {/* ← NUEVO: Ruta desde tu ubicación hasta el destino */}
+        {/*  Ruta desde tu ubicación hasta el destino */}
         {routeDestination && (
           <MapViewDirections
             origin={{
@@ -210,13 +208,13 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
             }}
             apikey={googleMapsApiKey}
             strokeWidth={5}
-            strokeColor="#667eea" // Color azul/morado
+            strokeColor="#667eea"
             optimizeWaypoints={true}
             onReady={(result) => {
               console.log(`Distancia: ${result.distance} km`);
               console.log(`Duración: ${result.duration} min`);
 
-              // ← NUEVO: Pasar info al parent
+              //Pasar info al parent
               onRouteReady?.(result.distance, result.duration);
 
               // Ajustar el zoom para ver toda la ruta

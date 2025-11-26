@@ -2,7 +2,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
   Image,
   Platform,
@@ -10,14 +9,12 @@ import {
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { fonts } from "../../theme/fonts";
 
-const { width } = Dimensions.get("window");
-
 interface PetMapDetailCardProps {
   petData: any;
   visible: boolean;
   onClose: () => void;
   onContact?: (type: string, value: any) => void;
-  onShowRoute?: () => void; // ← NUEVO
+  onShowRoute?: () => void;
 }
 
 export const PetMapDetailCard = ({
@@ -25,7 +22,7 @@ export const PetMapDetailCard = ({
   visible,
   onClose,
   onContact,
-  onShowRoute, // ← NUEVO
+  onShowRoute,
 }: PetMapDetailCardProps) => {
   if (!visible || !petData) return null;
 
@@ -68,7 +65,7 @@ export const PetMapDetailCard = ({
       <View style={styles.contentRow}>
         {/* Imagen cuadrada y fija */}
         <Image
-          source={{ uri: petData.photo || petData.image }} // ← Prioriza photo
+          source={{ uri: petData.photo || petData.image }}
           style={styles.petImage}
           resizeMode="cover"
         />
@@ -249,32 +246,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#666",
     flex: 1,
-    // fontStyle: "italic",
   },
   buttonsWrapper: {
     gap: 10,
     marginTop: 5,
   },
-  // Botón amarillo clarito
   secondaryActionBtn: {
-    // backgroundColor: "#fcf6dbff",
     backgroundColor: "rgba(102, 126, 234, 0.08)",
     paddingVertical: 8,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-
-    // borderWidth: 1,
-    // borderColor: "#fdda72ff",
   },
   secondaryActionText: {
     fontFamily: fonts.bold,
-    // color: "#333333ae",
     color: "#667eea",
     fontSize: 14,
-    // fontWeight: "600",
   },
-  // Botón principal negro
   primaryActionBtn: {
     backgroundColor: "#000",
     flexDirection: "row",

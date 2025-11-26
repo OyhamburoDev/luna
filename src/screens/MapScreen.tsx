@@ -3,21 +3,13 @@ import {
   StatusBar,
   View,
   TouchableOpacity,
-  Text,
   StyleSheet,
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useMapLogic } from "../hooks/useMapLogic";
-import { useMapFilters } from "../hooks/useMapFilters";
-import { useMapSearch } from "../hooks/useMapSearch";
 import { useMapDetails } from "../hooks/useMapDetails";
-import { MapWebView } from "../components/mapComponents/MapWebView";
-import { MapSearchBar } from "../components/mapComponents/MapSearchBar";
-import { MapFilters } from "../components/mapComponents/MapFilters";
-import { MapBottomCard } from "../components/mapComponents/MapBottomCard";
-import { PetMapModal } from "../components/mapComponents/PetMapModal";
 import { PetMapDetailCard } from "../components/mapComponents/PetMapDetailCard";
 import { BottomCard } from "../components/mapComponents/BottomCard";
 import { MapNative, MapNativeRef } from "../components/mapComponents/MapNative";
@@ -29,82 +21,56 @@ export default function MapScreen() {
   const [selectedPin, setSelectedPin] = useState<any>(null);
   const [showDetailCard, setShowDetailCard] = useState(false);
 
-  // ← NUEVO: Guardar la ubicación buscada
+  // Guardar la ubicación buscada
   const [searchedLocation, setSearchedLocation] = useState<{
     lat: number;
     lng: number;
     name: string;
   } | null>(null);
 
-  // ← NUEVO: Estado para la ruta
+  // Estado para la ruta
   const [routeDestination, setRouteDestination] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
-  // ← NUEVOS: Info de la ruta
+  //  Info de la ruta
   const [routeInfo, setRouteInfo] = useState<{
     distance: number;
     duration: number;
     destinationName: string;
   } | null>(null);
 
-  // ← NUEVO: Ubicación para el reporte
+  // Ubicación para el reporte
   const [reportLocation, setReportLocation] = useState<{
     lat: number;
     lng: number;
     name: string;
   } | null>(null);
 
-  // ← NUEVO: Estado para dark mode
+  // Estado para dark mode
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // ← NUEVO: Estados para el FAB menu
+  // Estados para el FAB menu
   const [isFabOpen, setIsFabOpen] = useState(false);
   const fabAnimation = useRef(new Animated.Value(0)).current;
 
-  // ← NUEVO: Estado para pins creados por el usuario
+  //  Estado para pins creados por el usuario
   const [userPins, setUserPins] = useState<any[]>([]);
 
-  // ← NUEVO: Ref para controlar el mapa
+  //  Ref para controlar el mapa
   const mapRef = useRef<MapNativeRef>(null);
 
-  // ← NUEVO: Obtener la API Key
+  // Obtener la API Key
   const googleMapsApiKey =
     Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   // Hooks personalizados con toda la lógica
   const mapLogic = useMapLogic();
-  const mapFilters = useMapFilters();
-  const mapSearch = useMapSearch();
-
-  // Función para manejar cambio de filtros (necesita acceso al webRef)
-  const handleFilterChange = (filter: any) => {
-    mapFilters.handleFilterChange(filter, mapLogic.webRef);
-  };
-
-  // Función para manejar cambios en el texto de búsqueda
-  const handleSearchChange = (text: string) => {
-    mapLogic.setQuery(text);
-    mapSearch.handleSearch(text);
-  };
-
-  // Función para seleccionar una sugerencia
-  const handleSelectSuggestion = (suggestion: any) => {
-    mapSearch.selectSuggestion(suggestion, mapLogic.webRef);
-    // Actualizar el texto del input con la selección
-    mapLogic.setQuery(suggestion.display_name);
-  };
 
   // Nuevo hook para manejar detalles y modal
   const mapDetails = useMapDetails(mapLogic.currentUserId);
 
-  // Función actualizada para "Ver más" que abre el modal
-  const handleViewMore = () => {
-    if (mapLogic.selected) {
-      mapDetails.loadPetDetails(mapLogic.selected.id);
-    }
-  };
   const handleClearSearchLocation = () => {
     setSearchedLocation(null);
   };
@@ -114,21 +80,17 @@ export default function MapScreen() {
     mapDetails.handleContact(contactInfo);
   };
 
-  const handleReportPress = (reportData: any) => {
-    mapDetails.handleReport(reportData);
-  };
-
   const handleMarkerPress = (marker: any) => {
     setSelectedPin(marker);
     setShowDetailCard(true);
   };
 
-  // ← NUEVA: Función para limpiar el pin de reporte
+  // Función para limpiar el pin de reporte
   const handleClearReportLocation = () => {
     setReportLocation(null);
   };
 
-  // ← NUEVO: Función que se llama cuando seleccionas una ubicación
+  // Función que se llama cuando seleccionas una ubicación
   const handleLocationSelect = (lat: number, lng: number, name: string) => {
     console.log("Moviendo mapa a:", lat, lng);
 
@@ -145,7 +107,7 @@ export default function MapScreen() {
     mapRef.current?.animateToLocation(lat, lng);
   };
 
-  // ← NUEVA: Función para mostrar ruta
+  // Función para mostrar ruta
   const handleShowRoute = () => {
     if (selectedPin) {
       console.log("Mostrando ruta a:", selectedPin.calle);
@@ -163,7 +125,7 @@ export default function MapScreen() {
     }
   };
 
-  // ← NUEVA: Función para recibir info de la ruta
+  // Función para recibir info de la ruta
   const handleRouteReady = (distance: number, duration: number) => {
     console.log("Ruta calculada:", distance, "km", duration, "min");
     if (routeInfo) {
@@ -175,14 +137,14 @@ export default function MapScreen() {
     }
   };
 
-  // ← NUEVA: Función para cerrar la ruta
+  //  Función para cerrar la ruta
   const handleCloseRoute = () => {
     setRouteDestination(null);
     setRouteInfo(null);
     setCardState("MINI");
   };
 
-  // ← NUEVA: Función para centrar el mapa
+  // Función para centrar el mapa
   const handleCenterMap = () => {
     if (mapLogic.location) {
       const { latitude, longitude } = mapLogic.location.coords;
@@ -193,12 +155,12 @@ export default function MapScreen() {
     }
   };
 
-  // ← NUEVA: Toggle dark mode
+  //  Toggle dark mode
   const handleToggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  // ← NUEVA: Función para publicar un nuevo reporte
+  // Función para publicar un nuevo reporte
   const handlePublishReport = (reportData: {
     type: "PERDIDO" | "AVISTADO" | "ENCONTRADO";
     pinImageUri: string;
@@ -228,7 +190,7 @@ export default function MapScreen() {
     // Cerrar la card
     setCardState("MINI");
 
-    // ⭐ NUEVO: Limpiar el pin de búsqueda
+    //  Limpiar el pin de búsqueda
     setSearchedLocation(null);
     setReportLocation(null);
 
@@ -237,11 +199,9 @@ export default function MapScreen() {
       reportData.location.lat,
       reportData.location.lng
     );
-
-    console.log("✅ Reporte publicado:", newPin);
   };
 
-  // ← NUEVA: Toggle del menú FAB con animación
+  // Toggle del menú FAB con animación
   const toggleFabMenu = () => {
     const toValue = isFabOpen ? 0 : 1;
 
@@ -255,13 +215,13 @@ export default function MapScreen() {
     setIsFabOpen(!isFabOpen);
   };
 
-  // ← NUEVA: Función para ejecutar acción y cerrar menú
+  // Función para ejecutar acción y cerrar menú
   const handleFabAction = (action: () => void) => {
     action();
     toggleFabMenu();
   };
 
-  // ← NUEVO: Calcular rotación y posiciones
+  // Calcular rotación y posiciones
   const fabRotation = fabAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "90deg"], // Rota 45 grados cuando se abre
@@ -292,14 +252,7 @@ export default function MapScreen() {
           backgroundColor: "black",
         }}
       >
-        {/* Mapa principal */}
-        {/* <MapWebView
-          webRef={mapLogic.webRef}
-          currentLat={mapLogic.currentLat}
-          currentLng={mapLogic.currentLng}
-          onMessage={mapLogic.handleWebViewMessage}
-        /> */}
-        {/* ← NUEVO: Header con flecha back (solo cuando hay ruta) */}
+        {/* Header con flecha back (solo cuando hay ruta) */}
         {routeDestination && (
           <TouchableOpacity
             onPress={handleCloseRoute}
@@ -308,7 +261,7 @@ export default function MapScreen() {
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
         )}
-        {/* ← NUEVO: FAB Menu expandible */}
+        {/*  FAB Menu expandible */}
         {cardState === "MINI" && (
           <View style={mapScreenStyles.fabContainer}>
             {/* Botón Dark Mode */}
@@ -375,47 +328,18 @@ export default function MapScreen() {
 
         <MapNative
           ref={mapRef}
-          currentLat={mapLogic.currentLat} // ← Usa tu ubicación real ✅
+          currentLat={mapLogic.currentLat}
           currentLng={mapLogic.currentLng}
           onMarkerPress={handleMarkerPress}
           searchedLocation={searchedLocation}
           reportLocation={reportLocation}
-          routeDestination={routeDestination} // ← NUEVO
+          routeDestination={routeDestination}
           googleMapsApiKey={googleMapsApiKey}
           onRouteReady={handleRouteReady}
           isDarkMode={isDarkMode}
           userPins={userPins}
         />
-        {/* Buscador en la parte superior */}
-        {/* <MapSearchBar
-          query={mapLogic.query}
-          onQueryChange={handleSearchChange}
-          onPressLocate={mapLogic.onPressLocate}
-          suggestions={mapSearch.suggestions}
-          isSearching={mapSearch.isSearching}
-          showSuggestions={mapSearch.showSuggestions}
-          noResults={mapSearch.noResults}
-          onSelectSuggestion={handleSelectSuggestion}
-          onCloseSuggestions={mapSearch.closeSuggestions}
-          isLocating={mapLogic.isLocating}
-        /> */}
 
-        {/* Filtros arriba de la bottom card */}
-        {/* <MapFilters
-          activeFilter={mapFilters.activeFilter}
-          onFilterChange={handleFilterChange}
-        /> */}
-
-        {/* Card inferior con detalles */}
-        {/* <MapBottomCard
-          selected={mapLogic.selected}
-          isMarked={
-            mapLogic.selected ? mapLogic.isMarked(mapLogic.selected.id) : false
-          }
-          onViewMore={handleViewMore}
-          onMark={mapLogic.onMarkPin}
-          onClose={mapLogic.onCloseSelection}
-        /> */}
         <BottomCard
           state={cardState}
           onChangeState={setCardState}
@@ -424,7 +348,7 @@ export default function MapScreen() {
           onClearSearchLocation={handleClearSearchLocation}
           onClearReportLocation={handleClearReportLocation}
           routeInfo={routeInfo}
-          onPublishReport={handlePublishReport} // ← NUEVO
+          onPublishReport={handlePublishReport}
           currentLocation={{
             // ← NUEVO
             lat: mapLogic.currentLat,

@@ -12,12 +12,11 @@ import {
 } from "react-native";
 import { fonts } from "../../theme/fonts";
 import { Search } from "lucide-react-native";
-import { black } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
-import { PinImageRenderer } from "../PinImageRenderer"; // ← NUEVO
+import { PinImageRenderer } from "../PinImageRenderer";
 import {
   pickAndProcessImage,
   generatePinImage,
-} from "../../utils/imageProcessor"; // ← NUEVO
+} from "../../utils/imageProcessor";
 import { useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -29,20 +28,18 @@ interface BottomCardProps {
   selectedPin?: any;
   onLocationSelect?: (lat: number, lng: number, name: string) => void;
   routeInfo?: {
-    // ← NUEVO
     distance: number;
     duration: number;
     destinationName: string;
   } | null;
   onPublishReport?: (reportData: {
-    // ← NUEVO
     type: "PERDIDO" | "AVISTADO" | "ENCONTRADO";
     pinImageUri: string;
-    photoUri: string; // ← NUEVO
+    photoUri: string;
     description: string;
     location: { lat: number; lng: number; address: string };
   }) => void;
-  currentLocation?: { lat: number; lng: number }; // ← NUEVO
+  currentLocation?: { lat: number; lng: number };
   onClearSearchLocation?: () => void;
   onClearReportLocation?: () => void;
 }
@@ -54,8 +51,8 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   onLocationSelect,
   onClearSearchLocation,
   routeInfo,
-  onPublishReport, // ← NUEVO
-  currentLocation, // ← NUEVO
+  onPublishReport,
+  currentLocation,
   onClearReportLocation,
 }) => {
   const [selectedType, setSelectedType] = useState<
@@ -68,9 +65,9 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<
     typeof setTimeout
-  > | null>(null); // ← NUEVO
+  > | null>(null);
 
-  // ← NUEVO: Para el buscador de ubicación
+  // Estados para el buscador de ubicación
   const [locationSearchTimeout, setLocationSearchTimeout] = useState<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -83,12 +80,12 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     address: string;
   } | null>(null);
 
-  // ← NUEVOS: Para manejar la foto
+  // Estados para manejar la foto
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [generatedPinUri, setGeneratedPinUri] = useState<string | null>(null);
   const pinRef = useRef<View>(null);
 
-  // ← NUEVO: Estado para descripción
+  //  Estado para descripción
   const [description, setDescription] = useState("");
 
   // ========== FUNCIÓN DE BÚSQUEDA CON DEBOUNCE ==========
@@ -216,7 +213,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     setLocationSearchTimeout(timeout);
   };
 
-  // ========== FUNCIÓN PARA ABRIR GOOGLE MAPS ========== ← NUEVO
+  // ========== FUNCIÓN PARA ABRIR GOOGLE MAPS ==========
   const openInMaps = () => {
     if (!routeInfo) return;
 
@@ -262,7 +259,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     }
   };
 
-  // ========== ESTADO RUTA ========== ← NUEVO
+  // ========== ESTADO RUTA ==========
   if (state === "RUTA") {
     return (
       <View style={styles.containerRoute}>
@@ -620,7 +617,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
                 pinImageUri: generatedPinUri,
                 photoUri: selectedImageUri,
                 description: description,
-                location: finalLocation, // ← Usar la ubicación correcta
+                location: finalLocation,
               });
 
               // Limpiar el formulario
@@ -789,7 +786,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "35%", // ← Más chico que el 80% del BUSCAR normal
+    height: "35%",
     backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -882,9 +879,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 20,
     position: "relative",
-    // borderBottomWidth: 1, // ← Línea de 1px
-    // borderBottomColor: "#E5E5E5", // ← Gris claro
-    // paddingBottom: 16,
   },
   titleLarge: {
     fontFamily: fonts.bold,
@@ -1034,7 +1028,7 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 16,
     textAlign: "center",
-    marginTop: -8, // Para acercarlo al título
+    marginTop: -8,
   },
   headerWithBackLeft: {
     flexDirection: "row",
@@ -1078,7 +1072,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
 
-  // ========== ESTILOS PARA ESTADO RUTA ========== ← NUEVO
+  // ========== ESTILOS PARA ESTADO RUTA ==========
   containerRoute: {
     position: "absolute",
     bottom: 0,
@@ -1102,7 +1096,7 @@ const styles = StyleSheet.create({
   },
   routeMainTitleCnt: {
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E5E5", // Color gris suave
+    borderBottomColor: "#E5E5E5",
     paddingBottom: 12, // Espacio antes de la línea
     marginBottom: 16, // Espacio después de la línea
   },
@@ -1118,14 +1112,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#000",
     marginBottom: 6,
-    textAlign: "center", // ← NUEVO
+    textAlign: "center",
   },
   routeAddress: {
     fontFamily: fonts.regular,
     fontSize: 14,
     color: "#666",
 
-    textAlign: "center", // ← NUEVO
+    textAlign: "center",
   },
   routeInfoContainer: {
     flexDirection: "row",
@@ -1167,7 +1161,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
-  // ← NUEVOS: Estilos para preview de foto
+
   photoPreviewContainer: {
     alignItems: "center",
     marginBottom: 16,
@@ -1184,7 +1178,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
-    // paddingHorizontal: 20,
   },
   backButton: {
     padding: 8,
