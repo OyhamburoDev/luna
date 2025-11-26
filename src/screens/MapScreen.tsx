@@ -24,7 +24,7 @@ import { MapNative, MapNativeRef } from "../components/mapComponents/MapNative";
 
 export default function MapScreen() {
   const [cardState, setCardState] = useState<
-    "MINI" | "CREAR" | "BUSCAR" | "RUTA"
+    "MINI" | "CREAR" | "BUSCAR" | "RUTA" | "BUSCAR_UBICACION"
   >("MINI");
   const [selectedPin, setSelectedPin] = useState<any>(null);
   const [showDetailCard, setShowDetailCard] = useState(false);
@@ -47,6 +47,13 @@ export default function MapScreen() {
     distance: number;
     duration: number;
     destinationName: string;
+  } | null>(null);
+
+  // ← NUEVO: Ubicación para el reporte
+  const [reportLocation, setReportLocation] = useState<{
+    lat: number;
+    lng: number;
+    name: string;
   } | null>(null);
 
   // ← NUEVO: Estado para dark mode
@@ -98,6 +105,9 @@ export default function MapScreen() {
       mapDetails.loadPetDetails(mapLogic.selected.id);
     }
   };
+  const handleClearSearchLocation = () => {
+    setSearchedLocation(null);
+  };
 
   // Funciones para el modal de detalles
   const handleContactPress = (contactInfo: any) => {
@@ -113,15 +123,26 @@ export default function MapScreen() {
     setShowDetailCard(true);
   };
 
+  // ← NUEVA: Función para limpiar el pin de reporte
+  const handleClearReportLocation = () => {
+    setReportLocation(null);
+  };
+
   // ← NUEVO: Función que se llama cuando seleccionas una ubicación
   const handleLocationSelect = (lat: number, lng: number, name: string) => {
     console.log("Moviendo mapa a:", lat, lng);
 
-    // ← NUEVO: Guardar la ubicación buscada
-    setSearchedLocation({ lat, lng, name });
+    // Si estamos en BUSCAR_UBICACION, guardar como reportLocation
+    if (cardState === "BUSCAR_UBICACION") {
+      setReportLocation({ lat, lng, name });
+    }
+    // Si estamos en BUSCAR, guardar como searchedLocation
+    else if (cardState === "BUSCAR") {
+      setSearchedLocation({ lat, lng, name });
+      setCardState("MINI");
+    }
 
     mapRef.current?.animateToLocation(lat, lng);
-    setCardState("MINI");
   };
 
   // ← NUEVA: Función para mostrar ruta
@@ -207,6 +228,10 @@ export default function MapScreen() {
     // Cerrar la card
     setCardState("MINI");
 
+    // ⭐ NUEVO: Limpiar el pin de búsqueda
+    setSearchedLocation(null);
+    setReportLocation(null);
+
     // Centrar el mapa en el nuevo pin
     mapRef.current?.animateToLocation(
       reportData.location.lat,
@@ -284,67 +309,69 @@ export default function MapScreen() {
           </TouchableOpacity>
         )}
         {/* ← NUEVO: FAB Menu expandible */}
-        <View style={mapScreenStyles.fabContainer}>
-          {/* Botón Dark Mode */}
-          <Animated.View
-            style={[
-              mapScreenStyles.fabOption,
-              {
-                transform: [
-                  { translateY: darkModeButtonTranslate },
-                  { scale: buttonScale },
-                ],
-                opacity: fabAnimation,
-              },
-            ]}
-          >
-            <TouchableOpacity
-              onPress={() => handleFabAction(handleToggleDarkMode)}
-              style={mapScreenStyles.fabButton}
+        {cardState === "MINI" && (
+          <View style={mapScreenStyles.fabContainer}>
+            {/* Botón Dark Mode */}
+            <Animated.View
+              style={[
+                mapScreenStyles.fabOption,
+                {
+                  transform: [
+                    { translateY: darkModeButtonTranslate },
+                    { scale: buttonScale },
+                  ],
+                  opacity: fabAnimation,
+                },
+              ]}
             >
-              <Ionicons
-                name={isDarkMode ? "sunny" : "moon"}
-                size={20}
-                color="#000"
-              />
-            </TouchableOpacity>
-          </Animated.View>
+              <TouchableOpacity
+                onPress={() => handleFabAction(handleToggleDarkMode)}
+                style={mapScreenStyles.fabButton}
+              >
+                <Ionicons
+                  name={isDarkMode ? "sunny" : "moon"}
+                  size={20}
+                  color="#000"
+                />
+              </TouchableOpacity>
+            </Animated.View>
 
-          {/* Botón Centrar */}
-          <Animated.View
-            style={[
-              mapScreenStyles.fabOption,
-              {
-                transform: [
-                  { translateY: centerButtonTranslate },
-                  { scale: buttonScale },
-                ],
-                opacity: fabAnimation,
-              },
-            ]}
-          >
-            <TouchableOpacity
-              onPress={() => handleFabAction(handleCenterMap)}
-              style={mapScreenStyles.fabButton}
+            {/* Botón Centrar */}
+            <Animated.View
+              style={[
+                mapScreenStyles.fabOption,
+                {
+                  transform: [
+                    { translateY: centerButtonTranslate },
+                    { scale: buttonScale },
+                  ],
+                  opacity: fabAnimation,
+                },
+              ]}
             >
-              <Ionicons name="locate" size={20} color="#000" />
-            </TouchableOpacity>
-          </Animated.View>
+              <TouchableOpacity
+                onPress={() => handleFabAction(handleCenterMap)}
+                style={mapScreenStyles.fabButton}
+              >
+                <Ionicons name="locate" size={20} color="#000" />
+              </TouchableOpacity>
+            </Animated.View>
 
-          {/* Botón Principal FAB */}
-          <Animated.View style={{ transform: [{ rotate: fabRotation }] }}>
-            <TouchableOpacity
-              onPress={toggleFabMenu}
-              style={mapScreenStyles.fabMainButton}
-            >
-              <Ionicons
-                name={isFabOpen ? "close" : "settings-outline"}
-                size={22}
-                color="#000"
-              />
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
+            {/* Botón Principal FAB */}
+            <Animated.View style={{ transform: [{ rotate: fabRotation }] }}>
+              <TouchableOpacity
+                onPress={toggleFabMenu}
+                style={mapScreenStyles.fabMainButton}
+              >
+                <Ionicons
+                  name={isFabOpen ? "close" : "settings-outline"}
+                  size={22}
+                  color="#000"
+                />
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        )}
 
         <MapNative
           ref={mapRef}
@@ -352,6 +379,7 @@ export default function MapScreen() {
           currentLng={mapLogic.currentLng}
           onMarkerPress={handleMarkerPress}
           searchedLocation={searchedLocation}
+          reportLocation={reportLocation}
           routeDestination={routeDestination} // ← NUEVO
           googleMapsApiKey={googleMapsApiKey}
           onRouteReady={handleRouteReady}
@@ -393,6 +421,8 @@ export default function MapScreen() {
           onChangeState={setCardState}
           selectedPin={null}
           onLocationSelect={handleLocationSelect}
+          onClearSearchLocation={handleClearSearchLocation}
+          onClearReportLocation={handleClearReportLocation}
           routeInfo={routeInfo}
           onPublishReport={handlePublishReport} // ← NUEVO
           currentLocation={{

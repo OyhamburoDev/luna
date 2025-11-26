@@ -19,8 +19,9 @@ import {
   generatePinImage,
 } from "../../utils/imageProcessor"; // ← NUEVO
 import { useRef } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
-type CardState = "MINI" | "CREAR" | "BUSCAR" | "RUTA";
+type CardState = "MINI" | "CREAR" | "BUSCAR" | "RUTA" | "BUSCAR_UBICACION";
 
 interface BottomCardProps {
   state: CardState;
@@ -42,6 +43,8 @@ interface BottomCardProps {
     location: { lat: number; lng: number; address: string };
   }) => void;
   currentLocation?: { lat: number; lng: number }; // ← NUEVO
+  onClearSearchLocation?: () => void;
+  onClearReportLocation?: () => void;
 }
 
 export const BottomCard: React.FC<BottomCardProps> = ({
@@ -49,9 +52,11 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   onChangeState,
   selectedPin,
   onLocationSelect,
+  onClearSearchLocation,
   routeInfo,
   onPublishReport, // ← NUEVO
   currentLocation, // ← NUEVO
+  onClearReportLocation,
 }) => {
   const [selectedType, setSelectedType] = useState<
     "PERDIDO" | "AVISTADO" | "ENCONTRADO" | null
@@ -64,6 +69,19 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<
     typeof setTimeout
   > | null>(null); // ← NUEVO
+
+  // ← NUEVO: Para el buscador de ubicación
+  const [locationSearchTimeout, setLocationSearchTimeout] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+  const [locationSearchText, setLocationSearchText] = useState("");
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [isLocationSearching, setIsLocationSearching] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat: number;
+    lng: number;
+    address: string;
+  } | null>(null);
 
   // ← NUEVOS: Para manejar la foto
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
@@ -82,6 +100,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
       setSuggestions([]);
       if (searchTimeout) clearTimeout(searchTimeout);
       setIsLoading(false);
+      onClearSearchLocation?.();
       return;
     }
 
@@ -133,6 +152,68 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     }, 1000); // ← Aumentado a 1 segundo
 
     setSearchTimeout(timeout);
+  };
+
+  // ========== FUNCIÓN DE BÚSQUEDA DE UBICACIÓN ==========
+  const handleLocationSearch = (text: string) => {
+    setLocationSearchText(text);
+
+    // Si está vacío, limpiar
+    if (text.trim() === "") {
+      setLocationSuggestions([]);
+      if (locationSearchTimeout) clearTimeout(locationSearchTimeout);
+      setIsLocationSearching(false);
+      return;
+    }
+
+    // Esperamos al menos 3 caracteres
+    if (text.length < 3) {
+      setLocationSuggestions([]);
+      if (locationSearchTimeout) clearTimeout(locationSearchTimeout);
+      setIsLocationSearching(false);
+      return;
+    }
+
+    // Cancelar búsqueda anterior si existe
+    if (locationSearchTimeout) {
+      clearTimeout(locationSearchTimeout);
+    }
+
+    setIsLocationSearching(true);
+
+    // Esperar 1 segundo después de que el usuario deje de escribir
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?` +
+            `q=${encodeURIComponent(text)}, Buenos Aires, Argentina&` +
+            `format=json&` +
+            `addressdetails=1&` +
+            `limit=5`,
+          {
+            headers: {
+              "User-Agent": "PetRescueApp/1.0",
+              Referer: "https://petrescueapp.com",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const responseText = await response.text();
+        const data = JSON.parse(responseText);
+        setLocationSuggestions(data);
+      } catch (error) {
+        console.error("Error buscando ubicación:", error);
+        setLocationSuggestions([]);
+      } finally {
+        setIsLocationSearching(false);
+      }
+    }, 1000);
+
+    setLocationSearchTimeout(timeout);
   };
 
   // ========== FUNCIÓN PARA ABRIR GOOGLE MAPS ========== ← NUEVO
@@ -224,6 +305,116 @@ export const BottomCard: React.FC<BottomCardProps> = ({
     );
   }
 
+  // ========== ESTADO BUSCAR_UBICACION ==========
+  if (state === "BUSCAR_UBICACION") {
+    return (
+      <View
+        style={
+          selectedLocation
+            ? styles.containerSearchSmall
+            : styles.containerSearch
+        }
+      >
+        {/* Header con flecha atrás */}
+        <View style={styles.headerWithBackCentered}>
+          <TouchableOpacity
+            onPress={() => onChangeState("CREAR")}
+            style={styles.backButtonAbsolute}
+          >
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+
+          <Text style={styles.titleCentered}>Elegir ubicación</Text>
+        </View>
+
+        {/* Buscador o dirección seleccionada */}
+        {!selectedLocation ? (
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar dirección..."
+              placeholderTextColor="#999"
+              value={locationSearchText}
+              onChangeText={handleLocationSearch}
+              autoFocus
+            />
+            <Search size={18} color="#999" style={{ marginRight: 10 }} />
+          </View>
+        ) : (
+          <View style={styles.selectedAddressCompact}>
+            <Text style={styles.selectedAddressCompactText} numberOfLines={1}>
+              📍 {selectedLocation.address}
+            </Text>
+          </View>
+        )}
+
+        {/* Loading */}
+        {isLocationSearching && (
+          <View style={styles.suggestionsContainer}>
+            <Text style={styles.loadingText}>Buscando...</Text>
+          </View>
+        )}
+
+        {/* Sugerencias */}
+        {!isLocationSearching && locationSuggestions.length > 0 && (
+          <ScrollView style={styles.suggestionsContainer}>
+            {locationSuggestions.map((suggestion, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.suggestionItem}
+                onPress={() => {
+                  const lat = parseFloat(suggestion.lat);
+                  const lng = parseFloat(suggestion.lon);
+                  const address = suggestion.display_name;
+
+                  // Guardar la ubicación
+                  setSelectedLocation({ lat, lng, address });
+
+                  // ⭐ Mover el mapa a esa ubicación
+                  onLocationSelect?.(lat, lng, address);
+
+                  // Limpiar búsqueda
+                  setLocationSearchText("");
+                  setLocationSuggestions([]);
+                }}
+              >
+                <Text style={styles.suggestionText}>
+                  📍 {suggestion.display_name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+
+        {/* Sin resultados */}
+        {!isLocationSearching &&
+          locationSearchText.length >= 3 &&
+          locationSuggestions.length === 0 && (
+            <View style={styles.suggestionsContainer}>
+              <Text style={styles.noResultsText}>
+                No se encontraron resultados
+              </Text>
+            </View>
+          )}
+
+        {/* Botón confirmar (solo si hay ubicación seleccionada) */}
+        {selectedLocation && (
+          <View style={styles.fixedButtonContainer}>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={() => {
+                // Volver a CREAR con la ubicación guardada
+                onChangeState("CREAR");
+              }}
+            >
+              <Text style={styles.confirmButtonText}>Confirmar ubicación</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  }
+
   // ========== ESTADO CREAR ==========
   if (state === "CREAR") {
     return (
@@ -232,10 +423,18 @@ export const BottomCard: React.FC<BottomCardProps> = ({
         <View style={styles.header}>
           <Text style={styles.titleLarge}>Reportar mascota</Text>
           <TouchableOpacity
-            onPress={() => onChangeState("MINI")}
-            style={styles.closeButton}
+            onPress={() => {
+              setSelectedType(null);
+              setSelectedImageUri(null);
+              setGeneratedPinUri(null);
+              setDescription("");
+              setSelectedLocation(null);
+              onClearReportLocation?.();
+              onChangeState("MINI");
+            }}
+            style={styles.closeButtonAbsolute}
           >
-            <Text style={styles.closeIcon}>✕</Text>
+            <Ionicons name="close" size={26} color="#666" />
           </TouchableOpacity>
         </View>
 
@@ -287,9 +486,18 @@ export const BottomCard: React.FC<BottomCardProps> = ({
             style={styles.photoButton}
             onPress={handleSelectPhoto}
           >
-            <Text style={styles.photoButtonText}>
-              {selectedImageUri ? "✅ Foto seleccionada" : "📷 Subir foto"}
-            </Text>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              <Ionicons
+                name={selectedImageUri ? "checkmark-circle" : "camera"}
+                size={20}
+                color={selectedImageUri ? "#10b981" : "#000"}
+              />
+              <Text style={styles.photoButtonText}>
+                {selectedImageUri ? "Foto seleccionada" : "Subir foto"}
+              </Text>
+            </View>
           </TouchableOpacity>
 
           {/* Preview de la foto seleccionada */}
@@ -336,64 +544,95 @@ export const BottomCard: React.FC<BottomCardProps> = ({
           <Text style={styles.label}>Ubicación</Text>
           <View style={styles.locationContainer}>
             <View style={styles.locationInfo}>
-              <Text style={styles.locationLabel}>📍 Tu ubicación actual</Text>
-              <Text style={styles.locationAddress}>San Martín 1234, CABA</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  marginBottom: 4,
+                }}
+              >
+                <Ionicons name="location" size={16} color="#666" />
+                <Text style={styles.locationLabel}>Tu ubicación actual</Text>
+              </View>
+              <Text style={styles.locationAddress}>
+                {selectedLocation
+                  ? selectedLocation.address
+                  : "Tu ubicación actual"}
+              </Text>
             </View>
-            <TouchableOpacity style={styles.adjustButton}>
-              <Text style={styles.adjustButtonText}>Ajustar en el mapa</Text>
+            <TouchableOpacity
+              style={styles.adjustButton}
+              onPress={() => {
+                setSelectedLocation(null);
+                onChangeState("BUSCAR_UBICACION");
+              }}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+              >
+                <Ionicons name="search" size={16} color="#000" />
+                <Text style={styles.adjustButtonText}>
+                  Elegir otra ubicación
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </ScrollView>
 
         {/* Botón FIJO abajo */}
-        <TouchableOpacity
-          style={styles.publishButton}
-          onPress={() => {
-            // Validaciones
-            if (!selectedType) {
-              alert("Por favor seleccioná el tipo de reporte");
-              return;
-            }
-            if (!generatedPinUri) {
-              alert("Por favor subí una foto");
-              return;
-            }
-            if (!selectedImageUri) {
-              // ← NUEVO
-              alert("Error procesando la foto");
-              return;
-            }
-            if (!description.trim()) {
-              alert("Por favor agregá una descripción");
-              return;
-            }
-            if (!currentLocation) {
-              alert("No se pudo obtener tu ubicación");
-              return;
-            }
+        <View style={styles.fixedButtonContainer}>
+          <TouchableOpacity
+            style={styles.publishButton}
+            onPress={() => {
+              // Validaciones
+              if (!selectedType) {
+                alert("Por favor seleccioná el tipo de reporte");
+                return;
+              }
+              if (!generatedPinUri) {
+                alert("Por favor subí una foto");
+                return;
+              }
+              if (!selectedImageUri) {
+                // ← NUEVO
+                alert("Error procesando la foto");
+                return;
+              }
+              if (!description.trim()) {
+                alert("Por favor agregá una descripción");
+                return;
+              }
+              if (!currentLocation) {
+                alert("No se pudo obtener tu ubicación");
+                return;
+              }
 
-            // Llamar a la función
-            onPublishReport?.({
-              type: selectedType,
-              pinImageUri: generatedPinUri, // Para el marker
-              photoUri: selectedImageUri, // Para la detail card
-              description: description,
-              location: {
+              // Determinar qué ubicación usar
+              const finalLocation = selectedLocation || {
                 lat: currentLocation.lat,
                 lng: currentLocation.lng,
                 address: "Tu ubicación actual",
-              },
-            });
+              };
 
-            // Limpiar el formulario
-            setSelectedType(null);
-            setSelectedImageUri(null);
-            setGeneratedPinUri(null);
-            setDescription("");
-          }}
-        >
-          <Text style={styles.publishButtonText}>Publicar reporte</Text>
-        </TouchableOpacity>
+              onPublishReport?.({
+                type: selectedType,
+                pinImageUri: generatedPinUri,
+                photoUri: selectedImageUri,
+                description: description,
+                location: finalLocation, // ← Usar la ubicación correcta
+              });
+
+              // Limpiar el formulario
+              setSelectedType(null);
+              setSelectedImageUri(null);
+              setGeneratedPinUri(null);
+              setDescription("");
+            }}
+          >
+            <Text style={styles.publishButtonText}>Publicar reporte</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -402,7 +641,22 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   if (state === "BUSCAR") {
     return (
       <View style={styles.containerSearch}>
-        <Text style={styles.title}>¿Dónde buscás?</Text>
+        <View style={styles.headerWithBackCentered}>
+          <View style={styles.titleContainerWithBack}>
+            <TouchableOpacity
+              onPress={() => onChangeState("MINI")}
+              style={styles.backButtonLeft}
+            >
+              <Ionicons name="arrow-back" size={24} color="#000" />
+            </TouchableOpacity>
+
+            <Text style={styles.titleCentered}>Buscá por zona</Text>
+          </View>
+
+          <Text style={styles.subtitleCentered}>
+            Encontrá mascotas perdidas o avistadas
+          </Text>
+        </View>
 
         <View style={styles.searchContainer}>
           <TextInput
@@ -422,13 +676,6 @@ export const BottomCard: React.FC<BottomCardProps> = ({
           />
           <Search size={18} color="#999" style={{ marginRight: 10 }} />
         </View>
-
-        <TouchableOpacity
-          style={styles.reportButton}
-          onPress={() => onChangeState("CREAR")}
-        >
-          <Text style={styles.reportButtonText}>+ Reportar mascota</Text>
-        </TouchableOpacity>
 
         {/* ========== LISTA DE SUGERENCIAS ========== */}
         {isLoading && (
@@ -451,7 +698,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
                   console.log("Seleccionaste:", name);
                   console.log("Moviendo a:", lat, lng);
 
-                  onLocationSelect?.(lat, lng, name); // ← Ahora pasamos también el nombre
+                  onLocationSelect?.(lat, lng, name);
                 }}
               >
                 <Text style={styles.suggestionText}>
@@ -537,6 +784,24 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 15,
   },
+  containerSearchSmall: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "35%", // ← Más chico que el 80% del BUSCAR normal
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 15,
+  },
   handle: {
     width: 50,
     height: 4,
@@ -568,6 +833,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#000",
   },
+  selectedAddressCompact: {
+    backgroundColor: "#F5F5F5",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  selectedAddressCompactText: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+  },
   reportButton: {
     backgroundColor: "#000",
     paddingVertical: 16,
@@ -588,7 +865,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "70%",
+    height: "90%",
     backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -600,27 +877,28 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
     paddingHorizontal: 20,
+    position: "relative",
+    // borderBottomWidth: 1, // ← Línea de 1px
+    // borderBottomColor: "#E5E5E5", // ← Gris claro
+    // paddingBottom: 16,
   },
   titleLarge: {
-    fontSize: 24,
+    fontFamily: fonts.bold,
+    fontSize: 22,
     fontWeight: "700",
     color: "#000",
+    textAlign: "center",
   },
-  closeButton: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
+  closeButtonAbsolute: {
+    position: "absolute",
+    right: 20,
+    padding: 8,
   },
-  closeIcon: {
-    fontSize: 24,
-    color: "#666",
-  },
+
   scrollContent: {
     flex: 1,
     paddingHorizontal: 20,
@@ -629,6 +907,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   label: {
+    fontFamily: fonts.bold,
     fontSize: 16,
     fontWeight: "600",
     color: "#000",
@@ -663,7 +942,8 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   typeText: {
-    fontSize: 14,
+    fontFamily: fonts.bold,
+    fontSize: 12,
     fontWeight: "600",
     color: "#000",
   },
@@ -675,7 +955,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   photoButtonText: {
-    fontSize: 16,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
     color: "#000",
   },
   descriptionInput: {
@@ -688,6 +969,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: "top",
     marginBottom: 16,
+    fontFamily: fonts.regular,
   },
   locationContainer: {
     backgroundColor: "#F5F5F5",
@@ -700,11 +982,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   locationLabel: {
+    fontFamily: fonts.regular,
     fontSize: 14,
     color: "#666",
     marginBottom: 4,
   },
   locationAddress: {
+    fontFamily: fonts.bold,
     fontSize: 15,
     fontWeight: "600",
     color: "#000",
@@ -719,6 +1003,7 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   adjustButtonText: {
+    fontFamily: fonts.bold,
     fontSize: 14,
     fontWeight: "600",
     color: "#000",
@@ -738,9 +1023,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   publishButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    fontWeight: "600",
     color: "#fff",
+  },
+  subtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 16,
+    textAlign: "center",
+    marginTop: -8, // Para acercarlo al título
+  },
+  headerWithBackLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  titleLeft: {
+    fontFamily: fonts.bold,
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 4,
   },
   // ========== ESTILOS PARA SUGERENCIAS ==========
   suggestionsContainer: {
@@ -872,5 +1178,71 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     borderWidth: 3,
     borderColor: "#ddd",
+  },
+  // ========== ESTILOS PARA BUSCAR_UBICACION ==========
+  headerWithBack: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    // paddingHorizontal: 20,
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 12,
+  },
+
+  confirmButton: {
+    backgroundColor: "#000",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  backButtonAbsolute: {
+    position: "absolute",
+    left: 0,
+    padding: 8,
+    zIndex: 1,
+  },
+  titleContainer: {
+    alignItems: "center",
+  },
+
+  headerWithBackCentered: {
+    alignItems: "center",
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  titleContainerWithBack: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    position: "relative",
+  },
+  backButtonLeft: {
+    position: "absolute",
+    left: -30,
+    padding: 8,
+    marginTop: 2,
+  },
+  titleCentered: {
+    fontFamily: fonts.bold,
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#000",
+    textAlign: "center",
+  },
+  subtitleCentered: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: "#666",
+    marginTop: 4,
+    textAlign: "center",
   },
 });

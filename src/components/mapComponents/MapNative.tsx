@@ -1,5 +1,5 @@
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE, Circle } from "react-native-maps";
 import { StyleSheet, Image, View } from "react-native";
 import MapViewDirections from "react-native-maps-directions";
 
@@ -8,6 +8,12 @@ interface MapNativeProps {
   currentLng: number;
   onMarkerPress?: (marker: any) => void;
   searchedLocation?: {
+    lat: number;
+    lng: number;
+    name: string;
+  } | null;
+  reportLocation?: {
+    // ← NUEVO
     lat: number;
     lng: number;
     name: string;
@@ -107,6 +113,7 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
       currentLng,
       onMarkerPress,
       searchedLocation,
+      reportLocation,
       routeDestination,
       googleMapsApiKey,
       onRouteReady,
@@ -157,22 +164,37 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
             onPress={() => onMarkerPress?.(pin)}
           />
         ))}
-
-        {/* Pin de la ubicación buscada */}
+        {/* Círculo de búsqueda normal */}
         {searchedLocation && (
-          <Marker
-            coordinate={{
+          <Circle
+            center={{
               latitude: searchedLocation.lat,
               longitude: searchedLocation.lng,
             }}
-            title={searchedLocation.name.split(",")[0]} // ← Solo la primera parte
-            description={searchedLocation.name
-              .split(",")
-              .slice(1, 3)
-              .join(",")
-              .trim()} // ← Las siguientes 2 partes
-            pinColor="#10b981"
+            radius={350} // ← Más grande (de 200 a 350 metros)
+            fillColor="rgba(59, 130, 246, 0.2)" // Azul con 20% opacidad
+            strokeColor="rgba(59, 130, 246, 0.3)" // ← Borde más suave (de 0.6 a 0.3)
+            strokeWidth={2}
           />
+        )}
+
+        {/* Pin de ubicación del reporte */}
+        {reportLocation && (
+          <Marker
+            coordinate={{
+              latitude: reportLocation.lat,
+              longitude: reportLocation.lng,
+            }}
+          >
+            <Image
+              source={require("../../../assets/media/images/marker.png")} // ← Reemplazá con tu ruta
+              style={{
+                width: 40,
+                height: 40,
+                resizeMode: "contain",
+              }}
+            />
+          </Marker>
         )}
 
         {/* ← NUEVO: Ruta desde tu ubicación hasta el destino */}
