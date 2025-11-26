@@ -14,13 +14,14 @@ import { PetMapDetailCard } from "../components/mapComponents/PetMapDetailCard";
 import { BottomCard } from "../components/mapComponents/BottomCard";
 import { MapNative, MapNativeRef } from "../components/mapComponents/MapNative";
 import { useFabMenu } from "../hooks/useFabMenu";
+import { usePinsManager } from "../hooks/usePinsManager";
 
 export default function MapScreen() {
   const [cardState, setCardState] = useState<
     "MINI" | "CREAR" | "BUSCAR" | "RUTA" | "BUSCAR_UBICACION"
   >("MINI");
-  const [selectedPin, setSelectedPin] = useState<any>(null);
-  const [showDetailCard, setShowDetailCard] = useState(false);
+  const pinsManager = usePinsManager();
+
   const fabMenu = useFabMenu();
 
   // Guardar la ubicación buscada
@@ -53,9 +54,6 @@ export default function MapScreen() {
   // Estado para dark mode
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  //  Estado para pins creados por el usuario
-  const [userPins, setUserPins] = useState<any[]>([]);
-
   //  Ref para controlar el mapa
   const mapRef = useRef<MapNativeRef>(null);
 
@@ -76,11 +74,6 @@ export default function MapScreen() {
   // Funciones para el modal de detalles
   const handleContactPress = (contactInfo: any) => {
     mapDetails.handleContact(contactInfo);
-  };
-
-  const handleMarkerPress = (marker: any) => {
-    setSelectedPin(marker);
-    setShowDetailCard(true);
   };
 
   // Función para limpiar el pin de reporte
@@ -107,19 +100,19 @@ export default function MapScreen() {
 
   // Función para mostrar ruta
   const handleShowRoute = () => {
-    if (selectedPin) {
-      console.log("Mostrando ruta a:", selectedPin.calle);
+    if (pinsManager.selectedPin) {
+      console.log("Mostrando ruta a:", pinsManager.selectedPin.calle);
       setRouteDestination({
-        lat: selectedPin.lat,
-        lng: selectedPin.lng,
+        lat: pinsManager.selectedPin.lat,
+        lng: pinsManager.selectedPin.lng,
       });
       setRouteInfo({
-        distance: 0, // Se actualizará cuando la ruta esté lista
+        distance: 0,
         duration: 0,
-        destinationName: selectedPin.calle,
+        destinationName: pinsManager.selectedPin.calle,
       });
-      setCardState("RUTA"); // ← Cambiar a estado RUTA
-      setShowDetailCard(false);
+      setCardState("RUTA");
+      pinsManager.closeDetailCard();
     }
   };
 
@@ -166,37 +159,16 @@ export default function MapScreen() {
     description: string;
     location: { lat: number; lng: number; address: string };
   }) => {
-    const newPin = {
-      id: Date.now().toString(),
-      lat: reportData.location.lat,
-      lng: reportData.location.lng,
-      image: reportData.pinImageUri, // Para el marker
-      photo: reportData.photoUri, // Para la detail card
-      label: reportData.type,
-      calle: reportData.location.address,
-      description: reportData.description,
-      dia: "Ahora",
-      hora: new Date().toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    // El manager crea y agrega el pin
+    const newPin = pinsManager.addPin(reportData);
 
-    // Agregar el nuevo pin
-    setUserPins([...userPins, newPin]);
-
-    // Cerrar la card
+    // Coordinación (MapScreen se encarga de esto)
     setCardState("MINI");
-
-    //  Limpiar el pin de búsqueda
     setSearchedLocation(null);
     setReportLocation(null);
 
     // Centrar el mapa en el nuevo pin
-    mapRef.current?.animateToLocation(
-      reportData.location.lat,
-      reportData.location.lng
-    );
+    mapRef.current?.animateToLocation(newPin.lat, newPin.lng);
   };
 
   return (
@@ -292,16 +264,15 @@ export default function MapScreen() {
           ref={mapRef}
           currentLat={mapLogic.currentLat}
           currentLng={mapLogic.currentLng}
-          onMarkerPress={handleMarkerPress}
+          onMarkerPress={pinsManager.selectPin}
           searchedLocation={searchedLocation}
           reportLocation={reportLocation}
           routeDestination={routeDestination}
           googleMapsApiKey={googleMapsApiKey}
           onRouteReady={handleRouteReady}
           isDarkMode={isDarkMode}
-          userPins={userPins}
+          userPins={pinsManager.userPins}
         />
-
         <BottomCard
           state={cardState}
           onChangeState={setCardState}
@@ -312,7 +283,6 @@ export default function MapScreen() {
           routeInfo={routeInfo}
           onPublishReport={handlePublishReport}
           currentLocation={{
-            // ← NUEVO
             lat: mapLogic.currentLat,
             lng: mapLogic.currentLng,
           }}
@@ -320,12 +290,16 @@ export default function MapScreen() {
 
         {/* Detail card para mostrar detalles de mascota */}
         <PetMapDetailCard
-          visible={showDetailCard}
-          petData={selectedPin}
-          onClose={() => setShowDetailCard(false)}
+          visible={pinsManager.showDetailCard}
+          petData={pinsManager.selectedPin}
+          onClose={pinsManager.closeDetailCard}
           onContact={(type, value) => {
             console.log(`Contactar por ${type}: ${value}`);
-            handleContactPress({ type, value, petId: selectedPin?.id });
+            handleContactPress({
+              type,
+              value,
+              petId: pinsManager.selectedPin?.id,
+            });
           }}
           onShowRoute={handleShowRoute}
         />
