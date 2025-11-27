@@ -122,6 +122,11 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
   ) => {
     const mapRef = useRef<MapView>(null);
 
+    // Determinar los deltas según si estamos en coordenadas por defecto o reales
+    const isDefaultLocation = currentLat === -34.75 && currentLng === -58.45;
+    const latitudeDelta = isDefaultLocation ? 0.5 : 0.02;
+    const longitudeDelta = isDefaultLocation ? 0.5 : 0.02;
+
     // Exponemos la función para mover el mapa
     useImperativeHandle(ref, () => ({
       animateToLocation: (lat: number, lng: number) => {
@@ -143,11 +148,11 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         customMapStyle={isDarkMode ? darkMapStyle : silverMapStyle}
-        initialRegion={{
+        region={{
           latitude: currentLat,
           longitude: currentLng,
-          latitudeDelta: 0.02,
-          longitudeDelta: 0.02,
+          latitudeDelta,
+          longitudeDelta,
         }}
         showsUserLocation={true}
         showsMyLocationButton={false}

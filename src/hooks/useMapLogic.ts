@@ -18,9 +18,9 @@ export const useMapLogic = () => {
   // Ref del WebView
   const webRef = useRef<WebView | null>(null);
 
-  // Coordenadas por defecto (Buenos Aires)
-  const defaultLat = -34.6037;
-  const defaultLng = -58.3816;
+  // Coordenadas por defecto (Centro de la provincia de Buenos Aires)
+  const defaultLat = -34.75;
+  const defaultLng = -58.45;
 
   // Coordenadas actuales (ubicación del usuario o por defecto)
   const currentLat = location ? location.coords.latitude : defaultLat;
