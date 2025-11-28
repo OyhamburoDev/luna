@@ -137,3 +137,26 @@ export interface ReportData {
   reportType: "inappropriate" | "spam" | "fake" | "resolved";
   description?: string;
 }
+
+export interface PinForm {
+  type: "PERDIDO" | "AVISTADO" | "ENCONTRADO";
+  animalName: string;
+  shortDescription: string;
+  detailedDescription: string;
+  pinImageUri: string;
+  photoUri: string;
+  location: {
+    lat: number;
+    lng: number;
+    address: string;
+  };
+}
+
+export interface SavedPin extends PinForm {
+  id: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  reportCount: number;
+  isActive: boolean;
+}

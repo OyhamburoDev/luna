@@ -125,9 +125,11 @@ export default function MapScreen() {
   // Función para publicar un nuevo reporte
   const handlePublishReport = (reportData: {
     type: "PERDIDO" | "AVISTADO" | "ENCONTRADO";
+    animalName: string;
+    shortDescription: string;
+    detailedDescription: string;
     pinImageUri: string;
     photoUri: string;
-    description: string;
     location: { lat: number; lng: number; address: string };
   }) => {
     // El manager crea y agrega el pin
@@ -256,8 +258,10 @@ export default function MapScreen() {
           currentLocation={{
             lat: mapLogic.currentLat,
             lng: mapLogic.currentLng,
+            address: mapLogic.currentAddress,
           }}
           searchedLocation={searchedLocation}
+          currentUserId={mapLogic.currentUserId}
         />
 
         {/* Detail card para mostrar detalles de mascota */}

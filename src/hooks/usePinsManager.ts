@@ -20,12 +20,15 @@ export const usePinsManager = () => {
   // Agregar un nuevo pin al mapa
   const addPin = (reportData: {
     type: "PERDIDO" | "AVISTADO" | "ENCONTRADO";
+    animalName: string;
+    shortDescription: string;
+    detailedDescription: string;
     pinImageUri: string;
     photoUri: string;
-    description: string;
     location: { lat: number; lng: number; address: string };
   }) => {
     // Crear el objeto del pin con todos sus datos
+    // Extraer species y color PRIMERO
     const newPin = {
       id: Date.now().toString(),
       lat: reportData.location.lat,
@@ -34,7 +37,11 @@ export const usePinsManager = () => {
       photo: reportData.photoUri,
       label: reportData.type,
       calle: reportData.location.address,
-      description: reportData.description,
+      description: reportData.detailedDescription,
+      animalName: reportData.animalName,
+      shortDescription: reportData.shortDescription,
+      species: reportData.animalName,
+      color: reportData.shortDescription,
       dia: "Ahora",
       hora: new Date().toLocaleTimeString("es-AR", {
         hour: "2-digit",

@@ -26,6 +26,9 @@ export const useMapLogic = () => {
   const currentLat = location ? location.coords.latitude : defaultLat;
   const currentLng = location ? location.coords.longitude : defaultLng;
 
+  // Dirección actual
+  const [currentAddress, setCurrentAddress] = useState<string>("Ubicación actual");
+
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(
     undefined
   );
@@ -48,6 +51,30 @@ export const useMapLogic = () => {
 
     getLocation();
   }, []);
+
+  // Obtener dirección cuando cambia la ubicación
+  useEffect(() => {
+    const getAddress = async () => {
+      if (!location) return;
+
+      try {
+        const geocode = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+
+        if (geocode && geocode.length > 0) {
+          const { street, city, region } = geocode[0];
+          const address = [street, city, region].filter(Boolean).join(", ");
+          setCurrentAddress(address || "Ubicación actual");
+        }
+      } catch (error) {
+        console.log("Error getting address:", error);
+      }
+    };
+
+    getAddress();
+  }, [location]);
 
   // Función para centrar el mapa en la ubicación actual
   const onPressLocate = async () => {
@@ -162,6 +189,7 @@ export const useMapLogic = () => {
     // Coordenadas
     currentLat,
     currentLng,
+    currentAddress,
 
     // Ref del WebView
     webRef,

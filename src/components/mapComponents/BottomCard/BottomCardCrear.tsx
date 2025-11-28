@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../../../theme/fonts";
 import { PinImageRenderer } from "../../PinImageRenderer";
+import { PinForm } from "../../../types/mapTypes";
 
 interface BottomCardCrearProps {
   currentLocation?: { lat: number; lng: number };
@@ -35,13 +36,12 @@ interface BottomCardCrearProps {
 
   onClose: () => void;
   onSearchLocationPress: () => void;
-  onPublishReport: (reportData: {
-    type: "PERDIDO" | "AVISTADO" | "ENCONTRADO";
-    pinImageUri: string;
-    photoUri: string;
-    description: string;
-    location: { lat: number; lng: number; address: string };
-  }) => void;
+  onPublishReport?: (reportData: PinForm) => void;
+  animalName: string;
+  onAnimalNameChange: (text: string) => void;
+  shortDescription: string;
+  onShortDescriptionChange: (text: string) => void;
+  handlePublish: () => Promise<void>;
 }
 
 export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
@@ -58,46 +58,12 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
   onClose,
   onSearchLocationPress,
   onPublishReport,
+  animalName,
+  onAnimalNameChange,
+  shortDescription,
+  onShortDescriptionChange,
+  handlePublish,
 }) => {
-  const handlePublish = () => {
-    // Validaciones
-    if (!selectedType) {
-      alert("Por favor seleccioná el tipo de reporte");
-      return;
-    }
-    if (!generatedPinUri) {
-      alert("Por favor subí una foto");
-      return;
-    }
-    if (!selectedImageUri) {
-      alert("Error procesando la foto");
-      return;
-    }
-    if (!description.trim()) {
-      alert("Por favor agregá una descripción");
-      return;
-    }
-    if (!currentLocation) {
-      alert("No se pudo obtener tu ubicación");
-      return;
-    }
-
-    // Determinar qué ubicación usar
-    const finalLocation = selectedLocation || {
-      lat: currentLocation.lat,
-      lng: currentLocation.lng,
-      address: "Tu ubicación actual",
-    };
-
-    onPublishReport({
-      type: selectedType,
-      pinImageUri: generatedPinUri,
-      photoUri: selectedImageUri,
-      description: description,
-      location: finalLocation,
-    });
-  };
-
   return (
     <View style={styles.containerExpanded}>
       {/* Header con título y botón cerrar */}
@@ -151,6 +117,39 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* Nombre del animal */}
+        <Text style={styles.label}>Nombre, especie o raza</Text>
+        <TextInput
+          style={styles.animalNameInput}
+          placeholder="Ej: Perro, Gato atigrado, Perro caniche..."
+          placeholderTextColor="#999"
+          value={animalName}
+          onChangeText={onAnimalNameChange}
+        />
+
+        {/* Descripción corta */}
+        <Text style={styles.label}>Rasgo distintivo</Text>
+        <TextInput
+          style={styles.shortDescriptionInput}
+          placeholder="Ej: collar rojo, mancha blanca..."
+          placeholderTextColor="#999"
+          numberOfLines={2}
+          value={shortDescription}
+          onChangeText={onShortDescriptionChange}
+        />
+
+        {/* Descripción */}
+        <Text style={styles.label}>Descripción</Text>
+        <TextInput
+          style={styles.descriptionInput}
+          placeholder="Ej: Se perdió el domingo en el parque, estaba asustado, llevaba collar rojo. Si lo ves avísame..."
+          placeholderTextColor="#999"
+          multiline
+          numberOfLines={3}
+          value={description}
+          onChangeText={onDescriptionChange}
+        />
+
         {/* Botón subir foto */}
         <TouchableOpacity style={styles.photoButton} onPress={onSelectPhoto}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -192,18 +191,6 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
             </View>
           </View>
         )}
-
-        {/* Descripción */}
-        <Text style={styles.label}>Descripción</Text>
-        <TextInput
-          style={styles.descriptionInput}
-          placeholder="Ej: Perro golden, collar rojo..."
-          placeholderTextColor="#999"
-          multiline
-          numberOfLines={3}
-          value={description}
-          onChangeText={onDescriptionChange}
-        />
 
         {/* Ubicación */}
         <Text style={styles.label}>Ubicación</Text>
@@ -256,7 +243,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "90%",
+    height: "75%",
     backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -333,6 +320,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     color: "#000",
+  },
+  animalNameInput: {
+    backgroundColor: "#F5F5F5",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 13,
+    color: "#000",
+    marginBottom: 16,
+    fontFamily: fonts.regular,
+  },
+  shortDescriptionInput: {
+    backgroundColor: "#F5F5F5",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: "#000",
+    minHeight: 50,
+    marginBottom: 16,
+    fontFamily: fonts.regular,
   },
   photoButton: {
     backgroundColor: "#F5F5F5",
