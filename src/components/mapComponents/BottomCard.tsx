@@ -47,7 +47,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
 }) => {
   // Hook para manejar el formulario de reporte
   const reportForm = useReportForm(currentLocation);
-
+  const [isPublishing, setIsPublishing] = useState(false);
   // Hook para manejar autenticación
   const authModal = useAuthModal();
   const { requireAuth } = useAuthModalContext();
@@ -57,18 +57,22 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   const [showErrorToast, setShowErrorToast] = useState(false);
 
   const handlePublish = async () => {
-    requireAuth(async () => {
-      const resultado = reportForm.submitForm();
+    // Si ya está publicando, no hacer nada
+    if (isPublishing) return;
 
-      if (resultado.success && resultado.data) {
-        try {
+    requireAuth(async () => {
+      setIsPublishing(true); // ← Bloquear botón
+
+      try {
+        const resultado = reportForm.submitForm();
+
+        if (resultado.success && resultado.data) {
           const userId = useAuthStore.getState().user?.uid;
 
           if (!userId) {
             throw new Error("No se pudo obtener el ID del usuario");
           }
 
-          // Validar límite diario
           const canCreate = await createPinService.canUserCreatePin(userId);
           if (!canCreate) {
             setErrorMessage("Ya creaste un pin hoy. Podés crear otro mañana.");
@@ -84,17 +88,18 @@ export const BottomCard: React.FC<BottomCardProps> = ({
           onPublishReport?.(resultado.data);
           reportForm.resetForm();
           onChangeState("MINI");
-        } catch (error) {
-          setErrorMessage("Error al guardar el reporte.");
+        } else if (!resultado.success && resultado.error) {
+          setErrorMessage(resultado.error);
           setShowErrorToast(true);
         }
-      } else if (!resultado.success && resultado.error) {
-        setErrorMessage(resultado.error);
+      } catch (error) {
+        setErrorMessage("Error al guardar el reporte.");
         setShowErrorToast(true);
+      } finally {
+        setIsPublishing(false); // ← Desbloquear botón
       }
     });
   };
-
   // ========== ESTADO RUTA ==========
   if (state === "RUTA") {
     return <BottomCardRuta routeInfo={routeInfo} />;
@@ -141,6 +146,7 @@ export const BottomCard: React.FC<BottomCardProps> = ({
           shortDescription={reportForm.shortDescription}
           onShortDescriptionChange={reportForm.setShortDescription}
           handlePublish={handlePublish}
+          isPublishing={isPublishing}
         />
         <ToastMessage
           visible={showErrorToast}

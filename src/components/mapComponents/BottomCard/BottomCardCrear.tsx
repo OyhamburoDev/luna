@@ -42,6 +42,7 @@ interface BottomCardCrearProps {
   shortDescription: string;
   onShortDescriptionChange: (text: string) => void;
   handlePublish: () => Promise<void>;
+  isPublishing: boolean;
 }
 
 export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
@@ -63,6 +64,7 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
   shortDescription,
   onShortDescriptionChange,
   handlePublish,
+  isPublishing,
 }) => {
   return (
     <View style={styles.containerExpanded}>
@@ -125,6 +127,7 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
           placeholderTextColor="#999"
           value={animalName}
           onChangeText={onAnimalNameChange}
+          maxLength={20}
         />
 
         {/* Descripción corta */}
@@ -136,6 +139,7 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
           numberOfLines={2}
           value={shortDescription}
           onChangeText={onShortDescriptionChange}
+          maxLength={30}
         />
 
         {/* Descripción */}
@@ -148,6 +152,7 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
           numberOfLines={3}
           value={description}
           onChangeText={onDescriptionChange}
+          maxLength={200}
         />
 
         {/* Botón subir foto */}
@@ -229,8 +234,17 @@ export const BottomCardCrear: React.FC<BottomCardCrearProps> = ({
 
       {/* Botón FIJO abajo */}
       <View style={styles.fixedButtonContainer}>
-        <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
-          <Text style={styles.publishButtonText}>Publicar reporte</Text>
+        <TouchableOpacity
+          style={[
+            styles.publishButton,
+            isPublishing && styles.publishButtonDisabled,
+          ]}
+          onPress={handlePublish}
+          disabled={isPublishing}
+        >
+          <Text style={styles.publishButtonText}>
+            {isPublishing ? "Publicando..." : "Publicar reporte"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -326,7 +340,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 13,
+    fontSize: 14,
     color: "#000",
     marginBottom: 16,
     fontFamily: fonts.regular,
@@ -336,7 +350,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: 14,
     color: "#000",
     minHeight: 50,
     marginBottom: 16,
@@ -370,7 +384,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: 14,
     color: "#000",
     minHeight: 80,
     textAlignVertical: "top",
@@ -433,5 +447,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#fff",
+  },
+  publishButtonDisabled: {
+    backgroundColor: "#666",
+    opacity: 0.5,
   },
 });

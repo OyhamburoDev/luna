@@ -3,7 +3,26 @@ import { useState, useRef } from "react";
 import { View } from "react-native";
 import { pickAndProcessImage, generatePinImage } from "../utils/imageProcessor";
 
-export const useReportForm = (currentLocation?: { lat: number; lng: number }) => {
+const VALIDATIONS = {
+  animalName: {
+    minLength: 2,
+    maxLength: 50,
+    regex: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, // Solo letras y espacios
+  },
+  shortDescription: {
+    minLength: 3,
+    maxLength: 100,
+  },
+  detailedDescription: {
+    minLength: 10,
+    maxLength: 500,
+  },
+};
+
+export const useReportForm = (currentLocation?: {
+  lat: number;
+  lng: number;
+}) => {
   // Estados del formulario
   const [selectedType, setSelectedType] = useState<
     "PERDIDO" | "AVISTADO" | "ENCONTRADO" | null
@@ -55,6 +74,28 @@ export const useReportForm = (currentLocation?: { lat: number; lng: number }) =>
     }
   };
 
+  // Función helper para detectar spam
+  const isSpam = (text: string): boolean => {
+    // Detectar repetición excesiva del mismo carácter (ej: "aaaaaaa")
+    const repeatedChar = /(.)\1{4,}/;
+    if (repeatedChar.test(text)) return true;
+
+    // Detectar palabras repetidas (ej: "si si si si si")
+    const words = text.toLowerCase().trim().split(/\s+/);
+    const uniqueWords = new Set(words);
+    if (words.length > 3 && uniqueWords.size === 1) return true;
+
+    return false;
+  };
+
+  // Función helper para sanitizar input (seguridad Firebase)
+  const sanitizeInput = (text: string): string => {
+    // Remover caracteres peligrosos que podrían romper Firebase
+    return text
+      .replace(/[<>{}[\]\\]/g, "") // Remover caracteres especiales
+      .trim();
+  };
+
   // Limpiar todos los campos del formulario
   const resetForm = () => {
     setSelectedType(null);
@@ -76,21 +117,101 @@ export const useReportForm = (currentLocation?: { lat: number; lng: number }) =>
     }
 
     // Validar animalName
-    if (!animalName.trim()) {
+    const sanitizedAnimalName = sanitizeInput(animalName);
+
+    if (!sanitizedAnimalName.trim()) {
       return {
         success: false,
         error: "Por favor completá el nombre o especie del animal",
       };
     }
 
+    if (sanitizedAnimalName.length < VALIDATIONS.animalName.minLength) {
+      return {
+        success: false,
+        error: `El nombre debe tener al menos ${VALIDATIONS.animalName.minLength} caracteres`,
+      };
+    }
+
+    if (sanitizedAnimalName.length > VALIDATIONS.animalName.maxLength) {
+      return {
+        success: false,
+        error: `El nombre no puede tener más de ${VALIDATIONS.animalName.maxLength} caracteres`,
+      };
+    }
+
+    if (!VALIDATIONS.animalName.regex.test(sanitizedAnimalName)) {
+      return {
+        success: false,
+        error: "El nombre solo puede contener letras y espacios",
+      };
+    }
+
+    if (isSpam(sanitizedAnimalName)) {
+      return {
+        success: false,
+        error: "Por favor ingresá un nombre válido",
+      };
+    }
+
     // Validar shortDescription
-    if (!shortDescription.trim()) {
+    const sanitizedShortDesc = sanitizeInput(shortDescription);
+
+    if (!sanitizedShortDesc.trim()) {
       return { success: false, error: "Por favor agregá un rasgo distintivo" };
     }
 
-    // Validar description
-    if (!detailedDescription.trim()) {
+    if (sanitizedShortDesc.length < VALIDATIONS.shortDescription.minLength) {
+      return {
+        success: false,
+        error: `El rasgo distintivo debe tener al menos ${VALIDATIONS.shortDescription.minLength} caracteres`,
+      };
+    }
+
+    if (sanitizedShortDesc.length > VALIDATIONS.shortDescription.maxLength) {
+      return {
+        success: false,
+        error: `El rasgo distintivo no puede tener más de ${VALIDATIONS.shortDescription.maxLength} caracteres`,
+      };
+    }
+
+    if (isSpam(sanitizedShortDesc)) {
+      return {
+        success: false,
+        error: "Por favor ingresá un rasgo distintivo válido",
+      };
+    }
+
+    // Validar detailedDescription
+    const sanitizedDetailedDesc = sanitizeInput(detailedDescription);
+
+    if (!sanitizedDetailedDesc.trim()) {
       return { success: false, error: "Por favor agregá una descripción" };
+    }
+
+    if (
+      sanitizedDetailedDesc.length < VALIDATIONS.detailedDescription.minLength
+    ) {
+      return {
+        success: false,
+        error: `La descripción debe tener al menos ${VALIDATIONS.detailedDescription.minLength} caracteres`,
+      };
+    }
+
+    if (
+      sanitizedDetailedDesc.length > VALIDATIONS.detailedDescription.maxLength
+    ) {
+      return {
+        success: false,
+        error: `La descripción no puede tener más de ${VALIDATIONS.detailedDescription.maxLength} caracteres`,
+      };
+    }
+
+    if (isSpam(sanitizedDetailedDesc)) {
+      return {
+        success: false,
+        error: "Por favor ingresá una descripción válida",
+      };
     }
 
     // Validar selectedImageUri
@@ -106,14 +227,14 @@ export const useReportForm = (currentLocation?: { lat: number; lng: number }) =>
       };
     }
 
-    // Si todo está bien, retornar los datos
+    // Si todo está bien, retornar los datos sanitizados
     return {
       success: true,
       data: {
         type: selectedType,
-        animalName,
-        shortDescription,
-        detailedDescription,
+        animalName: sanitizedAnimalName,
+        shortDescription: sanitizedShortDesc,
+        detailedDescription: sanitizedDetailedDesc,
         pinImageUri: generatedPinUri,
         photoUri: selectedImageUri,
         location: (selectedLocation || currentLocation) as {
