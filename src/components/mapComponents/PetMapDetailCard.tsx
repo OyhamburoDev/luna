@@ -6,6 +6,7 @@ import {
   Image,
   Platform,
 } from "react-native";
+import { useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { fonts } from "../../theme/fonts";
 
@@ -25,11 +26,39 @@ export const PetMapDetailCard = ({
   onShowRoute,
 }: PetMapDetailCardProps) => {
   if (!visible || !petData) return null;
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const isLost = petData.label === "PERDIDO";
-  const statusColor = isLost ? "#FFEBEE" : "#E8F5E9";
-  const statusTextColor = isLost ? "#D32F2F" : "#2E7D32";
-  const statusText = isLost ? "PERDIDO" : "ENCONTRADO";
+  const getStatusStyles = (label: string) => {
+    switch (label) {
+      case "PERDIDO":
+        return {
+          color: "#FFEBEE",
+          textColor: "#D32F2F",
+          text: "PERDIDO",
+        };
+      case "AVISTADO":
+        return {
+          color: "#E3F2FD",
+          textColor: "#1976D2",
+          text: "AVISTADO",
+        };
+      case "ENCONTRADO":
+        return {
+          color: "#E8F5E9",
+          textColor: "#2E7D32",
+          text: "ENCONTRADO",
+        };
+      default:
+        return {
+          color: "#F5F5F5",
+          textColor: "#666",
+          text: "DESCONOCIDO",
+        };
+    }
+  };
+
+  const status = getStatusStyles(petData.label);
+  const shouldShowExpandButton = petData.description?.length > 31;
 
   return (
     <View style={styles.cardContainer}>
@@ -40,17 +69,18 @@ export const PetMapDetailCard = ({
 
       {/* Header: Título y Estado */}
       <View style={styles.headerRow}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, flexDirection: "column" }}>
           <Text style={styles.petTitle}>
-            {petData.species || "Perro Golden Retriever"}{" "}
+            {petData.animalName}
             <Text style={styles.petSubtitle}>
-              - {petData.color || "Dorado con manchas blancas"}
+              {" "}
+              - {petData.shortDescription}
             </Text>
           </Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-          <Text style={[styles.statusText, { color: statusTextColor }]}>
-            {statusText}
+        <View style={[styles.statusBadge, { backgroundColor: status.color }]}>
+          <Text style={[styles.statusText, { color: status.textColor }]}>
+            {status.text}
           </Text>
         </View>
         {/* Botón cerrar discreto */}
@@ -81,8 +111,7 @@ export const PetMapDetailCard = ({
               style={styles.detailIcon}
             />
             <Text style={styles.detailText} numberOfLines={2}>
-              {petData.location ||
-                "Palermo, Buenos Aires - Cerca del Parque Las Heras"}
+              {petData.address}
             </Text>
           </View>
 
@@ -94,9 +123,7 @@ export const PetMapDetailCard = ({
               color="#666"
               style={styles.detailIcon}
             />
-            <Text style={styles.detailText}>
-              {petData.time || "Hace 2 horas"}
-            </Text>
+            <Text style={styles.detailText}>{petData.time}</Text>
           </View>
 
           {/* Descripción breve */}
@@ -107,9 +134,11 @@ export const PetMapDetailCard = ({
               color="#666"
               style={styles.detailIcon}
             />
-            <Text style={styles.descriptionText} numberOfLines={2}>
-              {petData.description ||
-                "Se escapó esta mañana del patio. Muy dócil, responde a su nombre. Tiene collar rojo."}
+            <Text
+              style={styles.descriptionText}
+              numberOfLines={isExpanded ? undefined : 1}
+            >
+              {petData.description}
             </Text>
           </View>
         </View>
@@ -118,12 +147,16 @@ export const PetMapDetailCard = ({
       {/* Botones de Acción - UNO DEBAJO DEL OTRO */}
       <View style={styles.buttonsWrapper}>
         {/* Botón Amarillo clarito */}
-        <TouchableOpacity
-          style={styles.secondaryActionBtn}
-          onPress={() => onContact?.("details", petData.id)}
-        >
-          <Text style={styles.secondaryActionText}>Ver Detalles Completos</Text>
-        </TouchableOpacity>
+        {shouldShowExpandButton && (
+          <TouchableOpacity
+            style={styles.secondaryActionBtn}
+            onPress={() => setIsExpanded(!isExpanded)}
+          >
+            <Text style={styles.secondaryActionText}>
+              {isExpanded ? "Ver Menos" : "Ver Detalles Completos"}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {/* Botón Principal Negro */}
         <TouchableOpacity style={styles.primaryActionBtn} onPress={onShowRoute}>

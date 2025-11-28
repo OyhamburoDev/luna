@@ -126,4 +126,39 @@ export const createPinService = {
       return false;
     }
   },
+
+  async getAllPins(): Promise<SavedPin[]> {
+    try {
+      const q = query(
+        collection(db, "map_pins"),
+        where("isActive", "==", true)
+      );
+
+      const snapshot = await getDocs(q);
+
+      const pins: SavedPin[] = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          type: data.type,
+          animalName: data.animalName,
+          shortDescription: data.shortDescription,
+          detailedDescription: data.detailedDescription,
+          pinImageUri: data.pinImageUri,
+          photoUri: data.photoUri,
+          location: data.location,
+          userId: data.userId,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          reportCount: data.reportCount || 0,
+          isActive: data.isActive,
+        };
+      });
+
+      return pins;
+    } catch (error) {
+      console.error("Error fetching pins:", error);
+      throw new Error("No se pudieron cargar los pins.");
+    }
+  },
 };

@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  ActivityIndicator,
+  Text,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
@@ -143,6 +145,28 @@ export default function MapScreen() {
     // Centrar el mapa en el nuevo pin
     mapRef.current?.animateToLocation(newPin.lat, newPin.lng);
   };
+
+  // Mostrar loader si está cargando
+  if (pinsManager.isLoadingPins) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+        <Text>Cargando reportes...</Text>
+      </View>
+    );
+  }
+
+  // Mostrar error si falló
+  if (pinsManager.pinsError) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>{pinsManager.pinsError}</Text>
+        <TouchableOpacity onPress={pinsManager.loadPins}>
+          <Text>Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <>
