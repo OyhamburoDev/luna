@@ -24,6 +24,7 @@ export default {
       },
     },
     android: {
+      package: "com.oyhamburo.refugioapp",
       softwareKeyboardLayoutMode: "pan",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
@@ -41,6 +42,9 @@ export default {
     },
     plugins: ["expo-font"],
     extra: {
+      eas: {
+        projectId: "ef89514e-cd11-4f45-9c41-e6a692145b15",
+      },
       EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
       EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN:
         process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
