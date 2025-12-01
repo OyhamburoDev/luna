@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import {
-  StatusBar,
   View,
   TouchableOpacity,
   StyleSheet,
@@ -8,6 +7,8 @@ import {
   ActivityIndicator,
   Text,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useMapLogic } from "../hooks/useMapLogic";
@@ -170,13 +171,10 @@ export default function MapScreen() {
 
   return (
     <>
-      <StatusBar barStyle="default" />
-      <View
-        style={{
-          flex: 1,
-          paddingTop: StatusBar.currentHeight || 0,
-          backgroundColor: "black",
-        }}
+      <StatusBar style="light" translucent backgroundColor="transparent" />
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "black" }}
+        edges={["top"]}
       >
         {/* Header con flecha back (solo cuando hay ruta) */}
         {routeManager.routeDestination && (
@@ -303,14 +301,14 @@ export default function MapScreen() {
           }}
           onShowRoute={handleShowRoute}
         />
-      </View>
+      </SafeAreaView>
     </>
   );
 }
 const mapScreenStyles = StyleSheet.create({
   backButtonFloating: {
     position: "absolute",
-    top: (StatusBar.currentHeight || 0) + 16,
+    top: 56,
     left: 16,
     width: 44,
     height: 44,
@@ -328,7 +326,7 @@ const mapScreenStyles = StyleSheet.create({
   // ← NUEVOS: Estilos del FAB Menu
   fabContainer: {
     position: "absolute",
-    top: (StatusBar.currentHeight || 0) + 16,
+    top: 56,
     right: 16,
     alignItems: "center",
     zIndex: 10,

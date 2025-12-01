@@ -18,6 +18,7 @@ import { useFirebasePosts } from "../hooks/useFirebasePosts";
 import FullScreenStackTest from "../screens/FullScreenStackTest";
 import { useUserNotifications } from "../hooks/useUserNotifications";
 import { useAuthStore } from "../store/auth";
+import * as NavigationBar from "expo-navigation-bar";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -103,6 +104,21 @@ export default function SwipeNavigator() {
       flatListRef.current?.scrollToIndex({ index: 0, animated: true });
     }, 10);
   };
+
+  // Dentro del componente
+  useEffect(() => {
+    if (currentIndex === 0) {
+      // Estamos en TabsNavigator (Inicio/Mapa/etc)
+      console.log("📍 SwipeNavigator: currentIndex 0 - setting black");
+      NavigationBar.setBackgroundColorAsync("#000000");
+      NavigationBar.setButtonStyleAsync("light");
+    } else if (currentIndex === 1 && selectedPetIndex !== null) {
+      // Estamos en FullScreenStack
+      console.log("📍 SwipeNavigator: currentIndex 1 - setting white");
+      NavigationBar.setBackgroundColorAsync("#ffffff");
+      NavigationBar.setButtonStyleAsync("dark");
+    }
+  }, [currentIndex, selectedPetIndex]);
 
   if (loading || !firebasePosts || firebasePosts.length === 0) {
     return (

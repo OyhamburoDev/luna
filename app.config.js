@@ -1,14 +1,14 @@
 export default {
   expo: {
-    name: "prueba-navegacion",
+    name: "Refugio",
     slug: "prueba-navegacion",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/media/images/play_store_512.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
     splash: {
-      image: "./assets/splash-icon.png",
+      image: "./assets/media/images/play_store_512.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
@@ -27,10 +27,14 @@ export default {
       package: "com.oyhamburo.refugioapp",
       softwareKeyboardLayoutMode: "pan",
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/media/images/play_store_512.png",
         backgroundColor: "#ffffff",
       },
-      edgeToEdgeEnabled: true,
+      edgeToEdgeEnabled: false,
+      navigationBar: {
+        backgroundColor: "#000000ff",
+        barStyle: "light-content",
+      },
       config: {
         googleMaps: {
           apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "",

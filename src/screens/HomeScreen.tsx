@@ -10,8 +10,10 @@ import {
   Text,
 } from "react-native";
 import { useCallback, useState, useRef, useEffect } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as NavigationBar from "expo-navigation-bar";
+import { StatusBar } from "expo-status-bar";
 
 import CustomHeaderTop from "../components/CustomHeaderTop";
 import PetCardVertical from "../components/PetCardVertical";
@@ -41,6 +43,7 @@ export default function HomeScreen({
   loadingMore,
   hasMore,
 }: Props) {
+  const isFocused = useIsFocused();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [cardHeight, setCardHeight] = useState(0);
@@ -48,6 +51,15 @@ export default function HomeScreen({
   useEffect(() => {
     setBackgroundColorAsync("black");
   }, []);
+
+  // 🔥 Agregar NavigationBar control
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     console.log("🏠 HomeScreen focused - setting NavigationBar to black");
+  //     NavigationBar.setBackgroundColorAsync("#000000");
+  //     NavigationBar.setButtonStyleAsync("light");
+  //   }
+  // }, [isFocused]);
 
   const onLayoutFlatListContainer = useCallback((event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
@@ -102,53 +114,63 @@ export default function HomeScreen({
   }
 
   return (
-    <SafeAreaView style={styles.fullScreenContainer} edges={["left", "right"]}>
-      <CustomHeaderTop currentPage={0} onPressArrow={onPressDiscoverMore} />
+    <>
+      {isFocused && (
+        <StatusBar style="light" translucent backgroundColor="transparent" />
+      )}
+      <SafeAreaView
+        style={styles.fullScreenContainer}
+        edges={["left", "right"]}
+      >
+        <CustomHeaderTop currentPage={0} onPressArrow={onPressDiscoverMore} />
 
-      <View style={styles.flatListWrapper} onLayout={onLayoutFlatListContainer}>
-        <FlatList
-          data={pets}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <PetCardVertical
-              pet={item}
-              isActive={index === activeIndex && (isScreenActive ?? true)}
-              alturaCard={cardHeight}
-              onPressArrow={onPressDiscoverMore}
-              index={index}
-            />
-          )}
-          decelerationRate={0.8} // Buen balance
-          overScrollMode="never" // Reduce el rebote excesivo en Android
-          showsVerticalScrollIndicator={false}
-          disableIntervalMomentum={true}
-          // pagingEnabled
-          snapToInterval={cardHeight > 0 ? cardHeight : 1}
-          snapToAlignment="start"
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          initialNumToRender={3}
-          maxToRenderPerBatch={5}
-          windowSize={5}
-          removeClippedSubviews={true}
-          ListFooterComponent={
-            loadingMore ? (
-              <View style={styles.footerLoader}>
-                <ActivityIndicator size="small" color="#f093fb" />
-              </View>
-            ) : !hasMore ? (
-              <View style={styles.footerEnd}>
-                <Text style={{ color: "white", fontSize: 14 }}>
-                  No hay más posts
-                </Text>
-              </View>
-            ) : null
-          }
-        />
-      </View>
-    </SafeAreaView>
+        <View
+          style={styles.flatListWrapper}
+          onLayout={onLayoutFlatListContainer}
+        >
+          <FlatList
+            data={pets}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item, index }) => (
+              <PetCardVertical
+                pet={item}
+                isActive={index === activeIndex && (isScreenActive ?? true)}
+                alturaCard={cardHeight}
+                onPressArrow={onPressDiscoverMore}
+                index={index}
+              />
+            )}
+            decelerationRate={0.8}
+            overScrollMode="never"
+            showsVerticalScrollIndicator={false}
+            disableIntervalMomentum={true}
+            snapToInterval={cardHeight > 0 ? cardHeight : 1}
+            snapToAlignment="start"
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            initialNumToRender={3}
+            maxToRenderPerBatch={5}
+            windowSize={5}
+            removeClippedSubviews={true}
+            ListFooterComponent={
+              loadingMore ? (
+                <View style={styles.footerLoader}>
+                  <ActivityIndicator size="small" color="#f093fb" />
+                </View>
+              ) : !hasMore ? (
+                <View style={styles.footerEnd}>
+                  <Text style={{ color: "white", fontSize: 14 }}>
+                    No hay más posts
+                  </Text>
+                </View>
+              ) : null
+            }
+          />
+        </View>
+      </SafeAreaView>
+    </>
   );
 }
 

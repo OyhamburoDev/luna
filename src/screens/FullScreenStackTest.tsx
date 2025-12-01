@@ -11,18 +11,18 @@ import {
   Animated,
   Platform,
 } from "react-native";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import type { PetPost } from "../types/petPots";
-// import { StatusBar } from "react-native";
 import { fonts } from "../theme/fonts";
 import PetMediaCarouselTest from "../components/PetMediaCarouselText";
 import HealthModalStackScreen from "../components/HealthModalStackScreen";
 import BehaviorModalStackScreen from "../components/BehaviorModalStackScreen";
 import useOwnerStats from "../hooks/useOwnerStats";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import * as NavigationBar from "expo-navigation-bar";
 
 type Props = {
   pet: PetPost;
@@ -44,11 +44,7 @@ export default function FullScreenStackTest({
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [healthModalVisible, setHealthModalVisible] = useState(false);
   const [behaviorModalVisible, setBehaviorModalVisible] = useState(false);
-
-  // Estados para el botón flotante
-  // const [showFloatingButton, setShowFloatingButton] = useState(false);
-  // const buttonAnimation = useRef(new Animated.Value(0)).current;
-  // const lastScrollY = useRef(0);
+  const isFocused = useIsFocused();
 
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -64,48 +60,20 @@ export default function FullScreenStackTest({
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("🔄 Refrescando stats del owner...");
       refreshStats();
     }, [refreshStats])
   );
 
-  // Función para manejar el scroll
-  // const handleScroll = (event: any) => {
-  //   const currentScrollY = event.nativeEvent.contentOffset.y;
-
-  //   // Mostrar botón cuando scrolleas hacia abajo (después de 100px)
-  //   // Ocultar cuando volvés arriba
-  //   if (currentScrollY > 1 && !showFloatingButton) {
-  //     setShowFloatingButton(true);
-  //     // ENTRADA con timing
-  //     Animated.timing(buttonAnimation, {
-  //       toValue: 1,
-  //       duration: 250, // misma duración que salida
-  //       useNativeDriver: true,
-  //     }).start();
-  //   } else if (currentScrollY <= 5 && showFloatingButton) {
-  //     setShowFloatingButton(false);
-  //     // SALIDA con timing
-  //     Animated.timing(buttonAnimation, {
-  //       toValue: 0,
-  //       duration: 250,
-  //       useNativeDriver: true,
-  //     }).start();
+  // 🔥 Agregar NavigationBar control
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     console.log(
+  //       "📄 FullScreenStack focused - setting NavigationBar to white"
+  //     );
+  //     NavigationBar.setBackgroundColorAsync("#ffffff");
+  //     NavigationBar.setButtonStyleAsync("dark");
   //   }
-
-  //   lastScrollY.current = currentScrollY;
-  // };
-
-  // Animaciones para el botón
-  // const buttonTranslateY = buttonAnimation.interpolate({
-  //   inputRange: [0, 1],
-  //   outputRange: [20, 0], // 👈 respeta el área segura
-  // });
-
-  // const buttonOpacity = buttonAnimation.interpolate({
-  //   inputRange: [0, 1],
-  //   outputRange: [0, 1],
-  // });
+  // }, [isFocused]);
 
   // Verificar si hay datos de salud
   const hasHealthInfo =
@@ -130,7 +98,6 @@ export default function FullScreenStackTest({
 
   return (
     <>
-      {/* <SafeAreaView style={{ flex: 1, backgroundColor: "#f5f5f5" }} edges={["bottom"]} > */}
       <StatusBar style="light" />
       <Animated.ScrollView
         ref={scrollViewRef}

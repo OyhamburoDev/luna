@@ -41,9 +41,8 @@ export default function ProfileView({
   const { logout } = useAuth();
   const { visible, open, close, editProfile, closeAccount } =
     useProfileOptModal({
-      onEditProfile: onEditPress, // ya la tenés por props
+      onEditProfile: onEditPress,
       onCloseAccount: () => {
-        console.log("Se ejecutó onCloseAccount");
         logout();
       },
     });
@@ -74,7 +73,6 @@ export default function ProfileView({
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("🔄 Refrescando likes del perfil...");
       refreshLikes();
     }, [refreshLikes])
   );

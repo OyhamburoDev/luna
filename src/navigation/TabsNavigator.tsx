@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import { View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,7 +9,7 @@ import MapScreen from "../screens/MapScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 import CameraScreen from "../screens/CamaraScreen";
 import { PetPost } from "../types/petPots";
-
+import * as NavigationBar from "expo-navigation-bar";
 import { textStyles } from "../theme/textStyles";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -50,6 +51,18 @@ export default function TabsNavigator({
 
   // Estado para trackear la pantalla actual
   const [currentRoute, setCurrentRoute] = React.useState("Inicio");
+
+  useEffect(() => {
+    if (currentRoute === "Mensajes" || currentRoute === "Crear") {
+      // Tabs con fondo blanco
+      NavigationBar.setBackgroundColorAsync("#ffffff");
+      NavigationBar.setButtonStyleAsync("dark");
+    } else {
+      // Tabs con fondo negro (Inicio, Mapa, Perfil)
+      NavigationBar.setBackgroundColorAsync("#000000");
+      NavigationBar.setButtonStyleAsync("light");
+    }
+  }, [currentRoute]);
 
   return (
     <Tab.Navigator
