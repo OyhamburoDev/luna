@@ -23,6 +23,7 @@ import { db, storage } from "../config/firebase";
 import { PetPost } from "../types/petPots";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { notificationsService } from "./notificationsService";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 type MediaItem = {
   uri: string;
@@ -112,7 +113,7 @@ class PostService {
   }
 
   /**
-   * Crea un nuevo post en Firestore con sus medias
+   * Crea un nuevo post usando Cloud Functions para validación segura
    */
   async createPost(
     postData: Partial<PetPost>,
@@ -120,24 +121,7 @@ class PostService {
     userId: string
   ): Promise<string> {
     try {
-      const today = new Date();
-
-      // verificacion para un limite diario de posteos
-      today.setHours(0, 0, 0, 0);
-
-      const postsQuery = query(
-        collection(db, "posts"),
-        where("userId", "==", userId),
-        where("createdAt", ">=", Timestamp.fromDate(today))
-      );
-
-      const snapshot = await getDocs(postsQuery);
-
-      if (snapshot.size >= 3) {
-        throw new Error("Alcanzaste el límite de 3 publicaciones por día");
-      }
-
-      // 1. Subir todas las imágenes/videos
+      // 1. Subir todas las imágenes/videos PRIMERO
       const uploadPromises = mediaList.map((media, index) =>
         this.uploadMedia(media.uri, userId, index, media.type)
       );
@@ -157,44 +141,61 @@ class PostService {
         );
       }
 
-      // 3. Preparar datos del post
-      const completePostData = {
-        ...postData,
-        userId,
-        mediaUrls,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        status: "available",
-        likes: 0,
-        views: 0,
+      // 3. 🔥 LLAMAR A CLOUD FUNCTION (validación segura en servidor)
+      const functions = getFunctions();
+
+      const dataToSend = {
+        postData: {
+          ...postData,
+          mediaUrls,
+          thumbnailUri,
+          likes: 0,
+          views: 0,
+        },
       };
 
-      if (thumbnailUri) {
-        completePostData.thumbnailUri = thumbnailUri;
-      }
+      console.log(
+        "📤 Enviando a Cloud Function:",
+        JSON.stringify(dataToSend, null, 2)
+      );
 
-      // 4. Guardar en Firestore
-      const docRef = await addDoc(collection(db, "posts"), completePostData);
+      const createPostFn = httpsCallable(functions, "createPost");
+      const result = await createPostFn(dataToSend); // ✅ Usamos dataToSend
 
-      console.log("Post created with ID:", docRef.id);
+      const { postId, remainingPosts } = result.data as {
+        success: boolean;
+        postId: string;
+        remainingPosts: number;
+      };
 
+      console.log(
+        `✅ Post creado: ${postId}, quedan ${remainingPosts} posts hoy`
+      );
+
+      // 4. Crear notificación si es su primera publicación
       const userPostsCount = await this.getOwnerPostsCount(userId);
-
       if (userPostsCount === 1) {
-        // Es su primera publicación, crear notificación
         await notificationsService.createFirstPetNotification(
           userId,
           postData.petName || "tu mascota"
         );
       }
 
-      return docRef.id;
+      return postId;
     } catch (error) {
+      console.error("Error en createPost:", error);
+
+      // Manejar errores específicos de Cloud Functions
       if (error instanceof Error) {
+        if (error.message.includes("límite")) {
+          throw new Error("Has alcanzado el límite de publicaciones por hoy");
+        }
+        if (error.message.includes("conexión")) {
+          throw new Error("Demasiadas publicaciones desde esta conexión hoy");
+        }
         throw error;
       }
 
-      // Si no, lanzar error genérico
       throw new Error("Error al crear la publicación");
     }
   }

@@ -50,12 +50,12 @@ export default function CreatePostScreen({
 
   const { requireAuth } = useAuthModalContext();
 
-  // 👇 OBTENER LA FUNCIÓN PARA AGREGAR POSTS LOCALMENTE
+  //  OBTENER LA FUNCIÓN PARA AGREGAR POSTS LOCALMENTE
   const { addNewPostLocally } = useFirebasePosts();
 
-  // 👇 PASAR LA FUNCIÓN AL HOOK DE CREACIÓN
+  //  PASAR LA FUNCIÓN AL HOOK DE CREACIÓN
   const { createPost, loading, updateFieldError, touchField, hasError } =
-    useCreatePost(addNewPostLocally); // 👈 AGREGAR addNewPostLocally AQUÍ
+    useCreatePost(addNewPostLocally);
 
   const [healthModalVisible, setHealthModalVisible] = useState(false);
   const [behaviorModalVisible, setBehaviorModalVisible] = useState(false);

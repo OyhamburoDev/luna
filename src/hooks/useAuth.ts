@@ -2,7 +2,7 @@ import { useState } from "react";
 import { authApi } from "../api/auth.api";
 import { useAuthStore } from "../store/auth";
 import { navigate } from "../navigation/NavigationService";
-import { ensureUserDoc } from "../api/userProfileService";
+import { ensureUserDoc, getUserProfile } from "../api/userProfileService"; // ⬅️ AGREGÁ getUserProfile
 import { useUserStore } from "../store/userStore";
 import { useMessageStore } from "../store/messageStore";
 import { notificationsService } from "../api/notificationsService";
@@ -30,8 +30,14 @@ export function useAuth() {
       // 2) Guardar credenciales en auth store
       loginStore(user, token);
 
-      // 3) Sembrar mínimos en userStore
-      updateUserInfo({ uid: user.uid, email: user.email ?? "" });
+      // 3) 🔥 CARGAR PERFIL COMPLETO DESDE FIRESTORE
+      const profile = await getUserProfile(user.uid);
+      if (profile) {
+        updateUserInfo(profile); // ✅ Ahora guarda photoUrl, location, etc.
+      } else {
+        // Fallback si por alguna razón no existe
+        updateUserInfo({ uid: user.uid, email: user.email ?? "" });
+      }
 
       return true;
     } catch (err: any) {
@@ -58,8 +64,13 @@ export function useAuth() {
       // auth store
       loginStore(user, token);
 
-      // user store (semilla mínima)
-      updateUserInfo({ uid: user.uid, email: user.email ?? "" });
+      // 🔥 CARGAR PERFIL COMPLETO (aunque esté vacío al principio)
+      const profile = await getUserProfile(user.uid);
+      if (profile) {
+        updateUserInfo(profile);
+      } else {
+        updateUserInfo({ uid: user.uid, email: user.email ?? "" });
+      }
 
       return true;
     } catch (err: any) {
