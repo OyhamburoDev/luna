@@ -1,5 +1,5 @@
-const { setGlobalOptions } = require("firebase-functions");
-const { onCall } = require("firebase-functions/v2/https");
+const {setGlobalOptions} = require("firebase-functions");
+const {onCall} = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const logger = require("firebase-functions/logger");
 
@@ -36,7 +36,7 @@ exports.createPost = onCall(async (request) => {
 
   const uid = request.auth.uid;
   const userIP = request.rawRequest.ip;
-  const { postData } = request.data;
+  const {postData} = request.data;
   const yesterday = getYesterdayTimestamp();
 
   logger.info("📦 postData:", JSON.stringify(postData));
@@ -44,11 +44,11 @@ exports.createPost = onCall(async (request) => {
   try {
     // 1. Verificar límite por usuario
     const userPosts = await admin
-      .firestore()
-      .collection("posts")
-      .where("userId", "==", uid)
-      .where("createdAt", ">", yesterday)
-      .get();
+        .firestore()
+        .collection("posts")
+        .where("userId", "==", uid)
+        .where("createdAt", ">", yesterday)
+        .get();
 
     if (userPosts.size >= DAILY_LIMIT_PER_USER) {
       const userMsg =
@@ -62,11 +62,11 @@ exports.createPost = onCall(async (request) => {
 
     // 2. Verificar límite por IP
     const ipPosts = await admin
-      .firestore()
-      .collection("posts")
-      .where("createdIP", "==", userIP)
-      .where("createdAt", ">", yesterday)
-      .get();
+        .firestore()
+        .collection("posts")
+        .where("createdIP", "==", userIP)
+        .where("createdAt", ">", yesterday)
+        .get();
 
     if (ipPosts.size >= DAILY_LIMIT_PER_IP) {
       const ipMsg =
@@ -92,9 +92,9 @@ exports.createPost = onCall(async (request) => {
     };
 
     const docRef = await admin
-      .firestore()
-      .collection("posts")
-      .add(completePostData);
+        .firestore()
+        .collection("posts")
+        .add(completePostData);
 
     const createdMsg =
       `✅ Post creado: ${docRef.id} por ` + `usuario ${uid} desde IP ${userIP}`;
@@ -134,19 +134,19 @@ exports.checkPostLimit = onCall(async (request) => {
   try {
     // Contar posts del usuario
     const userPosts = await admin
-      .firestore()
-      .collection("posts")
-      .where("userId", "==", uid)
-      .where("createdAt", ">", yesterday)
-      .get();
+        .firestore()
+        .collection("posts")
+        .where("userId", "==", uid)
+        .where("createdAt", ">", yesterday)
+        .get();
 
     // Contar posts de la IP
     const ipPosts = await admin
-      .firestore()
-      .collection("posts")
-      .where("createdIP", "==", userIP)
-      .where("createdAt", ">", yesterday)
-      .get();
+        .firestore()
+        .collection("posts")
+        .where("createdIP", "==", userIP)
+        .where("createdAt", ">", yesterday)
+        .get();
 
     const checkMsg =
       `📊 Check límites - Usuario: ` +
@@ -170,6 +170,110 @@ exports.checkPostLimit = onCall(async (request) => {
     };
   } catch (error) {
     logger.error("❌ Error verificando límite:", error);
+    throw error;
+  }
+});
+/**
+ * Obtiene posts con rate limiting por IP
+ */
+exports.getPosts = onCall(async (request) => {
+  try {
+    const userIP = request.rawRequest.ip;
+    const {limitCount = 5, lastDocId = null} = request.data;
+
+    // Límites de seguridad
+    const HOURLY_READ_LIMIT_PER_IP = 300;
+    const MAX_POSTS_PER_REQUEST = 20;
+    const safeLimit = Math.min(limitCount, MAX_POSTS_PER_REQUEST);
+
+    // Usar IP como ID del documento (sanitizar para Firestore)
+    const sanitizedIP = userIP.replace(/[^a-zA-Z0-9]/g, "_");
+    const rateLimitDoc = admin
+        .firestore()
+        .collection("read_logs")
+        .doc(sanitizedIP);
+
+    // Obtener o crear el documento de rate limit
+    const rateLimitSnap = await rateLimitDoc.get();
+    const now = admin.firestore.Timestamp.now();
+    const oneHourAgo = admin.firestore.Timestamp.fromMillis(
+        now.toMillis() - 60 * 60 * 1000,
+    );
+
+    let callCount = 0;
+    let lastReset = now;
+
+    if (rateLimitSnap.exists) {
+      const data = rateLimitSnap.data();
+      lastReset = data.lastReset;
+
+      // Si pasó más de 1 hora, resetear contador
+      if (lastReset.toMillis() < oneHourAgo.toMillis()) {
+        callCount = 1;
+        lastReset = now;
+      } else {
+        // Incrementar contador
+        callCount = data.callCount + 1;
+      }
+    } else {
+      // Primera llamada de esta IP
+      callCount = 1;
+    }
+
+    // Verificar límite
+    if (callCount > HOURLY_READ_LIMIT_PER_IP) {
+      throw new Error(
+          "Demasiadas consultas desde esta conexión. Intenta más tarde.",
+      );
+    }
+
+    // Actualizar documento de rate limit
+    await rateLimitDoc.set({
+      ip: userIP,
+      callCount: callCount,
+      lastReset: lastReset,
+      lastCall: now,
+    });
+
+    // Obtener posts
+    let postsQuery = admin
+        .firestore()
+        .collection("posts")
+        .orderBy("createdAt", "desc")
+        .limit(safeLimit);
+
+    if (lastDocId) {
+      const lastDoc = await admin
+          .firestore()
+          .collection("posts")
+          .doc(lastDocId)
+          .get();
+      if (lastDoc.exists) {
+        postsQuery = postsQuery.startAfter(lastDoc);
+      }
+    }
+
+    const postsSnapshot = await postsQuery.get();
+    const posts = [];
+    postsSnapshot.forEach((doc) => {
+      posts.push({id: doc.id, ...doc.data()});
+    });
+
+    const hasMore = posts.length === safeLimit;
+    const newLastDocId = posts.length > 0 ? posts[posts.length - 1].id : null;
+
+    console.log(
+        `✅ IP ${userIP}: Llamada ${callCount}/${HOURLY_READ_LIMIT_PER_IP}`,
+    );
+
+    return {
+      success: true,
+      posts,
+      hasMore,
+      lastDocId: newLastDocId,
+    };
+  } catch (error) {
+    console.error("❌ Error obteniendo posts:", error);
     throw error;
   }
 });

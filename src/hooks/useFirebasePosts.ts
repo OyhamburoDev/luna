@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { PetPost } from "../types/petPots";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 export function useFirebasePosts() {
   const [firebasePosts, setFirebasePosts] = useState<PetPost[]>([]);
@@ -26,7 +27,7 @@ export function useFirebasePosts() {
   const transformFirebaseDoc = (doc: any): PetPost => {
     const data = doc.data();
 
-    // 👇 NORMALIZAR createdAt A STRING ISO
+    // NORMALIZAR createdAt A STRING ISO
     let createdAt: string | Date | null;
 
     if (data.createdAt?.toDate) {
@@ -86,37 +87,29 @@ export function useFirebasePosts() {
   useEffect(() => {
     console.log("🔥 Iniciando carga inicial de posts");
 
-    const initialQuery = query(
-      collection(db, "posts"),
-      orderBy("createdAt", "desc"),
-      limit(5)
-    );
+    const loadInitialPosts = async () => {
+      try {
+        const functions = getFunctions();
+        const getPostsFn = httpsCallable(functions, "getPosts");
 
-    const unsubscribe = onSnapshot(
-      initialQuery,
-      (snapshot: QuerySnapshot<DocumentData>) => {
-        console.log("📥 Posts recibidos de Firebase (NORMALIZADOS):");
-        snapshot.docs.forEach((doc, index) => {
-          const data = doc.data();
-          const transformed = transformFirebaseDoc(doc);
-          console.log(`Post ${index}:`, {
-            id: doc.id,
-            name: data.petName,
-            originalCreatedAt: data.createdAt,
-            normalizedCreatedAt: transformed.createdAt,
-            normalizedType: typeof transformed.createdAt,
-            isDate: transformed.createdAt instanceof Date,
-          });
-        });
-        console.log("📥 Recibidos posts iniciales:", snapshot.docs.length);
+        const result = await getPostsFn({ limitCount: 5, lastDocId: null });
+        const data = result.data as {
+          success: boolean;
+          posts: any[];
+          hasMore: boolean;
+          lastDocId: string | null;
+        };
 
-        const posts: PetPost[] = snapshot.docs.map(transformFirebaseDoc);
+        console.log("📥 Posts recibidos de Cloud Function:", data.posts.length);
 
-        // 👇 AGREGAR ESTO - ORDENAR MANUALMENTE
+        const posts: PetPost[] = data.posts.map((post) =>
+          transformFirebaseDoc({ id: post.id, data: () => post })
+        );
+
         const orderedPosts = posts.sort((a, b) => {
           const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return timeB - timeA; // Más reciente primero
+          return timeB - timeA;
         });
 
         console.log("✅ ORDEN FINAL:");
@@ -124,55 +117,19 @@ export function useFirebasePosts() {
           console.log(`${index}: ${post.petName} - ${post.createdAt}`);
         });
 
-        console.log(
-          posts.map((p) => ({
-            name: p.petName,
-            createdAt: p.createdAt,
-            originalTimestamp: snapshot.docs.find((d) => d.id === p.id)?.data()
-              .createdAt,
-          }))
-        );
-
-        console.log(
-          "📊 Orden detallado:",
-          posts.map((p, index) => ({
-            posicion: index,
-            name: p.petName,
-            id: p.id.substring(0, 8),
-            createdAt: p.createdAt,
-            timestamp: p.createdAt ? new Date(p.createdAt).getTime() : 0,
-          }))
-        );
-
-        console.log(
-          "🔥 SNAPSHOT TRIGGER - Razón del cambio:",
-          snapshot.docChanges().map((change) => ({
-            type: change.type, // 'added', 'modified', 'removed'
-            doc: change.doc.id.substring(0, 8),
-            name: change.doc.data().petName,
-          }))
-        );
-        // Guardar el último documento para paginación
-
         setFirebasePosts(orderedPosts);
-        const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-        setLastVisible(lastDoc);
-
+        setLastVisible(data.lastDocId); // Ahora es un string, no un documento
         setCurrentPage(0);
-        setHasMore(snapshot.docs.length === 5);
+        setHasMore(data.hasMore);
         setLoading(false);
-      },
-      (err) => {
-        console.error("💥 Error en carga inicial:", err);
-        setError(err as Error);
+      } catch (error) {
+        console.error("💥 Error en carga inicial:", error);
+        setError(error as Error);
         setLoading(false);
       }
-    );
-
-    return () => {
-      console.log("🧹 Limpiando listener inicial");
-      unsubscribe();
     };
+
+    loadInitialPosts();
   }, []);
 
   // Función para cargar próximos 5 posts (AGREGAR al final)
@@ -190,32 +147,37 @@ export function useFirebasePosts() {
     setLoadingMore(true);
 
     try {
-      const nextQuery = query(
-        collection(db, "posts"),
-        orderBy("createdAt", "desc"),
-        startAfter(lastVisible),
-        limit(5)
-      );
+      const functions = getFunctions();
+      const getPostsFn = httpsCallable(functions, "getPosts");
 
-      const snapshot = await getDocs(nextQuery);
-      console.log("📥 Próximos posts recibidos:", snapshot.docs.length);
+      const result = await getPostsFn({
+        limitCount: 5,
+        lastDocId: lastVisible, // Ahora es un string
+      });
 
-      if (snapshot.docs.length > 0) {
-        const newPosts: PetPost[] = snapshot.docs.map(transformFirebaseDoc);
+      const data = result.data as {
+        success: boolean;
+        posts: any[];
+        hasMore: boolean;
+        lastDocId: string | null;
+      };
+
+      console.log("📥 Próximos posts recibidos:", data.posts.length);
+
+      if (data.posts.length > 0) {
+        const newPosts: PetPost[] = data.posts.map((post) =>
+          transformFirebaseDoc({ id: post.id, data: () => post })
+        );
 
         console.log(
           "✨ Agregando posts:",
           newPosts.map((p) => p.petName)
         );
 
-        // AGREGAR al final del array existente (scroll infinito)
         setFirebasePosts((prevPosts) => [...prevPosts, ...newPosts]);
-
-        // Actualizar paginación
-        const newLastVisible = snapshot.docs[snapshot.docs.length - 1];
-        setLastVisible(newLastVisible);
+        setLastVisible(data.lastDocId);
         setCurrentPage((prev) => prev + 1);
-        setHasMore(snapshot.docs.length === 5);
+        setHasMore(data.hasMore);
 
         console.log("✅ Posts agregados correctamente");
       } else {
