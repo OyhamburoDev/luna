@@ -45,7 +45,7 @@ export default function TabsNavigator({
 }: Props) {
   const hideBottomTabs = useTabsStore((state) => state.hideBottomTabs);
   const insets = useSafeAreaInsets();
-  const bottomPad = Math.max(insets.bottom, 16);
+  const bottomPad = Math.max(insets.bottom, 20);
   const unreadCount = useNotificationsStore((state) => state.unreadCount);
   const { isVisible } = useAuthModalContext();
 
@@ -156,6 +156,7 @@ export default function TabsNavigator({
                 borderTopWidth: 0,
                 paddingTop: 4,
                 paddingBottom: bottomPad,
+                height: 50 + bottomPad,
               },
 
           tabBarLabelStyle: {

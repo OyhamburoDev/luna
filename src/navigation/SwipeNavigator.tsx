@@ -11,7 +11,7 @@ import {
   NavigationIndependentTree,
 } from "@react-navigation/native";
 import TabsNavigator from "./TabsNavigator";
-import FullScreenStack from "../screens/FullScreenStack";
+import { StatusBar } from "expo-status-bar";
 import { useState, useRef, useEffect, useMemo } from "react";
 import AdoptionConfirmModal from "../components/AdoptionConfirmModal";
 import { useFirebasePosts } from "../hooks/useFirebasePosts";
@@ -25,11 +25,11 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 export default function SwipeNavigator() {
   const [activeTab, setActiveTab] = useState<
     "Inicio" | "Mapa" | "Crear" | "Mensajes" | "Perfil"
-  >("Inicio"); // para saber que tabs esta sellecionada?
+  >("Inicio"); // para saber que tabs esta sellecionada
 
   const scrollEnabled = activeTab === "Inicio"; // si esta activa , hacer scroll horizontal
 
-  const flatListRef = useRef<FlatList>(null); // no se
+  const flatListRef = useRef<FlatList>(null);
 
   const [selectedPetIndex, setSelectedPetIndex] = useState<number | null>(null); // seleccionamos el index
 
@@ -109,12 +109,12 @@ export default function SwipeNavigator() {
   useEffect(() => {
     if (currentIndex === 0) {
       // Estamos en TabsNavigator (Inicio/Mapa/etc)
-      console.log("📍 SwipeNavigator: currentIndex 0 - setting black");
+
       NavigationBar.setBackgroundColorAsync("#000000");
       NavigationBar.setButtonStyleAsync("light");
     } else if (currentIndex === 1 && selectedPetIndex !== null) {
       // Estamos en FullScreenStack
-      console.log("📍 SwipeNavigator: currentIndex 1 - setting white");
+
       NavigationBar.setBackgroundColorAsync("#ffffff");
       NavigationBar.setButtonStyleAsync("dark");
     }
@@ -122,21 +122,25 @@ export default function SwipeNavigator() {
 
   if (loading || !firebasePosts || firebasePosts.length === 0) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "black",
-        }}
-      >
-        <ActivityIndicator size="large" color="#667eea" />
-      </View>
+      <>
+        <StatusBar style="light" backgroundColor="#000000" />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "black",
+          }}
+        >
+          <ActivityIndicator size="large" color="#667eea" />
+        </View>
+      </>
     );
   }
 
   return (
     <>
+      <StatusBar style="light" backgroundColor="#000000" />
       <FlatList
         ref={flatListRef}
         data={[0, 1]}

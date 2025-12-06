@@ -9,14 +9,14 @@ export const useAuthModal = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   // CAMBIO CLAVE: Ahora el estado inicial es "register"
-  const [modalType, setModalType] = useState<AuthModalType>("register");
+  const [modalType, setModalType] = useState<AuthModalType>("login");
 
   // Obtenemos el estado de autenticación actual
   const { isAuthenticated } = useAuthStore();
 
   // FUNCIÓN PRINCIPAL: Esta es la magia 🎩
   const requireAuth = useCallback(
-    (action: () => void, defaultModalType: AuthModalType = "register") => {
+    (action: () => void, defaultModalType: AuthModalType = "login") => {
       if (isAuthenticated) {
         action();
       } else {
@@ -28,7 +28,7 @@ export const useAuthModal = () => {
   );
 
   // Función para abrir el modal manualmente - CAMBIÉ DEFAULT A "register"
-  const openModal = useCallback((type: AuthModalType = "register") => {
+  const openModal = useCallback((type: AuthModalType = "login") => {
     setModalType(type);
     setIsVisible(true);
   }, []);

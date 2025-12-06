@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { authApi } from "../api/auth.api";
 import { useAuthStore } from "../store/auth";
-import { navigate } from "../navigation/NavigationService";
-import { ensureUserDoc, getUserProfile } from "../api/userProfileService"; // ⬅️ AGREGÁ getUserProfile
+import { ensureUserDoc, getUserProfile } from "../api/userProfileService";
 import { useUserStore } from "../store/userStore";
 import { useMessageStore } from "../store/messageStore";
 import { notificationsService } from "../api/notificationsService";
+
+type AuthResult = {
+  success: boolean;
+  error?: string;
+};
 
 export function useAuth() {
   const loginStore = useAuthStore((state) => state.login);
@@ -17,7 +21,10 @@ export function useAuth() {
   const updateUserInfo = useUserStore((s) => s.updateUserInfo);
   const resetUserInfo = useUserStore((s) => s.resetUserInfo);
 
-  const login = async (email: string, password: string) => {
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);
 
@@ -30,26 +37,29 @@ export function useAuth() {
       // 2) Guardar credenciales en auth store
       loginStore(user, token);
 
-      // 3) 🔥 CARGAR PERFIL COMPLETO DESDE FIRESTORE
+      // 3) CARGAR PERFIL COMPLETO DESDE FIRESTORE
       const profile = await getUserProfile(user.uid);
       if (profile) {
-        updateUserInfo(profile); // ✅ Ahora guarda photoUrl, location, etc.
+        updateUserInfo(profile); // Ahora guarda photoUrl, location, etc.
       } else {
         // Fallback si por alguna razón no existe
         updateUserInfo({ uid: user.uid, email: user.email ?? "" });
       }
 
-      return true;
+      return { success: true };
     } catch (err: any) {
-      console.error("Login error:", err);
-      setError("Credenciales incorrectas o error de red");
-      return false;
+      const errorMsg = err.message || "Error al iniciar sesión";
+      setError(errorMsg);
+      return { success: false, error: errorMsg }; // ← CAMBIO: devolver error también
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (
+    email: string,
+    password: string
+  ): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);
 
@@ -64,7 +74,7 @@ export function useAuth() {
       // auth store
       loginStore(user, token);
 
-      // 🔥 CARGAR PERFIL COMPLETO (aunque esté vacío al principio)
+      // CARGAR PERFIL COMPLETO (aunque esté vacío al principio)
       const profile = await getUserProfile(user.uid);
       if (profile) {
         updateUserInfo(profile);
@@ -72,11 +82,11 @@ export function useAuth() {
         updateUserInfo({ uid: user.uid, email: user.email ?? "" });
       }
 
-      return true;
+      return { success: true }; // ← CAMBIO: objeto en lugar de true
     } catch (err: any) {
-      console.error("Register error:", err);
-      setError("No se pudo registrar el usuario");
-      return false;
+      const errorMsg = err.message || "No se pudo registrar el usuario";
+      setError(errorMsg);
+      return { success: false, error: errorMsg }; // ← CAMBIO: objeto con error
     } finally {
       setIsLoading(false);
     }
@@ -91,11 +101,16 @@ export function useAuth() {
     resetMessages();
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   return {
     login,
     register,
     logout,
     isLoading,
     error,
+    clearError,
   };
 }

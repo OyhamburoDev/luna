@@ -12,12 +12,14 @@ import {
   Animated,
   KeyboardAvoidingView,
   StyleSheet as RNStyleSheet,
+  Keyboard,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../hooks/useAuth";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { fonts } from "../theme/fonts";
-import { textStyles } from "../theme/textStyles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ToastModal from "./ToastMessage";
 
 export const AuthModal: React.FC = () => {
   const insets = useSafeAreaInsets();
@@ -25,20 +27,21 @@ export const AuthModal: React.FC = () => {
 
   const { isVisible, modalType, closeModal, switchModalType } =
     useAuthModalContext();
-  const { login, register, isLoading, error } = useAuth();
+  const { login, register, isLoading, error, clearError } = useAuth();
 
   const { height, width } = useWindowDimensions();
   const pagerRef = useRef<ScrollView>(null);
 
-  const modalHeight = Math.max(320, height * 0.85);
+  const modalHeight = Math.max(320, height * 0.9);
   const slideY = useRef(new Animated.Value(modalHeight)).current;
 
   const [mounted, setMounted] = useState(isVisible);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  // CAMBIO CLAVE: Ahora isRegister es true cuando modalType es "register"
-  const isRegister = modalType === "register";
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Animación de apertura/cierre
   useEffect(() => {
@@ -77,7 +80,7 @@ export const AuthModal: React.FC = () => {
       return;
     }
     if (prevModalType.current !== modalType) {
-      const x = modalType === "register" ? 0 : width;
+      const x = modalType === "login" ? 0 : width;
 
       pagerRef.current.scrollTo({ x, y: 0, animated: true });
     }
@@ -85,20 +88,50 @@ export const AuthModal: React.FC = () => {
   }, [modalType, width, isVisible]);
 
   const handleAuth = async () => {
+    Keyboard.dismiss();
+
+    // ← VALIDACIONES ACÁ:
+    // 1. Email vacío
+    if (!email.trim()) {
+      setErrorMessage("Por favor ingresá tu email");
+      setShowErrorToast(true);
+      return; // No continuar
+    }
+
+    // 2. Email mal formado (regex simple)
+    if (!email.includes("@")) {
+      setErrorMessage("El email debe contener @");
+      setShowErrorToast(true);
+      return;
+    }
+
+    // 2. Contraseña vacía
+    if (!password) {
+      setErrorMessage("Por favor ingresá tu contraseña");
+      setShowErrorToast(true);
+      return; // No continuar
+    }
+
     if (modalType === "register") {
-      const success = await register(email, password);
-      if (success) {
-        handleClose(); // Cerrar primero
-        setPassword(""); // Limpiar después
+      const result = await register(email, password); // ← Cambio: guardar resultado
+      if (result.success) {
+        // ← Cambio: usar .success
+        handleClose();
+        setPassword("");
       } else {
-        Alert.alert("Error", "No se pudo crear la cuenta");
+        // Usar el error que devolvió register
+        setErrorMessage(result.error || "No se pudo crear la cuenta");
+        setShowErrorToast(true);
       }
     } else {
-      const success = await login(email, password);
-      if (success) {
+      const result = await login(email, password); // ← Cambio: guardar resultado
+      if (result.success) {
+        // ← Cambio: usar .success
         handleClose();
       } else {
-        Alert.alert("Error", "No se pudo iniciar sesión");
+        // Usar el error que devolvió login
+        setErrorMessage(result.error || "No se pudo iniciar sesión");
+        setShowErrorToast(true);
       }
     }
   };
@@ -130,17 +163,16 @@ export const AuthModal: React.FC = () => {
           },
         ]}
       >
+        <View style={styles.header}>
+          <Pressable onPress={handleClose} style={styles.closeButton}>
+            <Ionicons name="close" size={26} color="#666" />
+          </Pressable>
+        </View>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={56}
           style={{ flex: 1 }}
         >
-          <View style={styles.header}>
-            <Pressable onPress={handleClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>✕</Text>
-            </Pressable>
-          </View>
-
           {/* SCROLL VIEW - contentOffset inicial basado en modalType */}
           <ScrollView
             ref={pagerRef}
@@ -152,8 +184,63 @@ export const AuthModal: React.FC = () => {
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ width: width * 2 }}
             contentOffset={{ x: 0, y: 0 }}
-            style={{ flex: 1 }}
+            style={{ flex: 1, minHeight: 200 }}
           >
+            {/* PÁGINA 2 (x=width): LOGIN */}
+            <View style={[styles.page, { width }]}>
+              <View style={styles.body}>
+                <Text style={[{ fontFamily: fonts.bold }, styles.title]}>
+                  Inicio de sesión
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Correo electrónico"
+                  placeholderTextColor="#888888"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (error) clearError();
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Contraseña"
+                    placeholderTextColor="#888888"
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (error) clearError();
+                    }}
+                    secureTextEntry={!showPassword}
+                  />
+                  <Pressable onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={22}
+                      color="#888"
+                    />
+                  </Pressable>
+                </View>
+                {error && <Text style={styles.error}>{error}</Text>}
+
+                <View style={styles.line} />
+
+                <Pressable
+                  style={[styles.button, isLoading && styles.buttonDisabled]}
+                  onPress={handleAuth}
+                  disabled={isLoading}
+                >
+                  <Text style={[{ fontFamily: fonts.bold }, styles.buttonText]}>
+                    Iniciar sesión
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+
             {/* PÁGINA 1 (x=0): REGISTER */}
             <View style={[styles.page, { width }]}>
               <View style={styles.body}>
@@ -166,18 +253,34 @@ export const AuthModal: React.FC = () => {
                   placeholder="Correo electrónico"
                   placeholderTextColor="#888888"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (error) clearError();
+                  }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Contraseña"
-                  placeholderTextColor="#888888"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Contraseña"
+                    placeholderTextColor="#888888"
+                    value={password}
+                    onChangeText={(text) => {
+                      // ← Igual que en login
+                      setPassword(text);
+                      if (error) clearError();
+                    }}
+                    secureTextEntry={!showPassword}
+                  />
+                  <Pressable onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={22}
+                      color="#888"
+                    />
+                  </Pressable>
+                </View>
 
                 {error && <Text style={styles.error}>{error}</Text>}
 
@@ -193,81 +296,29 @@ export const AuthModal: React.FC = () => {
                   </Text>
                 </Pressable>
               </View>
-
-              <View style={styles.btnScroll}>
-                <Pressable onPress={handleSwitchMode} style={styles.link}>
-                  <Text
-                    style={[{ fontFamily: fonts.semiBold }, styles.linkText]}
-                  >
-                    ¿Ya tienes una cuenta?{" "}
-                    <Text
-                      style={[{ fontFamily: fonts.bold }, styles.linkTextTwo]}
-                    >
-                      Iniciar sesión
-                    </Text>
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-
-            {/* PÁGINA 2 (x=width): LOGIN */}
-            <View style={[styles.page, { width }]}>
-              <View style={styles.body}>
-                <Text style={[{ fontFamily: fonts.bold }, styles.title]}>
-                  Inicio de sesión
-                </Text>
-
-                <TextInput
-                  style={styles.input}
-                  placeholder="Correo electrónico"
-                  placeholderTextColor="#888888"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Contraseña"
-                  placeholderTextColor="#888888"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-
-                {error && <Text style={styles.error}>{error}</Text>}
-
-                <View style={styles.line} />
-
-                <Pressable
-                  style={[styles.button, isLoading && styles.buttonDisabled]}
-                  onPress={handleAuth}
-                  disabled={isLoading}
-                >
-                  <Text style={[{ fontFamily: fonts.bold }, styles.buttonText]}>
-                    Iniciar sesión
-                  </Text>
-                </Pressable>
-              </View>
-
-              <View style={styles.btnScroll}>
-                <Pressable onPress={handleSwitchMode} style={styles.link}>
-                  <Text
-                    style={[{ fontFamily: fonts.semiBold }, styles.linkText]}
-                  >
-                    ¿No tenés cuenta?{" "}
-                    <Text
-                      style={[{ fontFamily: fonts.bold }, styles.linkTextTwo]}
-                    >
-                      Regístrate
-                    </Text>
-                  </Text>
-                </Pressable>
-              </View>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
+        {/* 👇 NUEVO FOOTER - Agregar acá */}
+        <View style={[styles.footerFixed, { paddingBottom: bottomPad + 15 }]}>
+          <Pressable onPress={handleSwitchMode} style={styles.link}>
+            <Text style={[{ fontFamily: fonts.semiBold }, styles.linkText]}>
+              {modalType === "login"
+                ? "¿No tenés cuenta? "
+                : "¿Ya tienes una cuenta? "}
+              <Text style={[{ fontFamily: fonts.bold }, styles.linkTextTwo]}>
+                {modalType === "login" ? "Regístrate" : "Iniciar sesión"}
+              </Text>
+            </Text>
+          </Pressable>
+        </View>
       </Animated.View>
+      <ToastModal
+        visible={showErrorToast}
+        onClose={() => setShowErrorToast(false)}
+        message={errorMessage}
+        type="error"
+      />
     </View>
   );
 };
@@ -300,16 +351,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  closeButtonText: {
-    fontSize: 18,
-    color: "#666",
-  },
   page: {
     flex: 1,
     marginTop: 30,
-    justifyContent: "space-between",
   },
   body: {
+    flex: 1,
     alignItems: "center",
     paddingHorizontal: 20,
   },
@@ -320,11 +367,28 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingBottom: 30,
   },
+
+  passwordContainer: {
+    width: "100%",
+    backgroundColor: "#0000000c",
+    borderRadius: 8,
+    marginBottom: 15,
+    flexDirection: "row", // ← Para poner input e ícono en fila
+    alignItems: "center", // ← Centra verticalmente
+    paddingRight: 12, // ← Espacio para el ícono
+  },
+  passwordInput: {
+    flex: 1, // ← Ocupa todo el espacio disponible
+    padding: 12,
+    paddingVertical: 15,
+    fontFamily: fonts.regular,
+  },
   input: {
     width: "100%",
     backgroundColor: "#0000000c",
     borderRadius: 8,
     padding: 12,
+    paddingVertical: 15,
     marginBottom: 15,
     fontFamily: fonts.regular,
   },
@@ -354,7 +418,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   error: {
-    color: "red",
+    fontFamily: fonts.semiBold,
+    color: "#FF3B30",
     textAlign: "center",
     marginBottom: 10,
   },
@@ -371,5 +436,14 @@ const styles = StyleSheet.create({
   linkTextTwo: {
     color: "#FE2C55",
     fontSize: 15,
+  },
+  footerFixed: {
+    backgroundColor: "#0000000c",
+    width: "100%",
+    paddingTop: 15,
+    position: "absolute", // ← Esto lo hace fijo
+    bottom: 0, // ← Siempre abajo
+    left: 0,
+    right: 0,
   },
 });
