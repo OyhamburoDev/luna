@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
@@ -59,6 +59,24 @@ export default function MapScreen() {
 
   // Nuevo hook para manejar detalles y modal
   const mapDetails = useMapDetails(mapLogic.currentUserId);
+
+  // Animar cuando se obtiene ubicación GPS por primera vez
+  const hasAnimatedRef = useRef(false);
+
+  useEffect(() => {
+    // Si ya obtuvimos ubicación y no hemos animado aún
+    if (mapLogic.location && !hasAnimatedRef.current) {
+      hasAnimatedRef.current = true;
+
+      // Guardar coordenadas antes del setTimeout
+      const { latitude, longitude } = mapLogic.location.coords;
+
+      // Animar desde provincia a ubicación real
+      setTimeout(() => {
+        mapRef.current?.animateToLocation(latitude, longitude);
+      }, 500);
+    }
+  }, [mapLogic.location]);
 
   const handleClearSearchLocation = () => {
     setSearchedLocation(null);
@@ -152,7 +170,6 @@ export default function MapScreen() {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
-        <Text>Cargando reportes...</Text>
       </View>
     );
   }

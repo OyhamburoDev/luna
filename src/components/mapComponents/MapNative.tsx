@@ -148,7 +148,7 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         customMapStyle={isDarkMode ? darkMapStyle : silverMapStyle}
-        region={{
+        initialRegion={{
           latitude: currentLat,
           longitude: currentLng,
           latitudeDelta,
