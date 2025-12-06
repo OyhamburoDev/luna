@@ -90,56 +90,61 @@ export const AuthModal: React.FC = () => {
   const handleAuth = async () => {
     Keyboard.dismiss();
 
-    // ← VALIDACIONES ACÁ:
-    // 1. Email vacío
-    if (!email.trim()) {
-      setErrorMessage("Por favor ingresá tu email");
-      setShowErrorToast(true);
-      return; // No continuar
-    }
-
-    // 2. Email mal formado (regex simple)
-    if (!email.includes("@")) {
-      setErrorMessage("El email debe contener @");
-      setShowErrorToast(true);
-      return;
-    }
-
-    // 2. Contraseña vacía
-    if (!password) {
-      setErrorMessage("Por favor ingresá tu contraseña");
-      setShowErrorToast(true);
-      return; // No continuar
-    }
-
-    if (modalType === "register") {
-      const result = await register(email, password); // ← Cambio: guardar resultado
-      if (result.success) {
-        // ← Cambio: usar .success
-        handleClose();
-        setPassword("");
-      } else {
-        // Usar el error que devolvió register
-        setErrorMessage(result.error || "No se pudo crear la cuenta");
+    setTimeout(async () => {
+      // ← VALIDACIONES ACÁ:
+      // 1. Email vacío
+      if (!email.trim()) {
+        setErrorMessage("Por favor ingresá tu email");
         setShowErrorToast(true);
+        return; // No continuar
       }
-    } else {
-      const result = await login(email, password); // ← Cambio: guardar resultado
-      if (result.success) {
-        // ← Cambio: usar .success
-        handleClose();
-      } else {
-        // Usar el error que devolvió login
-        setErrorMessage(result.error || "No se pudo iniciar sesión");
+
+      // 2. Email mal formado (regex simple)
+      if (!email.includes("@")) {
+        setErrorMessage("El email debe contener @");
         setShowErrorToast(true);
+        return;
       }
-    }
+
+      // 2. Contraseña vacía
+      if (!password) {
+        setErrorMessage("Por favor ingresá tu contraseña");
+        setShowErrorToast(true);
+        return; // No continuar
+      }
+
+      if (modalType === "register") {
+        const result = await register(email, password); // ← Cambio: guardar resultado
+        if (result.success) {
+          // ← Cambio: usar .success
+          handleClose();
+          setPassword("");
+        } else {
+          // Usar el error que devolvió register
+          setErrorMessage(result.error || "No se pudo crear la cuenta");
+          setShowErrorToast(true);
+        }
+      } else {
+        const result = await login(email, password); // ← Cambio: guardar resultado
+        if (result.success) {
+          // ← Cambio: usar .success
+          handleClose();
+        } else {
+          // Usar el error que devolvió login
+          setErrorMessage(result.error || "No se pudo iniciar sesión");
+          setShowErrorToast(true);
+        }
+      }
+    }, 150); // Delay para que cierre el teclado primero
   };
 
   const handleClose = () => {
-    closeModal();
-    setEmail("");
-    setPassword("");
+    Keyboard.dismiss();
+    setTimeout(() => {
+      closeModal();
+      setEmail("");
+      setPassword("");
+    }, 100); // Pequeño delay para que el teclado se cierre primero
   };
 
   const handleSwitchMode = () => {
