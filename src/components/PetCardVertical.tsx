@@ -89,7 +89,7 @@ export default function PetCardVertical({
           setShowControls(false);
         }
       } catch (error: unknown) {
-        console.error(
+        console.warn(
           "Error controlando video:",
           error instanceof Error ? error.message : String(error)
         );
