@@ -11,7 +11,7 @@ import {
   Animated,
   Platform,
 } from "react-native";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import type { PetPost } from "../types/petPots";
 import { fonts } from "../theme/fonts";
@@ -22,7 +22,6 @@ import useOwnerStats from "../hooks/useOwnerStats";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import * as NavigationBar from "expo-navigation-bar";
 
 type Props = {
   pet: PetPost;
@@ -64,17 +63,6 @@ export default function FullScreenStackTest({
     }, [refreshStats])
   );
 
-  // 🔥 Agregar NavigationBar control
-  // useEffect(() => {
-  //   if (isFocused) {
-  //     console.log(
-  //       "📄 FullScreenStack focused - setting NavigationBar to white"
-  //     );
-  //     NavigationBar.setBackgroundColorAsync("#ffffff");
-  //     NavigationBar.setButtonStyleAsync("dark");
-  //   }
-  // }, [isFocused]);
-
   // Verificar si hay datos de salud
   const hasHealthInfo =
     pet.isVaccinated ||
@@ -91,7 +79,7 @@ export default function FullScreenStackTest({
     pet.energyLevel;
 
   const buttonTranslateY = scrollY.interpolate({
-    inputRange: [0, 70],
+    inputRange: [0, 400],
     outputRange: [buttonHeight + 16, 0],
     extrapolate: "clamp",
   });
@@ -312,28 +300,6 @@ export default function FullScreenStackTest({
           </View>
         </View>
       </Animated.ScrollView>
-      {/* <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.adoptButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.adoptButtonText}>Adoptar a {pet.petName}</Text>
-          </TouchableOpacity>
-        </View> */}
-      {/* <Animated.View
-        style={[styles.floatingButtonContainer, { bottom: insets.bottom + 20, transform: [{ translateY: buttonTranslateY }], opacity: buttonOpacity }]}
-        pointerEvents={showFloatingButton ? "auto" : "none"}
-      >
-        <TouchableOpacity
-          style={styles.floatingButton}
-          onPress={() => setModalVisible(true)}
-          activeOpacity={0.9}
-        >
-          <Ionicons name="heart" size={24} color="white" />
-          <Text style={styles.floatingButtonText}>Adoptar a {pet.petName}</Text>
-        </TouchableOpacity>
-      </Animated.View> */}
-      {/* </SafeAreaView> */}
       {/* Barra de navegación simulada (opaca) */}
       {Platform.OS === "android" && (
         <View

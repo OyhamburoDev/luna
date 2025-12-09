@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dimensions, View, Image, StyleSheet, Text } from "react-native";
+import { BlurView } from "expo-blur";
+import { Animated } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import Carousel from "react-native-reanimated-carousel";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import type { PetPost } from "../types/petPots";
 import { useMemo } from "react";
+import { ActivityIndicator } from "react-native";
 
 const { width } = Dimensions.get("window");
 const { height: screenHeight } = Dimensions.get("window");
@@ -21,18 +25,41 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [videoThumbnail, setVideoThumbnail] = useState(null);
   const [isLoadingMedia, setIsLoadingMedia] = useState(true);
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
+  const fadeAnimation = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmerAnimation, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, [shimmerAnimation]);
+
+  const handleImageLoad = () => {
+    Animated.timing(fadeAnimation, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsLoadingMedia(false);
+      fadeAnimation.setValue(1);
+    });
+  };
 
   useEffect(() => {
     if (!pet) return;
 
     console.log("esteee", pet.thumbnailUri);
 
-    setIsLoadingMedia(true);
-    setVideoThumbnail(null); // Limpiamos el estado anterior
+    setIsLoadingMedia(true); // ← Ahora sí queda en true
+    setVideoThumbnail(null);
     if (pet.thumbnailUri) {
       setVideoThumbnail(pet.thumbnailUri);
     }
-    setIsLoadingMedia(false);
+    // ❌ NO pongas setIsLoadingMedia(false) acá
   }, [pet]);
 
   useEffect(() => {
@@ -67,49 +94,6 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
 
   console.log("🧪 mediaItems:", mediaItems);
 
-  if (isLoadingMedia) {
-    return (
-      <View
-        style={{
-          height: carouselHeight,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#f5f5f5",
-        }}
-      >
-        <Ionicons name="reload" size={48} color="#666" />
-        <Text style={{ color: "#666", marginTop: 12, fontSize: 14 }}>
-          Cargando...
-        </Text>
-      </View>
-    );
-  }
-
-  if (mediaItems.length === 0) {
-    return (
-      <View
-        style={{
-          height: carouselHeight,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#f5f5f5",
-        }}
-      >
-        <Ionicons name="image-outline" size={64} color="#999" />
-        <Text
-          style={{
-            color: "#666",
-            marginTop: 16,
-            fontSize: 16,
-            fontWeight: "600",
-          }}
-        >
-          Sin contenido multimedia
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View
       style={{
@@ -136,6 +120,7 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
                     typeof item.uri === "string" ? { uri: item.uri } : item.uri
                   }
                   style={styles.image}
+                  onLoad={handleImageLoad}
                 />
               </>
             ) : (
@@ -144,11 +129,65 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
                   typeof item.uri === "string" ? { uri: item.uri } : item.uri
                 }
                 style={styles.image}
+                onLoad={handleImageLoad}
               />
             )}
           </View>
         )}
       />
+
+      {isLoadingMedia && (
+        <Animated.View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: "hidden",
+            zIndex: 10,
+            opacity: fadeAnimation,
+          }}
+        >
+          {/* Fondo con degradado sutil */}
+          <LinearGradient
+            colors={["#EBEBEB", "#F5F5F5", "#EBEBEB"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ flex: 1 }}
+          >
+            {/* Efecto shimmer mejorado */}
+            <Animated.View
+              style={{
+                width: width * 2.5,
+                height: "100%",
+                transform: [
+                  {
+                    translateX: shimmerAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-width * 2.5, width * 0.5],
+                    }),
+                  },
+                ],
+              }}
+            >
+              <LinearGradient
+                colors={[
+                  "rgba(255, 255, 255, 0)",
+                  "rgba(255, 255, 255, 0.4)",
+                  "rgba(255, 255, 255, 1)",
+                  "rgba(255, 255, 255, 0.4)",
+                  "rgba(255, 255, 255, 0)",
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ flex: 1 }}
+                locations={[0, 0.35, 0.5, 0.65, 1]}
+              />
+            </Animated.View>
+          </LinearGradient>
+        </Animated.View>
+      )}
 
       {mediaItems.length > 1 && (
         <View style={styles.imageCounter}>
