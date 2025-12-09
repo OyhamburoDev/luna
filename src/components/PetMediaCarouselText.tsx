@@ -121,6 +121,11 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
                   }
                   style={styles.image}
                   onLoad={handleImageLoad}
+                  onError={(error) => {
+                    console.log("❌ ERROR cargando imagen:", item.uri);
+                    console.log("Error details:", error.nativeEvent.error);
+                    setIsLoadingMedia(false); // Ocultar el loading aunque falle
+                  }}
                 />
               </>
             ) : (
