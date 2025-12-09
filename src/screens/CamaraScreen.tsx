@@ -27,6 +27,12 @@ export default function CameraScreen() {
   const [modalVisible, setModalVisible] = useState(true);
   const navigation = useNavigation<CameraScreenNavigationProp>();
 
+  React.useEffect(() => {
+    if (permission && !permission.granted) {
+      requestPermission();
+    }
+  }, [permission]);
+
   // Resetear modal cada vez que la pantalla gana foco
   useFocusEffect(
     React.useCallback(() => {
@@ -46,30 +52,18 @@ export default function CameraScreen() {
         const photo = result.assets[0];
 
         // VALIDAR FOTO ANTES DE CONTINUAR
-        console.log("=== VALIDANDO FOTO ===");
         const validation = await validatePhotoMedia(photo.uri);
 
-        console.log("Es válida:", validation.isValid);
-        console.log("Tamaño MB:", validation.sizeMB);
-        console.log("Error:", validation.error || "Ninguno");
-
         if (!validation.isValid) {
-          console.log("=== FOTO RECHAZADA ===");
           Alert.alert("Foto muy pesada", validation.error);
           return;
         }
-
-        console.log("Cerrando modal...");
         closeModal();
-
-        console.log("Navegando a CreatePost...");
 
         navigate("CreatePost", {
           media: { uri: photo.uri, width: photo.width, height: photo.height },
           type: "photo",
         });
-
-        console.log("Navigate ejecutado");
       }
     } catch (error) {
       console.log("Error:", error);
@@ -78,8 +72,6 @@ export default function CameraScreen() {
   };
 
   const recordVideo = async () => {
-    console.log("=== CONFIGURACIÓN DE VIDEO ===");
-
     try {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -89,31 +81,15 @@ export default function CameraScreen() {
         // videoMaxDuration removido - no funciona en Android
       });
 
-      console.log("=== RESULTADO DE CÁMARA ===", result.canceled);
-
       if (!result.canceled && result.assets?.length > 0) {
         const video = result.assets[0];
-        console.log("=== VIDEO OBTENIDO ===", {
-          duration: video.duration,
-          uri: video.uri.substring(0, 50) + "...",
-        });
 
         // VALIDAR VIDEO ANTES DE CONTINUAR (solo peso, no duración)
-        console.log("=== INICIANDO VALIDACIÓN ===");
         const validation = await validateVideoMedia(video.uri, video.duration);
-
-        console.log("=== RESULTADO VALIDACIÓN ===");
-        console.log("Es válido:", validation.isValid);
-        console.log("Tamaño MB:", validation.sizeMB);
-        console.log("Error:", validation.error || "Ninguno");
-
         if (!validation.isValid) {
-          console.log("=== VIDEO RECHAZADO ===");
           Alert.alert("Video muy pesado", validation.error);
           return; // No continuar si el video no es válido
         }
-
-        console.log("=== VIDEO VÁLIDO, NAVEGANDO ===");
         closeModal();
 
         navigate("CreatePost", {
@@ -143,7 +119,6 @@ export default function CameraScreen() {
         const type = media.type === "video" ? "video" : "photo";
 
         if (type === "photo") {
-          console.log("=== VALIDANDO FOTO DE GALERÍA ===");
           const validation = await validatePhotoMedia(media.uri);
 
           if (!validation.isValid) {
@@ -187,24 +162,24 @@ export default function CameraScreen() {
   };
 
   if (!permission) {
-    return <View />;
+    return <View style={{ flex: 1, backgroundColor: "black" }} />;
   }
 
-  if (!permission.granted) {
-    return (
-      <View style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>
-          Necesitamos permisos de cámara
-        </Text>
-        <TouchableOpacity
-          onPress={requestPermission}
-          style={styles.permissionButton}
-        >
-          <Text style={styles.permissionButtonText}>Dar permisos</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  // if (!permission.granted) {
+  //   return (
+  //     <View style={styles.permissionContainer}>
+  //       <Text style={styles.permissionText}>
+  //         Necesitamos permisos de cámara
+  //       </Text>
+  //       <TouchableOpacity
+  //         onPress={requestPermission}
+  //         style={styles.permissionButton}
+  //       >
+  //         <Text style={styles.permissionButtonText}>Dar permisos</Text>
+  //       </TouchableOpacity>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>

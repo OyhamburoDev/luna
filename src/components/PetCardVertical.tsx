@@ -122,7 +122,7 @@ export default function PetCardVertical({
     // Detectar doble tap
     if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
       if (!userId) {
-        openModal();
+        openModal("login", "#000000");
         return;
       }
 
@@ -196,7 +196,7 @@ export default function PetCardVertical({
       isActive
     ) {
       videoRef.current?.replayAsync().catch((error: unknown) => {
-        console.error("💥 Error en loop manual:", {
+        console.warn("💥 Error en loop manual:", {
           error: error instanceof Error ? error.message : String(error),
           petId: pet.id || pet.petName,
         });
@@ -205,7 +205,7 @@ export default function PetCardVertical({
 
     // Manejo de errores
     if (!status.isLoaded && status.error) {
-      console.error("💥 VIDEO ERROR:", {
+      console.warn("💥 VIDEO ERROR:", {
         error: status.error,
         uri: pet.videoUri,
         petId: pet.id || pet.petName,
@@ -364,7 +364,7 @@ export default function PetCardVertical({
             style={styles.likeButton}
             onPress={() => {
               if (!userId) {
-                openModal();
+                openModal("login", "#000000");
                 return;
               }
               toggleLike();

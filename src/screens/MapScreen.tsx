@@ -169,7 +169,7 @@ export default function MapScreen() {
   if (pinsManager.isLoadingPins) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#667eea" />
       </View>
     );
   }

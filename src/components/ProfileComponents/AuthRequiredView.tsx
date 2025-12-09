@@ -62,7 +62,7 @@ export const AuthRequiredView = ({
 
           <Pressable
             style={styles.authRequiredButton}
-            onPress={() => openModal()}
+            onPress={() => openModal("login", "#000000")}
           >
             <Text
               style={[

@@ -1,20 +1,17 @@
 import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LoginScreen from "../screens/LoginScreen";
-import RegisterScreen from "../screens/RegisterScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import CreatePostScreen from "../screens/CreatePostScreen";
-
 import SwipeNavigator from "./SwipeNavigator";
-import PetRegisterScreen from "../screens/PetRegisterFormScreen";
 import AdoptionFormScreen from "../screens/AdoptionFormScreen";
 import NotificationDetailScreen from "../screens/NotificationDetailScreen";
-
+import CameraScreen from "../screens/CamaraScreen";
 import ChatsScreen from "../screens/ChatsScreen";
 import { useNavigation } from "@react-navigation/native";
 
 export type RootStackParamList = {
   Swipe: undefined;
+  Camera: undefined;
   PetRegister: undefined;
   CreatePost: {
     media: {
@@ -45,6 +42,7 @@ export default function RootNavigator() {
         component={CreatePostScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="Camera" component={CameraScreen} />
       <Stack.Screen name="AdoptionFormPet" component={AdoptionFormScreen} />
       <Stack.Screen name="ChatsList" component={ChatsScreen} />
       <Stack.Screen name="Perfil" component={ProfileScreen} />

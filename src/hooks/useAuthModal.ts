@@ -10,16 +10,22 @@ export const useAuthModal = () => {
 
   // CAMBIO CLAVE: Ahora el estado inicial es "register"
   const [modalType, setModalType] = useState<AuthModalType>("login");
+  const [currentScreenColor, setCurrentScreenColor] = useState("#000000");
 
   // Obtenemos el estado de autenticación actual
   const { isAuthenticated } = useAuthStore();
 
   // FUNCIÓN PRINCIPAL: Esta es la magia 🎩
   const requireAuth = useCallback(
-    (action: () => void, defaultModalType: AuthModalType = "login") => {
+    (
+      action: () => void,
+      defaultModalType: AuthModalType = "login",
+      screenColor?: string
+    ) => {
       if (isAuthenticated) {
         action();
       } else {
+        if (screenColor) setCurrentScreenColor(screenColor); // ← AGREGAR ESTO
         setModalType(defaultModalType);
         setIsVisible(true);
       }
@@ -28,10 +34,14 @@ export const useAuthModal = () => {
   );
 
   // Función para abrir el modal manualmente - CAMBIÉ DEFAULT A "register"
-  const openModal = useCallback((type: AuthModalType = "login") => {
-    setModalType(type);
-    setIsVisible(true);
-  }, []);
+  const openModal = useCallback(
+    (type: AuthModalType = "login", screenColor?: string) => {
+      if (screenColor) setCurrentScreenColor(screenColor);
+      setModalType(type);
+      setIsVisible(true);
+    },
+    []
+  );
 
   // Función para cerrar el modal
   const closeModal = useCallback(() => {
@@ -52,5 +62,6 @@ export const useAuthModal = () => {
     openModal, // Abrir modal manualmente
     closeModal, // Cerrar modal
     switchModalType, // Cambiar entre login/register
+    currentScreenColor,
   };
 };

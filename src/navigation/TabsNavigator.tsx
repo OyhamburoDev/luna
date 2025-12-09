@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect } from "react";
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
@@ -17,6 +17,7 @@ import { useTabsStore } from "../store/tabsStore";
 import { fonts } from "../theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNotificationsStore } from "../store/notificationsStore";
+import { navigate } from "../navigation/NavigationService";
 
 const Tab = createBottomTabNavigator();
 
@@ -53,12 +54,12 @@ export default function TabsNavigator({
   const [currentRoute, setCurrentRoute] = React.useState("Inicio");
 
   useEffect(() => {
-    if (currentRoute === "Mensajes" || currentRoute === "Crear") {
-      // Tabs con fondo blanco
+    if (currentRoute === "Mensajes") {
+      // Solo Mensajes tiene fondo blanco
       NavigationBar.setBackgroundColorAsync("#ffffff");
       NavigationBar.setButtonStyleAsync("dark");
     } else {
-      // Tabs con fondo negro (Inicio, Mapa, Perfil)
+      // Resto con fondo negro (Inicio, Mapa, Perfil, Crear)
       NavigationBar.setBackgroundColorAsync("#000000");
       NavigationBar.setButtonStyleAsync("light");
     }
@@ -194,6 +195,12 @@ export default function TabsNavigator({
         component={CameraScreen}
         initialParams={{ onTabChange }}
         options={{ tabBarLabel: () => null }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigate("Camera");
+          },
+        })}
       />
       <Tab.Screen
         name="Mensajes"

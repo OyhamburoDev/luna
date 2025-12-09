@@ -20,13 +20,19 @@ import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { fonts } from "../theme/fonts";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ToastModal from "./ToastMessage";
+import * as NavigationBar from "expo-navigation-bar";
 
 export const AuthModal: React.FC = () => {
   const insets = useSafeAreaInsets();
   const bottomPad = Math.max(insets.bottom, 16);
 
-  const { isVisible, modalType, closeModal, switchModalType } =
-    useAuthModalContext();
+  const {
+    isVisible,
+    modalType,
+    closeModal,
+    switchModalType,
+    currentScreenColor,
+  } = useAuthModalContext();
   const { login, register, isLoading, error, clearError } = useAuth();
 
   const { height, width } = useWindowDimensions();
@@ -57,19 +63,31 @@ export const AuthModal: React.FC = () => {
 
       Animated.timing(slideY, {
         toValue: 0,
-        duration: 200,
+        duration: 350,
         useNativeDriver: true,
       }).start();
     } else if (mounted) {
       Animated.timing(slideY, {
         toValue: modalHeight,
-        duration: 240,
+        duration: 300,
         useNativeDriver: true,
       }).start(({ finished }) => {
         if (finished) setMounted(false);
       });
     }
   }, [isVisible, modalHeight, mounted, slideY]);
+
+  useEffect(() => {
+    if (isVisible) {
+      NavigationBar.setBackgroundColorAsync("#ffffff");
+      NavigationBar.setButtonStyleAsync("dark");
+    } else {
+      NavigationBar.setBackgroundColorAsync(currentScreenColor);
+      NavigationBar.setButtonStyleAsync(
+        currentScreenColor === "#ffffff" ? "dark" : "light"
+      );
+    }
+  }, [isVisible, currentScreenColor]);
 
   // LÓGICA DEL SCROLL - ESTO ES LO IMPORTANTE:
   // - Si modalType = "register" → scroll a x=0 (primera página)

@@ -666,12 +666,6 @@ export default function AdoptionFormScreen() {
                     >
                       Enviar solicitud
                     </Text>
-                    {/* <Ionicons
-                      name="send"
-                      size={20}
-                      color="#ffffff"
-                      style={{ marginLeft: 8 }}
-                    /> */}
                   </TouchableOpacity>
 
                   <Text
@@ -916,7 +910,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#ffffff",
     fontSize: 16,
-
     letterSpacing: 0.3,
   },
   disclaimer: {

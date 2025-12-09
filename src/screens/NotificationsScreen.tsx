@@ -24,6 +24,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { navigationRef } from "../navigation/NavigationService";
+import * as NavigationBar from "expo-navigation-bar";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -192,7 +193,7 @@ export default function NotificationsScreen() {
   //   );
   // };
   const { isAuthenticated } = useAuthStore();
-  const { openModal } = useAuthModalContext();
+  const { openModal, requireAuth } = useAuthModalContext();
   const { notifications, loading, error, refetch } = useUserNotifications();
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProp>();
@@ -200,6 +201,14 @@ export default function NotificationsScreen() {
   const [activeTab, setActiveTab] = useState<"all" | "adoptions" | "alerts">(
     "all"
   );
+
+  // 🎨 Control del color de la barra de navegación
+  useEffect(() => {
+    if (isFocused) {
+      NavigationBar.setBackgroundColorAsync("#ffffff");
+      NavigationBar.setButtonStyleAsync("dark");
+    }
+  }, [isFocused]);
 
   const filteredNotifications = useMemo(() => {
     if (activeTab === "all") {
@@ -218,10 +227,10 @@ export default function NotificationsScreen() {
     React.useCallback(() => {
       if (!isAuthenticated) {
         setTimeout(() => {
-          openModal();
+          requireAuth(() => {}, "login", "#ffffff"); // ← Usar requireAuth con screenColor
         }, 100);
       }
-    }, [isAuthenticated, openModal])
+    }, [isAuthenticated, requireAuth])
   );
 
   useFocusEffect(

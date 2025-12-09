@@ -32,7 +32,7 @@ export default function ProfileScreen({ onTabChange }: Props) {
     React.useCallback(() => {
       if (!isAuthenticated) {
         setTimeout(() => {
-          openModal();
+          openModal("login", "#000000");
         }, 100);
       }
     }, [isAuthenticated, openModal])

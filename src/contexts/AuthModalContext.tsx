@@ -4,10 +4,15 @@ import { useAuthModal, AuthModalType } from "../hooks/useAuthModal";
 interface AuthModalContextType {
   isVisible: boolean;
   modalType: AuthModalType;
-  requireAuth: (action: () => void, defaultModalType?: AuthModalType) => void;
-  openModal: (type?: AuthModalType) => void;
+  requireAuth: (
+    action: () => void,
+    defaultModalType?: AuthModalType,
+    screenColor?: string // ← AGREGAR ESTE PARÁMETRO
+  ) => void;
+  openModal: (type?: AuthModalType, screenColor?: string) => void;
   closeModal: () => void;
   switchModalType: () => void;
+  currentScreenColor: string;
 }
 
 const AuthModalContext = createContext<AuthModalContextType | undefined>(
