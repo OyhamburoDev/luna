@@ -106,19 +106,19 @@ export default function SwipeNavigator() {
   };
 
   // Dentro del componente
-  useEffect(() => {
-    if (currentIndex === 0) {
-      // Estamos en TabsNavigator (Inicio/Mapa/etc)
+  // useEffect(() => {
+  //   if (currentIndex === 0) {
+  //     // Estamos en TabsNavigator (Inicio/Mapa/etc)
 
-      NavigationBar.setBackgroundColorAsync("#000000");
-      NavigationBar.setButtonStyleAsync("light");
-    } else if (currentIndex === 1 && selectedPetIndex !== null) {
-      // Estamos en FullScreenStack
+  //     NavigationBar.setBackgroundColorAsync("#000000");
+  //     NavigationBar.setButtonStyleAsync("light");
+  //   } else if (currentIndex === 1 && selectedPetIndex !== null) {
+  //     // Estamos en FullScreenStack
 
-      NavigationBar.setBackgroundColorAsync("#ffffff");
-      NavigationBar.setButtonStyleAsync("dark");
-    }
-  }, [currentIndex, selectedPetIndex]);
+  //     NavigationBar.setBackgroundColorAsync("#ffffff");
+  //     NavigationBar.setButtonStyleAsync("dark");
+  //   }
+  // }, [currentIndex, selectedPetIndex]);
 
   if (loading || !firebasePosts || firebasePosts.length === 0) {
     return (
@@ -186,6 +186,22 @@ export default function SwipeNavigator() {
             </NavigationIndependentTree>
           </View>
         )}
+        onScroll={(e) => {
+          const offsetX = e.nativeEvent.contentOffset.x;
+          const threshold = SCREEN_WIDTH / 2; // Mitad de la pantalla
+
+          // Si pasamos la mitad hacia la derecha, cambiar a blanco
+          if (offsetX > threshold) {
+            NavigationBar.setBackgroundColorAsync("#ffffff");
+            NavigationBar.setButtonStyleAsync("dark");
+          }
+          // Si estamos en la mitad izquierda, cambiar a negro
+          else {
+            NavigationBar.setBackgroundColorAsync("#000000");
+            NavigationBar.setButtonStyleAsync("light");
+          }
+        }}
+        scrollEventThrottle={16}
         onMomentumScrollEnd={(e) => {
           const newIndex = Math.round(
             e.nativeEvent.contentOffset.x / SCREEN_WIDTH
