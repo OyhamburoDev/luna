@@ -405,6 +405,7 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingVertical: 15,
     fontFamily: fonts.regular,
+    color: "#000000",
   },
   input: {
     width: "100%",
@@ -414,6 +415,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     marginBottom: 15,
     fontFamily: fonts.regular,
+    color: "#000000",
   },
   line: {
     borderBottomWidth: 2,
@@ -442,7 +444,9 @@ const styles = StyleSheet.create({
   },
   error: {
     fontFamily: fonts.semiBold,
-    color: "#FF3B30",
+    color:
+      "#FF3B3\
+    ",
     textAlign: "center",
     marginBottom: 10,
   },
