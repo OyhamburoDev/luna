@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Dimensions, View, Image, StyleSheet, Text } from "react-native";
-import { BlurView } from "expo-blur";
+import { Dimensions, View, Image, StyleSheet } from "react-native";
 import { Animated } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import Carousel from "react-native-reanimated-carousel";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import type { PetPost } from "../types/petPots";
 import { useMemo } from "react";
 import { ActivityIndicator } from "react-native";
@@ -51,15 +48,11 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
 
   useEffect(() => {
     if (!pet) return;
-
-    console.log("esteee", pet.thumbnailUri);
-
-    setIsLoadingMedia(true); // ← Ahora sí queda en true
+    setIsLoadingMedia(true);
     setVideoThumbnail(null);
     if (pet.thumbnailUri) {
       setVideoThumbnail(pet.thumbnailUri);
     }
-    // ❌ NO pongas setIsLoadingMedia(false) acá
   }, [pet]);
 
   useEffect(() => {
@@ -92,8 +85,6 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
     return items;
   }, [videoThumbnail, pet.imageUris]);
 
-  console.log("🧪 mediaItems:", mediaItems);
-
   return (
     <View
       style={{
@@ -124,7 +115,7 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
                   onError={(error) => {
                     console.log("❌ ERROR cargando imagen:", item.uri);
                     console.log("Error details:", error.nativeEvent.error);
-                    setIsLoadingMedia(false); // Ocultar el loading aunque falle
+                    setIsLoadingMedia(false);
                   }}
                 />
               </>
@@ -142,63 +133,8 @@ export default function PetMediaCarouselTest({ pet }: CarouselProps) {
       />
 
       {isLoadingMedia && (
-        <Animated.View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            overflow: "hidden",
-            zIndex: 10,
-            opacity: fadeAnimation,
-          }}
-        >
-          {/* Fondo con degradado sutil */}
-          <LinearGradient
-            colors={["#EBEBEB", "#F5F5F5", "#EBEBEB"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{ flex: 1 }}
-          >
-            {/* Efecto shimmer mejorado */}
-            <Animated.View
-              style={{
-                width: width * 2.5,
-                height: "100%",
-                transform: [
-                  {
-                    translateX: shimmerAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [-width * 2.5, width * 0.5],
-                    }),
-                  },
-                ],
-              }}
-            >
-              <LinearGradient
-                colors={[
-                  "rgba(255, 255, 255, 0)",
-                  "rgba(255, 255, 255, 0.4)",
-                  "rgba(255, 255, 255, 1)",
-                  "rgba(255, 255, 255, 0.4)",
-                  "rgba(255, 255, 255, 0)",
-                ]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{ flex: 1 }}
-                locations={[0, 0.35, 0.5, 0.65, 1]}
-              />
-            </Animated.View>
-          </LinearGradient>
-        </Animated.View>
-      )}
-
-      {mediaItems.length > 1 && (
-        <View style={styles.imageCounter}>
-          <Text style={styles.imageCounterText}>
-            {currentIndex + 1}/{mediaItems.length}
-          </Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#667eea" />
         </View>
       )}
 
@@ -229,21 +165,6 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     overflow: "hidden",
   },
-  imageCounter: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    zIndex: 10,
-  },
-  imageCounterText: {
-    color: "#ffffff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
   paginationDots: {
     position: "absolute",
     bottom: 20,
@@ -263,5 +184,16 @@ const styles = StyleSheet.create({
   dotActive: {
     backgroundColor: "#ffffff",
     width: 24,
+  },
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#f5f5f5", // Mismo color que el fondo
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
 });
