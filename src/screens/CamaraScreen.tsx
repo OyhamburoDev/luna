@@ -9,11 +9,10 @@ import {
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
-import { useFocusEffect } from "@react-navigation/native";
 import { navigate } from "../navigation/NavigationService";
 import {
   validateVideoMedia,
@@ -30,24 +29,18 @@ export default function CameraScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCameraNativeOpen, setIsCameraNativeOpen] = useState(false);
 
-  // React.useEffect(() => {
-  //   if (permission && !permission.granted) {
-  //     requestPermission();
-  //   }
-  // }, [permission]);
-
-  // Resetear modal cada vez que la pantalla gana foco
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     setModalVisible(true);
-  //   }, [])
-  // );
-
   React.useEffect(() => {
     if (permission && !permission.granted) {
       requestPermission();
     }
   }, [permission]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsProcessing(false);
+      setIsCameraNativeOpen(false);
+    }, [])
+  );
 
   const takePhoto = async () => {
     try {
@@ -203,6 +196,8 @@ export default function CameraScreen() {
       {/* Visor de la cámara */}
       <View style={styles.cameraContainer}>
         <CameraView style={styles.camera} facing="back" />
+        {/* Overlay oscuro sobre el visor */}
+        <View style={styles.cameraOverlay} />
       </View>
 
       {/* Panel inferior con bordes redondeados */}
@@ -263,6 +258,10 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  cameraOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.7)", // Ajusta la opacidad si querés (0.3 - 0.7)
   },
   panel: {
     flex: 0.35, // 35% para el panel

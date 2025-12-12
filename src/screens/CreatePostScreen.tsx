@@ -23,6 +23,7 @@ import type { KeyboardTypeOptions } from "react-native";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { useConfettiStore } from "../store/useConfettiStore";
 import * as NavigationBar from "expo-navigation-bar";
+import { useNavigation } from "@react-navigation/native";
 
 type MediaItem = {
   uri: string;
@@ -50,6 +51,7 @@ export default function CreatePostScreen({
   const { marcarNuevoPost } = useConfettiStore();
 
   const { requireAuth } = useAuthModalContext();
+  const navigation = useNavigation();
 
   //  OBTENER LA FUNCIÓN PARA AGREGAR POSTS LOCALMENTE
   const { addNewPostLocally } = useFirebasePosts();
@@ -239,7 +241,7 @@ export default function CreatePostScreen({
   };
 
   const goBack = () => {
-    navigate("Swipe");
+    navigation.goBack();
   };
 
   if (fieldEditConfig) {
