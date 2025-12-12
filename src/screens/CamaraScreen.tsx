@@ -59,6 +59,7 @@ export default function CameraScreen() {
         const validation = await validatePhotoMedia(photo.uri);
 
         if (!validation.isValid) {
+          setIsProcessing(false);
           Alert.alert("Foto muy pesada", validation.error);
           return;
         }
@@ -95,6 +96,7 @@ export default function CameraScreen() {
         // VALIDAR VIDEO ANTES DE CONTINUAR (solo peso, no duración)
         const validation = await validateVideoMedia(video.uri, video.duration);
         if (!validation.isValid) {
+          setIsProcessing(false);
           Alert.alert("Video muy pesado", validation.error);
           return; // No continuar si el video no es válido
         }
@@ -134,6 +136,7 @@ export default function CameraScreen() {
           const validation = await validatePhotoMedia(media.uri);
 
           if (!validation.isValid) {
+            setIsProcessing(false);
             Alert.alert("Foto muy pesada", validation.error);
             return;
           }
@@ -148,6 +151,7 @@ export default function CameraScreen() {
           );
 
           if (!validation.isValid) {
+            setIsProcessing(false);
             Alert.alert("Video muy pesado", validation.error);
             return;
           }
