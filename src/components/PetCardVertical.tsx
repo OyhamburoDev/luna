@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Image,
   Pressable,
-  AppState,
 } from "react-native";
 import { Video, ResizeMode, type AVPlaybackStatus } from "expo-av";
 import { useRef, useEffect, useState } from "react";
@@ -15,7 +14,6 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { PetPost } from "../types/petPots";
-import { textStyles } from "../theme/textStyles";
 import { fonts } from "../theme/fonts";
 import HeartIcon from "../components/HeartIcon";
 import { SoundOffIcon } from "./SoundOnIcon";
@@ -54,7 +52,6 @@ export default function PetCardVertical({
   const [showControls, setShowControls] = useState(false);
   const controlTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const insets = useSafeAreaInsets();
   const { openModal, requireAuth } = useAuthModalContext();
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const { mostrarConfetti, resetConfetti } = useConfettiStore();
@@ -336,7 +333,7 @@ export default function PetCardVertical({
               height: 260,
             }}
           />
-          <TouchableOpacity style={styles.profileContainer}>
+          <View style={styles.profileContainer}>
             <LinearGradient
               colors={["#41D1FF", "#22D3EE", "#10B981"]}
               start={{ x: 0, y: 0 }}
@@ -358,7 +355,7 @@ export default function PetCardVertical({
               </View>
             </LinearGradient>
             <View style={styles.onlineIndicator} />
-          </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={styles.likeButton}
