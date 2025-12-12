@@ -14,6 +14,8 @@ import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as NavigationBar from "expo-navigation-bar";
 import { StatusBar } from "expo-status-bar";
+import LottieView from "lottie-react-native";
+import { useConfettiStore } from "../store/useConfettiStore";
 
 import CustomHeaderTop from "../components/CustomHeaderTop";
 import PetCardVertical from "../components/PetCardVertical";
@@ -48,6 +50,9 @@ export default function HomeScreen({
   const [isLoading, setIsLoading] = useState(true);
   const [cardHeight, setCardHeight] = useState(0);
 
+  const confettiRef = useRef<LottieView>(null);
+  const { mostrarConfetti, resetConfetti } = useConfettiStore();
+
   useEffect(() => {
     setBackgroundColorAsync("black");
   }, []);
@@ -77,6 +82,27 @@ export default function HomeScreen({
       setIsLoading(false);
     }
   }, [pets]);
+
+  // useEffect para el confetti - esperar a que termine de cargar + delay
+  useEffect(() => {
+    if (mostrarConfetti && confettiRef.current && !isLoading) {
+      console.log("🎊 Esperando 1.5s antes de lanzar confetti...");
+
+      // Delay de 1.5 segundos para que cargue el media del primer post
+      const delayTimer = setTimeout(() => {
+        console.log("🎊 LANZANDO CONFETTI!");
+        confettiRef.current?.play();
+
+        // Resetear después de 3 segundos
+        setTimeout(() => {
+          resetConfetti();
+        }, 3000);
+      }, 1500);
+
+      // Cleanup
+      return () => clearTimeout(delayTimer);
+    }
+  }, [mostrarConfetti, isLoading, resetConfetti]);
 
   useEffect(() => {
     if (isScreenActive) {
@@ -122,6 +148,26 @@ export default function HomeScreen({
         style={styles.fullScreenContainer}
         edges={["left", "right"]}
       >
+        {/* Confetti overlay */}
+        {mostrarConfetti && (
+          <LottieView
+            ref={confettiRef}
+            source={require("../../assets/animations/confetti.json")}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 99999, // ← MÁS ALTO
+              elevation: 99999, // ← AGREGAR PARA ANDROID
+              pointerEvents: "none",
+              transform: [{ scale: 2 }],
+            }}
+            autoPlay={false}
+            loop={false}
+          />
+        )}
         <CustomHeaderTop currentPage={0} onPressArrow={onPressDiscoverMore} />
 
         <View

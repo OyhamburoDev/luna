@@ -23,7 +23,7 @@ import { useMute } from "../contexts/MuteContext";
 import { useLike } from "../hooks/useLike";
 import DoubleTapHeart from "./DoubleTapHeart";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
-import { useConfettiStore } from "../store/useConfettiStore";
+// import { useConfettiStore } from "../store/useConfettiStore";
 import LottieView from "lottie-react-native";
 
 type Props = {
@@ -54,8 +54,8 @@ export default function PetCardVertical({
   const [isExpanded, setIsExpanded] = useState(false);
   const { openModal, requireAuth } = useAuthModalContext();
   const [mediaLoaded, setMediaLoaded] = useState(false);
-  const { mostrarConfetti, resetConfetti } = useConfettiStore();
-  const confettiRef = useRef<LottieView>(null);
+  // const { mostrarConfetti, resetConfetti } = useConfettiStore();
+  // const confettiRef = useRef<LottieView>(null);
 
   // Estados para la barra de progreso del video
   const [duration, setDuration] = useState(0);
@@ -102,14 +102,22 @@ export default function PetCardVertical({
     };
   }, [isActive]);
 
-  useEffect(() => {
-    if (mediaLoaded && mostrarConfetti && index === 0 && confettiRef.current) {
-      confettiRef.current.play();
-      setTimeout(() => {
-        resetConfetti();
-      }, 3000);
-    }
-  }, [mediaLoaded, mostrarConfetti, index]);
+  // useEffect(() => {
+  //   console.log("🎊 CONFETTI DEBUG:", {
+  //     mediaLoaded,
+  //     mostrarConfetti,
+  //     index,
+  //     hasRef: !!confettiRef.current,
+  //   });
+
+  //   if (mediaLoaded && mostrarConfetti && index === 0 && confettiRef.current) {
+  //     console.log("🎊 LANZANDO CONFETTI!");
+  //     confettiRef.current.play();
+  //     setTimeout(() => {
+  //       resetConfetti();
+  //     }, 3000);
+  //   }
+  // }, [mediaLoaded, mostrarConfetti, index]);
 
   // 🔍 LOG: Función de video press con debugging
   const handleVideoPress = async () => {
@@ -484,7 +492,7 @@ export default function PetCardVertical({
           </View>
         </View>
       </View>
-      {mostrarConfetti && (
+      {/* {mostrarConfetti && (
         <LottieView
           ref={confettiRef}
           source={require("../../assets/animations/confetti.json")}
@@ -501,7 +509,7 @@ export default function PetCardVertical({
           autoPlay={false}
           loop={false}
         />
-      )}
+      )} */}
     </Pressable>
   );
 }
