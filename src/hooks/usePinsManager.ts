@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { createPinService } from "../api/createPinService";
 import { getRelativeTime } from "../utils/timeUtils";
+import { preloadImages } from "../utils/imagePreloader";
 
 export const usePinsManager = () => {
-  // Estados para gestionar pins
   const [userPins, setUserPins] = useState<any[]>([]);
   const [selectedPin, setSelectedPin] = useState<any>(null);
   const [showDetailCard, setShowDetailCard] = useState(false);
   const [isLoadingPins, setIsLoadingPins] = useState(false);
   const [pinsError, setPinsError] = useState<string | null>(null);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   useEffect(() => {
     loadPins();
@@ -18,11 +19,13 @@ export const usePinsManager = () => {
   const loadPins = async () => {
     setIsLoadingPins(true);
     setPinsError(null);
+    setImagesLoaded(false);
 
     try {
+      // PASO 1: Obtener datos de Firebase
       const pins = await createPinService.getAllPins();
 
-      // Transformar los pins de Firebase al formato del mapa
+      // PASO 2: Transformar los pins al formato del mapa
       const formattedPins = pins.map((pin) => ({
         id: pin.id,
         lat: pin.location.lat,
@@ -37,10 +40,29 @@ export const usePinsManager = () => {
         time: getRelativeTime(pin.createdAt),
       }));
 
+      // PASO 3: Actualizar el estado con los datos
       setUserPins(formattedPins);
+
+      //  4.  Precargar las imágenes de los pines
+      const imageUris = formattedPins
+        .map((pin) => pin.image) // Extraer las URIs de las imágenes
+        .filter(
+          (uri) => uri && typeof uri === "string" && uri.startsWith("http")
+        ); // Solo URIs válidas
+
+      console.log(`📥 Precargando ${imageUris.length} imágenes de pines...`);
+
+      if (imageUris.length > 0) {
+        await preloadImages(imageUris);
+      }
+
+      //  5 Marcar imágenes como cargadas
+      setImagesLoaded(true);
+      console.log("✅ Pines e imágenes listos para mostrar");
     } catch (error) {
       console.error("Error loading pins:", error);
       setPinsError("No se pudieron cargar los reportes");
+      setImagesLoaded(true); //  6. Marcar como listo incluso si falla
     } finally {
       setIsLoadingPins(false);
     }
@@ -67,8 +89,6 @@ export const usePinsManager = () => {
     photoUri: string;
     location: { lat: number; lng: number; address: string };
   }) => {
-    // Crear el objeto del pin con todos sus datos
-    // Extraer species y color PRIMERO
     const newPin = {
       id: Date.now().toString(),
       lat: reportData.location.lat,
@@ -86,7 +106,17 @@ export const usePinsManager = () => {
     // Agregar el nuevo pin al array
     setUserPins((prevPins) => [...prevPins, newPin]);
 
-    // Retornar el pin creado
+    //  7. OPCIONAL: Precargar la imagen del nuevo pin
+    if (
+      newPin.image &&
+      typeof newPin.image === "string" &&
+      newPin.image.startsWith("http")
+    ) {
+      preloadImages([newPin.image]).catch((err) =>
+        console.warn("Error precargando imagen del nuevo pin:", err)
+      );
+    }
+
     return newPin;
   };
 
@@ -96,6 +126,7 @@ export const usePinsManager = () => {
     selectedPin,
     showDetailCard,
     isLoadingPins,
+    imagesLoaded, // ← 8 Exportar el estado
     pinsError,
 
     // Funciones

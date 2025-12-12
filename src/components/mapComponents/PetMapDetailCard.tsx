@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -27,6 +28,7 @@ export const PetMapDetailCard = ({
 }: PetMapDetailCardProps) => {
   if (!visible || !petData) return null;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const getStatusStyles = (label: string) => {
     switch (label) {
@@ -94,11 +96,21 @@ export const PetMapDetailCard = ({
       {/* Cuerpo Principal: Imagen izquierda + Datos derecha */}
       <View style={styles.contentRow}>
         {/* Imagen cuadrada y fija */}
-        <Image
-          source={{ uri: petData.photo || petData.image }}
-          style={styles.petImage}
-          resizeMode="cover"
-        />
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: petData.photo || petData.image }}
+            style={styles.petImage}
+            resizeMode="cover"
+            onLoadStart={() => setImageLoading(true)}
+            onLoad={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
+          />
+          {imageLoading && (
+            <View style={styles.imageLoadingA}>
+              <ActivityIndicator size="small" color="#667eea" />
+            </View>
+          )}
+        </View>
 
         {/* Columna de detalles */}
         <View style={styles.detailsColumn}>
@@ -245,11 +257,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 20,
   },
+  imageContainer: {
+    position: "relative",
+    width: 90,
+    height: 90,
+  },
   petImage: {
     width: 90,
     height: 90,
     borderRadius: 12,
     backgroundColor: "#F0F0F0",
+  },
+  imageLoadingA: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 12,
   },
   detailsColumn: {
     flex: 1,

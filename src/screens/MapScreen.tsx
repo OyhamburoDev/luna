@@ -165,11 +165,20 @@ export default function MapScreen() {
     mapRef.current?.animateToLocation(newPin.lat, newPin.lng);
   };
 
-  // Mostrar loader si está cargando
-  if (pinsManager.isLoadingPins) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#667eea" />
+  {
+    /* Overlay de loading sobre el mapa (no bloqueante) */
+  }
+  {
+    (pinsManager.isLoadingPins || !pinsManager.imagesLoaded) && (
+      <View style={mapScreenStyles.loadingOverlay}>
+        <View style={mapScreenStyles.loadingCard}>
+          <ActivityIndicator size="large" color="#667eea" />
+          <Text style={mapScreenStyles.loadingText}>
+            {pinsManager.isLoadingPins
+              ? "Cargando pines..."
+              : "Preparando imágenes..."}
+          </Text>
+        </View>
       </View>
     );
   }
@@ -283,7 +292,7 @@ export default function MapScreen() {
           googleMapsApiKey={googleMapsApiKey}
           onRouteReady={handleRouteReady}
           isDarkMode={isDarkMode}
-          userPins={pinsManager.userPins}
+          userPins={pinsManager.imagesLoaded ? pinsManager.userPins : []}
         />
         <BottomCard
           state={cardNav.cardState}
@@ -376,5 +385,33 @@ const mapScreenStyles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+  },
+  loadingCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
   },
 });
