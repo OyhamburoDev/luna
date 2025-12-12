@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -19,13 +19,29 @@ import {
   validateVideoMedia,
   validatePhotoMedia,
 } from "../utils/mediaValidation";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CameraScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
-  const [modalVisible, setModalVisible] = useState(true);
   const navigation = useNavigation<CameraScreenNavigationProp>();
+  const insets = useSafeAreaInsets();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isCameraNativeOpen, setIsCameraNativeOpen] = useState(false);
+
+  // React.useEffect(() => {
+  //   if (permission && !permission.granted) {
+  //     requestPermission();
+  //   }
+  // }, [permission]);
+
+  // Resetear modal cada vez que la pantalla gana foco
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     setModalVisible(true);
+  //   }, [])
+  // );
 
   React.useEffect(() => {
     if (permission && !permission.granted) {
@@ -33,15 +49,9 @@ export default function CameraScreen() {
     }
   }, [permission]);
 
-  // Resetear modal cada vez que la pantalla gana foco
-  useFocusEffect(
-    React.useCallback(() => {
-      setModalVisible(true);
-    }, [])
-  );
-
   const takePhoto = async () => {
     try {
+      setIsCameraNativeOpen(true);
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [4, 5],
@@ -49,6 +59,7 @@ export default function CameraScreen() {
       });
 
       if (!result.canceled && result.assets?.length > 0) {
+        setIsProcessing(true);
         const photo = result.assets[0];
 
         // VALIDAR FOTO ANTES DE CONTINUAR
@@ -58,7 +69,7 @@ export default function CameraScreen() {
           Alert.alert("Foto muy pesada", validation.error);
           return;
         }
-        closeModal();
+        // closeModal();
 
         navigate("CreatePost", {
           media: { uri: photo.uri, width: photo.width, height: photo.height },
@@ -68,11 +79,14 @@ export default function CameraScreen() {
     } catch (error) {
       console.log("Error:", error);
       Alert.alert("Error", "No se pudo tomar la foto");
+    } finally {
+      setIsCameraNativeOpen(false);
     }
   };
 
   const recordVideo = async () => {
     try {
+      setIsCameraNativeOpen(true);
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         allowsEditing: true,
@@ -82,6 +96,7 @@ export default function CameraScreen() {
       });
 
       if (!result.canceled && result.assets?.length > 0) {
+        setIsProcessing(true);
         const video = result.assets[0];
 
         // VALIDAR VIDEO ANTES DE CONTINUAR (solo peso, no duración)
@@ -90,18 +105,22 @@ export default function CameraScreen() {
           Alert.alert("Video muy pesado", validation.error);
           return; // No continuar si el video no es válido
         }
-        closeModal();
+        // closeModal();
 
         navigate("CreatePost", {
           media: { uri: video.uri, width: video.width, height: video.height },
           type: "video",
         });
       } else {
+        setIsCameraNativeOpen(false);
         console.log("=== GRABACIÓN CANCELADA ===");
+        setIsCameraNativeOpen(false);
       }
     } catch (error) {
       console.log("=== ERROR EN GRABACIÓN ===", error);
       Alert.alert("Error", "No se pudo grabar el video");
+    } finally {
+      setIsCameraNativeOpen(false); // ← AGREGAR
     }
   };
 
@@ -141,7 +160,7 @@ export default function CameraScreen() {
           }
         }
 
-        closeModal();
+        // closeModal();
 
         navigate("CreatePost", {
           media: { uri: media.uri, width: media.width, height: media.height },
@@ -153,9 +172,9 @@ export default function CameraScreen() {
     }
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
-  };
+  // const closeModal = () => {
+  //   setModalVisible(false);
+  // };
 
   const exitCameraScreen = () => {
     navigation.goBack();
@@ -164,73 +183,72 @@ export default function CameraScreen() {
   if (!permission) {
     return <View style={{ flex: 1, backgroundColor: "black" }} />;
   }
+  // Mostrar loading SOLO cuando está procesando (no al abrir cámara)
+  if (isProcessing) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#667eea" />
+        <Text style={styles.loadingText}>Procesando...</Text>
+      </View>
+    );
+  }
 
-  // if (!permission.granted) {
-  //   return (
-  //     <View style={styles.permissionContainer}>
-  //       <Text style={styles.permissionText}>
-  //         Necesitamos permisos de cámara
-  //       </Text>
-  //       <TouchableOpacity
-  //         onPress={requestPermission}
-  //         style={styles.permissionButton}
-  //       >
-  //         <Text style={styles.permissionButtonText}>Dar permisos</Text>
-  //       </TouchableOpacity>
-  //     </View>
-  //   );
-  // }
+  // Ocultar el CameraScreen mientras la cámara nativa está abierta
+  if (isCameraNativeOpen) {
+    return <View style={{ flex: 1, backgroundColor: "black" }} />;
+  }
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing="back">
-        <Modal visible={modalVisible} transparent onRequestClose={closeModal}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.header}>
-                <TouchableOpacity onPress={exitCameraScreen}>
-                  <Ionicons name="close" size={24} color="white" />
-                </TouchableOpacity>
-                <Text style={styles.title}>Publicar adopción</Text>
+      {/* Visor de la cámara */}
+      <View style={styles.cameraContainer}>
+        <CameraView style={styles.camera} facing="back" />
+      </View>
 
-                <View style={{ width: 24 }} />
-              </View>
-
-              <View style={styles.optionsContainer}>
-                <TouchableOpacity style={styles.mainOption} onPress={takePhoto}>
-                  <View style={styles.optionIconContainer}>
-                    <Ionicons name="camera" size={32} color="white" />
-                  </View>
-                  <Text style={styles.optionTitle}>Cámara</Text>
-                  <Text style={styles.optionSubtitle}>Tomar foto</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.mainOption}
-                  onPress={recordVideo}
-                >
-                  <View style={styles.optionIconContainer}>
-                    <Ionicons name="videocam" size={32} color="white" />
-                  </View>
-                  <Text style={styles.optionTitle}>Video</Text>
-                  <Text style={styles.optionSubtitle}>Máx 40 MB</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.mainOption}
-                  onPress={pickFromLibrary}
-                >
-                  <View style={styles.optionIconContainer}>
-                    <Ionicons name="images" size={32} color="white" />
-                  </View>
-                  <Text style={styles.optionTitle}>Galería</Text>
-                  <Text style={styles.optionSubtitle}>Elegir existente</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+      {/* Panel inferior con bordes redondeados */}
+      <View style={[styles.panel, { paddingBottom: insets.bottom + 20 }]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={exitCameraScreen}
+            style={styles.closeButton}
+          >
+            <Ionicons name="arrow-back" size={26} color="white" />
+          </TouchableOpacity>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Publicar adopción</Text>
+            <Text style={styles.subtitle}>Elige una opción</Text>
           </View>
-        </Modal>
-      </CameraView>
+          <View style={{ width: 26 }} />
+        </View>
+
+        {/* Opciones */}
+        <View style={styles.optionsContainer}>
+          <TouchableOpacity style={styles.option} onPress={takePhoto}>
+            <View style={styles.optionIconContainer}>
+              <Ionicons name="camera" size={32} color="white" />
+            </View>
+            <Text style={styles.optionTitle}>Cámara</Text>
+            <Text style={styles.optionSubtitle}>Tomar foto</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.option} onPress={recordVideo}>
+            <View style={styles.optionIconContainer}>
+              <Ionicons name="videocam" size={32} color="white" />
+            </View>
+            <Text style={styles.optionTitle}>Video</Text>
+            <Text style={styles.optionSubtitle}>Máx 40 MB</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.option} onPress={pickFromLibrary}>
+            <View style={styles.optionIconContainer}>
+              <Ionicons name="images" size={32} color="white" />
+            </View>
+            <Text style={styles.optionTitle}>Galería</Text>
+            <Text style={styles.optionSubtitle}>Elegir existente</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }
@@ -238,64 +256,55 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "black",
+  },
+  cameraContainer: {
+    flex: 0.65, // 65% para el visor
   },
   camera: {
     flex: 1,
   },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "black",
-  },
-  permissionText: {
-    color: "white",
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  permissionButton: {
-    backgroundColor: "#6366F1",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  permissionButtonText: {
-    color: "white",
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
+  panel: {
+    flex: 0.35, // 35% para el panel
     backgroundColor: "#1a1a1a",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 30,
-    minHeight: "35%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24, // Superposición para mostrar bordes redondeados
+    paddingTop: 10,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  titleContainer: {
+    alignItems: "center",
+    flex: 1,
   },
   title: {
     color: "white",
     fontSize: 18,
     fontWeight: "600",
   },
+  subtitle: {
+    color: "#888",
+    fontSize: 14,
+    marginTop: 2,
+  },
   optionsContainer: {
     paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: 25,
     flexDirection: "row",
     justifyContent: "space-around",
   },
-  mainOption: {
+  option: {
     alignItems: "center",
     flex: 1,
   },
@@ -318,5 +327,16 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 12,
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    color: "white",
+    fontSize: 16,
+    marginTop: 12,
   },
 });

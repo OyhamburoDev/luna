@@ -168,11 +168,6 @@ export default function SwipeNavigator() {
                   />
                 ) : activeTab === "Inicio" && selectedPetIndex !== null ? (
                   <>
-                    {/* <FullScreenStack
-                      pet={allPets[selectedPetIndex]}
-                      onGoBackToFeed={goToPage0}
-                      setModalVisible={setModalVisible}
-                    /> */}
                     <FullScreenStackTest
                       pet={allPets[selectedPetIndex]}
                       onGoBackToFeed={goToPage0}

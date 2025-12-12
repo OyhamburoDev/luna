@@ -22,6 +22,7 @@ import { useFirebasePosts } from "../hooks/useFirebasePosts";
 import type { KeyboardTypeOptions } from "react-native";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { useConfettiStore } from "../store/useConfettiStore";
+import * as NavigationBar from "expo-navigation-bar";
 
 type MediaItem = {
   uri: string;
@@ -92,6 +93,18 @@ export default function CreatePostScreen({
     multiline: boolean;
     keyboardType?: KeyboardTypeOptions;
   } | null>(null);
+
+  React.useEffect(() => {
+    // Configurar barra de navegación al entrar
+    NavigationBar.setBackgroundColorAsync("#ffffff");
+    NavigationBar.setButtonStyleAsync("dark");
+
+    // Cleanup: restaurar al salir
+    return () => {
+      NavigationBar.setBackgroundColorAsync("#000000");
+      NavigationBar.setButtonStyleAsync("light");
+    };
+  }, []);
 
   const updateField = (field: keyof PetPost, value: any) => {
     setPostData((prev) => ({ ...prev, [field]: value }));
