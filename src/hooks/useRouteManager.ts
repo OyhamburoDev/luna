@@ -17,8 +17,6 @@ export const useRouteManager = () => {
   const startRoute = (pin: any) => {
     if (!pin) return;
 
-    console.log("Mostrando ruta a:", pin.calle);
-
     setRouteDestination({
       lat: pin.lat,
       lng: pin.lng,
@@ -27,7 +25,7 @@ export const useRouteManager = () => {
     setRouteInfo({
       distance: 0, // Se actualizará cuando la ruta esté lista
       duration: 0,
-      destinationName: pin.calle,
+      destinationName: pin.address,
     });
   };
 

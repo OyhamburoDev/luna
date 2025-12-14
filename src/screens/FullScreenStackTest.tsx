@@ -6,9 +6,8 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  type ScrollView,
+  ScrollView,
   Image,
-  Animated,
   Platform,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
@@ -47,12 +46,7 @@ export default function FullScreenStackTest({
   const isFocused = useIsFocused();
 
   const insets = useSafeAreaInsets();
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const buttonHeight = 60;
   const scrollViewRef = useRef<ScrollView>(null);
-
-  // Calcular padding inferior
-  const scrollPaddingBottom = buttonHeight + insets.bottom + 16;
 
   useEffect(() => {
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
@@ -79,28 +73,16 @@ export default function FullScreenStackTest({
     pet.needsWalks ||
     pet.energyLevel;
 
-  const buttonTranslateY = scrollY.interpolate({
-    inputRange: [0, 400],
-    outputRange: [buttonHeight + 16, 0],
-    extrapolate: "clamp",
-  });
-
   return (
     <>
       <StatusBar style="light" />
-      <Animated.ScrollView
+      <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         style={styles.container}
         contentContainerStyle={{
-          paddingBottom: scrollPaddingBottom,
+          paddingBottom: insets.bottom + 10, // Espacio fijo para el botón
         }}
-        // onScroll={handleScroll}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
       >
         <View>
           <View
@@ -298,42 +280,19 @@ export default function FullScreenStackTest({
               onClose={() => setBehaviorModalVisible(false)}
               pet={pet}
             />
+            <TouchableOpacity
+              style={styles.adoptButton}
+              onPress={() => setModalVisible(true)}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="heart" size={17} color="white" />
+              <Text style={styles.adoptButtonText}>
+                Adoptar a {pet.petName}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
-      </Animated.ScrollView>
-      {/* Barra de navegación simulada (opaca) */}
-      {Platform.OS === "android" && (
-        <View
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: insets.bottom,
-            backgroundColor: "#f5f5f5",
-            zIndex: 2, // que quede por encima de todo
-          }}
-        />
-      )}
-      {/* Botón animado */}
-      <Animated.View
-        style={[
-          styles.buttonContainer,
-          {
-            bottom: insets.bottom + 20,
-            transform: [{ translateY: buttonTranslateY }],
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setModalVisible(true)}
-          activeOpacity={0.9}
-        >
-          <Ionicons name="heart" size={17} color="white" />
-          <Text style={styles.floatingButtonText}>Adoptar a {pet.petName}</Text>
-        </TouchableOpacity>
-      </Animated.View>
+      </ScrollView>
     </>
   );
 }
@@ -544,11 +503,13 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   adoptButton: {
-    paddingVertical: 12,
-    borderRadius: 12,
+    flexDirection: "row", // 👈 Solo agregá esto para que el ícono quede al lado
+    paddingVertical: 16,
+    borderRadius: 9,
     backgroundColor: "#667eea",
     alignItems: "center",
     justifyContent: "center",
+    gap: 8, // 👈 Y esto para separar el ícono del texto
   },
   adoptButtonText: {
     fontSize: normalizeFont(16),
