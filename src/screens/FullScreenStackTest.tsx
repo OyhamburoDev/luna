@@ -22,6 +22,7 @@ import useOwnerStats from "../hooks/useOwnerStats";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type Props = {
   pet: PetPost;
@@ -378,19 +379,19 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   petName: {
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontFamily: fonts.bold,
     color: "#111827",
     marginBottom: 6,
   },
   petSubtitle: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontFamily: fonts.regular,
     color: "#6B7280",
     marginBottom: 16,
   },
   bioText: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontFamily: fonts.regular,
     color: "#6B7280",
     lineHeight: 22,
@@ -400,7 +401,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   readMoreText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontFamily: fonts.semiBold,
     color: "#667eea",
   },
@@ -416,13 +417,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontFamily: fonts.regular,
     color: "#6B7280",
   },
   infoValue: {
     fontFamily: fonts.bold,
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "#2d3436",
   },
   divider: {
@@ -468,12 +469,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   shelterName: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontFamily: fonts.bold,
     color: "#111827",
   },
   shelterLocation: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontFamily: fonts.regular,
     color: "#6B7280",
     marginTop: 2,
@@ -491,12 +492,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontFamily: fonts.bold,
     color: "#667eea",
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     fontFamily: fonts.regular,
     color: "#9CA3AF",
     marginTop: 4,
@@ -525,12 +526,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontFamily: fonts.bold,
     color: "#111827",
   },
   cardSubtitle: {
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     fontFamily: fonts.regular,
     color: "#9CA3AF",
     marginTop: 4,
@@ -550,7 +551,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   adoptButtonText: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontFamily: fonts.semiBold,
     fontWeight: "500",
     color: "white",
@@ -578,7 +579,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   floatingButtonText: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontFamily: fonts.semiBold,
     letterSpacing: 0.3,
     color: "white",
@@ -609,6 +610,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: normalizeFont(16),
   },
 });

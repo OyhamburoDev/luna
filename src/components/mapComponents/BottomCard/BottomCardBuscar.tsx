@@ -10,6 +10,7 @@ import {
 import { Search } from "lucide-react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../../../theme/fonts";
+import { normalizeFont } from "../../../utils/normalizeFont";
 
 interface BottomCardBuscarProps {
   onLocationSelect: (lat: number, lng: number, name: string) => void;
@@ -206,14 +207,14 @@ const styles = StyleSheet.create({
   },
   titleCentered: {
     fontFamily: fonts.bold,
-    fontSize: 22,
+    fontSize: normalizeFont(22),
     fontWeight: "700",
     color: "#000",
     textAlign: "center",
   },
   subtitleCentered: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     marginTop: 4,
     textAlign: "center",
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
   },
   suggestionsContainer: {
@@ -245,19 +246,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   suggestionText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
     fontFamily: fonts.regular,
   },
   loadingText: {
     textAlign: "center",
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     paddingVertical: 20,
   },
   noResultsText: {
     textAlign: "center",
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     paddingVertical: 20,
   },

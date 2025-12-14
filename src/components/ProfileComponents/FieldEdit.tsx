@@ -14,6 +14,7 @@ import type { KeyboardTypeOptions } from "react-native";
 import { useFieldEdit } from "../../hooks/useFieldEdit";
 import { StatusBar } from "expo-status-bar";
 import { useIsFocused } from "@react-navigation/native";
+import { normalizeFont } from "../../utils/normalizeFont";
 
 type Props = {
   title: string;
@@ -163,13 +164,17 @@ const styles = StyleSheet.create({
     borderBottomColor: "#00000012",
   },
   cancelButton: { padding: 8 },
-  cancelText: { fontSize: 16, color: "#2d3436", fontWeight: "400" },
-  headerTitle: { fontSize: 18 },
+  cancelText: {
+    fontSize: normalizeFont(16),
+    color: "#2d3436",
+    fontWeight: "400",
+  },
+  headerTitle: { fontSize: normalizeFont(18) },
   saveButton: { padding: 8 },
   // 🔧 estilos visibles para activo / deshabilitado
   saveButtonActive: { opacity: 1 },
   saveButtonDisabled: { opacity: 0.4 },
-  saveText: { fontSize: 16, fontWeight: "600" },
+  saveText: { fontSize: normalizeFont(16), fontWeight: "600" },
   saveTextActive: { color: "#FE2C55" },
   saveTextDisabled: { color: "#ccc" },
 
@@ -181,13 +186,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontWeight: "700",
     color: "#00000094",
     marginBottom: 8,
   },
   textInput: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#2d3436",
     paddingVertical: 8,
     borderWidth: 0,
@@ -203,8 +208,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
     gap: 6,
   },
-  errorText: { fontSize: 12, color: "#FF6B6B", flex: 1 },
-  counter: { fontSize: 12, color: "#999", textAlign: "left", marginTop: 8 },
+  errorText: { fontSize: normalizeFont(12), color: "#FF6B6B", flex: 1 },
+  counter: {
+    fontSize: normalizeFont(12),
+    color: "#999",
+    textAlign: "left",
+    marginTop: 8,
+  },
   counterWithError: { marginTop: 4 },
-  description: { fontSize: 12, color: "#666", marginTop: 12, lineHeight: 16 },
+  description: {
+    fontSize: normalizeFont(12),
+    color: "#666",
+    marginTop: 12,
+    lineHeight: 16,
+  },
 });

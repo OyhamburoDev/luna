@@ -6,7 +6,6 @@ import SwipeNavigator from "./SwipeNavigator";
 import AdoptionFormScreen from "../screens/AdoptionFormScreen";
 import NotificationDetailScreen from "../screens/NotificationDetailScreen";
 import CameraScreen from "../screens/CamaraScreen";
-import ChatsScreen from "../screens/ChatsScreen";
 import { useNavigation } from "@react-navigation/native";
 
 export type RootStackParamList = {
@@ -44,7 +43,7 @@ export default function RootNavigator() {
       />
       <Stack.Screen name="Camera" component={CameraScreen} />
       <Stack.Screen name="AdoptionFormPet" component={AdoptionFormScreen} />
-      <Stack.Screen name="ChatsList" component={ChatsScreen} />
+
       <Stack.Screen name="Perfil" component={ProfileScreen} />
       <Stack.Screen
         name="NotificationDetail"

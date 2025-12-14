@@ -26,6 +26,7 @@ import { useAuthStore } from "../../store/auth";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useIsFocused } from "@react-navigation/native";
+import { normalizeFont } from "../../utils/normalizeFont";
 
 type Props = {
   onTabChange?: (tab: "Inicio" | "Mapa" | "Perfil") => void;
@@ -412,18 +413,18 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontFamily: fonts.bold,
-    fontSize: 20,
+    fontSize: normalizeFont(20),
     color: "#2d3436",
     marginBottom: 8,
   },
   userNameDefault: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "700",
     color: "#2d3436",
     marginBottom: 8,
   },
   userBio: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#636e72",
     lineHeight: 20,
     textAlign: "center",
@@ -438,7 +439,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   addBioText: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     color: "#667eea",
     fontWeight: "500",
   },
@@ -453,7 +454,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   editProfileButtonText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontWeight: "600",
     color: "#000000ff",
   },
@@ -471,7 +472,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f0f0f0",
   },
   contactText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#2d3436",
     marginLeft: 12,
     flex: 1,
@@ -494,7 +495,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#667eea",
   },
   tabText: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "600",
     color: "#999",
     marginLeft: 8,
@@ -542,7 +543,7 @@ const styles = StyleSheet.create({
   },
   postLikes: {
     color: "white",
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     fontWeight: "600",
     marginLeft: 4,
   },
@@ -554,7 +555,7 @@ const styles = StyleSheet.create({
     gap: 0,
   },
   emptyTitle: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "600",
     color: "#2d3436",
     textAlign: "center",
@@ -563,7 +564,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   emptyLikeTitle: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "600",
     color: "#2d3436",
     textAlign: "center",
@@ -579,7 +580,7 @@ const styles = StyleSheet.create({
   },
   uploadButtonText: {
     color: "white",
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "600",
   },
 });

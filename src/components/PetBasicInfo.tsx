@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../theme/fonts";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type PetFormData = {
   petName: string;
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontFamily: fonts.semiBold,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#000",
     minHeight: 50,
     textAlignVertical: "top",
@@ -267,11 +268,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   charCount: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     color: "#666",
   },
   errorText: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     color: "#EF4444",
     marginTop: 4,
     marginBottom: 8,
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
   },
   optionTitle: {
     fontFamily: fonts.semiBold,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#000",
     fontWeight: "400",
   },
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
   optionSubtitle: {
     fontFamily: fonts.regular,
     paddingRight: 15,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#666",
     marginTop: 2,
   },

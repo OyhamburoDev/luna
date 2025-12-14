@@ -18,6 +18,7 @@ import { fonts } from "../../theme/fonts";
 import { textStyles } from "../../theme/textStyles";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "react-native";
+import { normalizeFont } from "../../utils/normalizeFont";
 
 type Props = {
   title: string;
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#00000012",
   },
-  headerTitle: { fontSize: 18 },
+  headerTitle: { fontSize: normalizeFont(18) },
   authRequiredContainer: {
     flex: 1,
     justifyContent: "center",
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     maxWidth: 250,
   },
   authRequiredSubtitle: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#00000065",
     textAlign: "center",
     lineHeight: 22,
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
   },
   authRequiredButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "600",
     textAlign: "center",
   },
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
   },
   authRequiredButtonTextSecondary: {
     color: "#667eea",
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "600",
     textAlign: "center",
   },

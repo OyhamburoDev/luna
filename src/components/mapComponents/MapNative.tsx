@@ -216,9 +216,6 @@ export const MapNative = forwardRef<MapNativeRef, MapNativeProps>(
             strokeColor="#667eea"
             optimizeWaypoints={true}
             onReady={(result) => {
-              console.log(`Distancia: ${result.distance} km`);
-              console.log(`Duración: ${result.duration} min`);
-
               //Pasar info al parent
               onRouteReady?.(result.distance, result.duration);
 

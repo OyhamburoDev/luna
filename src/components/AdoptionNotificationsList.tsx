@@ -5,6 +5,7 @@ import { AppNotification } from "../types/notifications";
 import { fonts } from "../theme/fonts";
 import DefaultAvatar from "../../assets/media/avatars/default-avatar.jpg";
 import { useNotificationsStore } from "../store/notificationsStore";
+import { normalizeFont } from "../utils/normalizeFont";
 
 const getRelativeTime = (date: Date): string => {
   const now = new Date();
@@ -161,13 +162,13 @@ const styles = StyleSheet.create({
   },
   notificationTitle: {
     fontFamily: fonts.bold,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#8E8E93",
     marginBottom: 2,
   },
   notificationMessage: {
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000000b4",
     lineHeight: 20,
   },
@@ -178,7 +179,7 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     fontWeight: "400",
     color: "#8E8E93",
     marginBottom: 4,

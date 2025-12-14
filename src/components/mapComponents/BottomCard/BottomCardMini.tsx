@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { fonts } from "../../../theme/fonts";
+import { normalizeFont } from "../../../utils/normalizeFont";
 
 interface BottomCardMiniProps {
   onSearchFocus: () => void;
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fonts.bold,
-    fontSize: 22,
+    fontSize: normalizeFont(22),
     fontWeight: "700",
     color: "#000",
     marginBottom: 16,
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
   },
   reportButton: {
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   },
   reportButtonText: {
     fontFamily: fonts.bold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontWeight: "600",
     color: "#fff",
   },

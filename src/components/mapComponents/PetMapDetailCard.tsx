@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { fonts } from "../../theme/fonts";
+import { normalizeFont } from "../../utils/normalizeFont";
 
 interface PetMapDetailCardProps {
   petData: any;
@@ -221,13 +222,13 @@ const styles = StyleSheet.create({
   },
   petTitle: {
     fontFamily: fonts.bold,
-    fontSize: 17,
+    fontSize: normalizeFont(17),
     fontWeight: "bold",
     color: "#222",
   },
   petSubtitle: {
     fontFamily: fonts.semiBold,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "400",
     color: "#666",
   },
@@ -239,7 +240,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontFamily: fonts.bold,
-    fontSize: 10,
+    fontSize: normalizeFont(10),
     fontWeight: "bold",
     letterSpacing: 0.5,
   },
@@ -297,14 +298,14 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#444",
     flex: 1,
     fontWeight: "500",
   },
   descriptionText: {
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#666",
     flex: 1,
   },
@@ -322,7 +323,7 @@ const styles = StyleSheet.create({
   secondaryActionText: {
     fontFamily: fonts.bold,
     color: "#667eea",
-    fontSize: 14,
+    fontSize: normalizeFont(14),
   },
   primaryActionBtn: {
     backgroundColor: "#000",
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   primaryActionText: {
     fontFamily: fonts.bold,
     color: "#fff",
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "600",
   },
 });

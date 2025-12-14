@@ -20,6 +20,7 @@ import { useFabMenu } from "../hooks/useFabMenu";
 import { usePinsManager } from "../hooks/usePinsManager";
 import { useCardNavigation } from "../hooks/useCardNavigation";
 import { useRouteManager } from "../hooks/useRouteManager";
+import { normalizeFont } from "../utils/normalizeFont";
 
 export default function MapScreen() {
   const cardNav = useCardNavigation();
@@ -410,7 +411,7 @@ const mapScreenStyles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#6B7280",
     fontWeight: "500",
   },

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { textStyles } from "../../theme/textStyles";
+import { normalizeFont } from "../../utils/normalizeFont";
 
 type Props = {
   visible: boolean;
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#000000ff",
     fontWeight: "500",
   },
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cancelText: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#00000080",
     fontWeight: "500",
   },

@@ -17,13 +17,14 @@ import BehaviorModal from "../components/BehaviorModal";
 import { navigate } from "../navigation/NavigationService";
 import PetFieldEdit from "../components/PetFieldEdit";
 import { PetPost } from "../types/petPots";
-import { useCreatePost } from "../hooks/useCreatePost"; // HOOK LIMPIO
+import { useCreatePost } from "../hooks/useCreatePost";
 import { useFirebasePosts } from "../hooks/useFirebasePosts";
 import type { KeyboardTypeOptions } from "react-native";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
 import { useConfettiStore } from "../store/useConfettiStore";
 import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation } from "@react-navigation/native";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type MediaItem = {
   uri: string;
@@ -403,7 +404,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   backButton: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: "600", color: "#000" },
+  headerTitle: {
+    fontSize: normalizeFont(18),
+    fontWeight: "600",
+    color: "#000",
+  },
   placeholder: { width: 32 },
   content: { flex: 1 },
   optionRow: {
@@ -417,13 +422,13 @@ const styles = StyleSheet.create({
   optionContent: { flex: 1, marginLeft: 12 },
   optionTitle: {
     fontFamily: fonts.semiBold,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#000",
     fontWeight: "400",
   },
   optionSubtitle: {
     fontFamily: fonts.regular,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#666",
     marginTop: 2,
   },
@@ -444,7 +449,7 @@ const styles = StyleSheet.create({
   publishButtonDisabled: { backgroundColor: "#ffaaaa" },
   publishButtonText: {
     fontFamily: fonts.bold,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "white",
   },
   loadingOverlay: {
@@ -466,5 +471,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 8,
   },
-  loadingText: { color: "white", fontSize: 16 },
+  loadingText: { color: "white", fontSize: normalizeFont(16) },
 });

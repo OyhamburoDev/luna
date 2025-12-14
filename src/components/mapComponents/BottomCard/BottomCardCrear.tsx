@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../../../theme/fonts";
 import { PinImageRenderer } from "../../PinImageRenderer";
 import { PinForm } from "../../../types/mapTypes";
+import { normalizeFont } from "../../../utils/normalizeFont";
 
 interface BottomCardCrearProps {
   currentLocation?: { lat: number; lng: number };
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
   },
   titleLarge: {
     fontFamily: fonts.bold,
-    fontSize: 22,
+    fontSize: normalizeFont(22),
     fontWeight: "700",
     color: "#000",
     textAlign: "center",
@@ -296,7 +297,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fonts.bold,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "600",
     color: "#000",
     marginBottom: 12,
@@ -331,7 +332,7 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontFamily: fonts.bold,
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     fontWeight: "600",
     color: "#000",
   },
@@ -340,7 +341,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
     marginBottom: 16,
     fontFamily: fonts.regular,
@@ -350,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
     minHeight: 50,
     marginBottom: 16,
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
   },
   photoButtonText: {
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
   },
   photoPreviewContainer: {
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
     minHeight: 80,
     textAlignVertical: "top",
@@ -403,13 +404,13 @@ const styles = StyleSheet.create({
   },
   locationLabel: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     marginBottom: 4,
   },
   locationAddress: {
     fontFamily: fonts.bold,
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "600",
     color: "#000",
   },
@@ -424,7 +425,7 @@ const styles = StyleSheet.create({
   },
   adjustButtonText: {
     fontFamily: fonts.bold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontWeight: "600",
     color: "#000",
   },
@@ -444,7 +445,7 @@ const styles = StyleSheet.create({
   },
   publishButtonText: {
     fontFamily: fonts.bold,
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "600",
     color: "#fff",
   },

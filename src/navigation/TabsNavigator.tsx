@@ -18,6 +18,7 @@ import { fonts } from "../theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNotificationsStore } from "../store/notificationsStore";
 import { navigate } from "../navigation/NavigationService";
+import { normalizeFont } from "../utils/normalizeFont";
 
 const Tab = createBottomTabNavigator();
 
@@ -162,7 +163,7 @@ export default function TabsNavigator({
 
           tabBarLabelStyle: {
             marginTop: -4,
-            fontSize: 10,
+            fontSize: normalizeFont(10),
             fontFamily: fonts.bold,
           },
           headerShown: false,

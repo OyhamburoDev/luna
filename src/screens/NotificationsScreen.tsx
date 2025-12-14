@@ -25,173 +25,14 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { navigationRef } from "../navigation/NavigationService";
 import * as NavigationBar from "expo-navigation-bar";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "NotificationDetail"
 >;
 
-// Mock data para las notificaciones
-// const MOCK_NOTIFICATIONS = [
-//   {
-//     id: "1",
-//     type: "adoption_request",
-//     icon: "heart-circle",
-//     iconColor: "#FF6B9D",
-//     title: "Solicitudes de adopción",
-//     message: "Carlos Mendez ha solicitado adoptar a Luna",
-//     timestamp: "5 min",
-//     userImage: "https://i.pravatar.cc/150?img=12",
-//     unread: true,
-//   },
-//   {
-//     id: "2",
-//     type: "adoption_request",
-//     icon: "heart-circle",
-//     iconColor: "#FF6B9D",
-//     title: "Solicitudes de adopción",
-//     message: "María González ha solicitado adoptar a Max",
-//     timestamp: "1 h",
-//     userImage: "https://i.pravatar.cc/150?img=45",
-//     unread: true,
-//   },
-//   {
-//     id: "3",
-//     type: "lost_pet_alert",
-//     icon: "location",
-//     iconColor: "#FF8C42",
-//     title: "Alerta de mascota perdida",
-//     message: "Tu mascota fue vista cerca de Av. Córdoba",
-//     timestamp: "2 h",
-//     userImage: null,
-//     unread: true,
-//   },
-//   {
-//     id: "4",
-//     type: "lost_pet_found",
-//     icon: "paw",
-//     iconColor: "#4ECDC4",
-//     title: "Mascota encontrada",
-//     message: "Ana Torres cree haber encontrado tu mascota",
-//     timestamp: "3 h",
-//     userImage: "https://i.pravatar.cc/150?img=32",
-//     unread: false,
-//   },
-//   {
-//     id: "5",
-//     type: "like",
-//     icon: "heart",
-//     iconColor: "#FF6B9D",
-//     title: "Actividad",
-//     message: "A Pedro y 12 personas más les gustó tu publicación de Rocky",
-//     timestamp: "5 h",
-//     userImage: "https://i.pravatar.cc/150?img=8",
-//     unread: false,
-//   },
-//   {
-//     id: "6",
-//     type: "system",
-//     icon: "notifications",
-//     iconColor: "#A78BFA",
-//     title: "Notificaciones del sistema",
-//     message: "Actualización: Nuevas funciones disponibles",
-//     timestamp: "1 d",
-//     userImage: null,
-//     unread: false,
-//   },
-//   {
-//     id: "7",
-//     type: "adoption_request",
-//     icon: "heart-circle",
-//     iconColor: "#FF6B9D",
-//     title: "Solicitudes de adopción",
-//     message: "Luis Ramírez ha solicitado adoptar a Bella",
-//     timestamp: "2 d",
-//     userImage: "https://i.pravatar.cc/150?img=15",
-//     unread: false,
-//   },
-//   {
-//     id: "8",
-//     type: "lost_pet_alert",
-//     icon: "location",
-//     iconColor: "#FF8C42",
-//     title: "Alerta de mascota perdida",
-//     message: "Usuario reportó haber visto a Milo en Parque Centenario",
-//     timestamp: "3 d",
-//     userImage: "https://i.pravatar.cc/150?img=25",
-//     unread: false,
-//   },
-// ];
-
 export default function NotificationsScreen() {
-  // const renderNotificationItem = (
-  //   notification: (typeof MOCK_NOTIFICATIONS)[0]
-  // ) => {
-  //   return (
-  //     <TouchableOpacity
-  //       key={notification.id}
-  //       style={[
-  //         styles.notificationItem,
-  //         notification.unread && styles.notificationItemUnread,
-  //       ]}
-  //       activeOpacity={0.7}
-  //     >
-  //       <View style={styles.notificationContent}>
-  //         {/* Avatar o Icono */}
-  //         <View style={styles.avatarContainer}>
-  //           {notification.userImage ? (
-  //             <Image
-  //               source={{ uri: notification.userImage }}
-  //               style={styles.avatar}
-  //             />
-  //           ) : (
-  //             <View
-  //               style={[
-  //                 styles.iconContainer,
-  //                 { backgroundColor: `${notification.iconColor}20` },
-  //               ]}
-  //             >
-  //               <Ionicons
-  //                 name={notification.icon as any}
-  //                 size={24}
-  //                 color={notification.iconColor}
-  //               />
-  //             </View>
-  //           )}
-  //           {/* Badge de tipo de notificación */}
-  //           <View
-  //             style={[
-  //               styles.typeBadge,
-  //               { backgroundColor: notification.iconColor },
-  //             ]}
-  //           >
-  //             <Ionicons
-  //               name={notification.icon as any}
-  //               size={12}
-  //               color="#FFFFFF"
-  //             />
-  //           </View>
-  //         </View>
-
-  //         {/* Contenido de texto */}
-  //         <View style={styles.textContainer}>
-  //           <Text style={styles.notificationTitle} numberOfLines={1}>
-  //             {notification.title}
-  //           </Text>
-  //           <Text style={styles.notificationMessage} numberOfLines={2}>
-  //             {notification.message}
-  //           </Text>
-  //         </View>
-
-  //         {/* Timestamp y indicador de no leído */}
-  //         <View style={styles.rightContainer}>
-  //           <Text style={styles.timestamp}>{notification.timestamp}</Text>
-  //           {notification.unread && <View style={styles.unreadDot} />}
-  //         </View>
-  //       </View>
-  //     </TouchableOpacity>
-  //   );
-  // };
   const { isAuthenticated } = useAuthStore();
   const { openModal, requireAuth } = useAuthModalContext();
   const { notifications, loading, error, refetch } = useUserNotifications();
@@ -311,16 +152,6 @@ export default function NotificationsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Lista de notificaciones */}
-        {/* <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-        >
-          {MOCK_NOTIFICATIONS.map((notification) =>
-            renderNotificationItem(notification)
-          )}
-        </ScrollView> */}
-
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
@@ -355,7 +186,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontFamily: fonts.bold,
-    fontSize: 20,
+    fontSize: normalizeFont(20),
     color: "#000000",
   },
   searchButton: {
@@ -381,13 +212,13 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontFamily: fonts.bold,
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "500",
     color: "#8E8E93",
   },
   tabTextActive: {
     fontFamily: fonts.bold,
-    fontSize: 15,
+    fontSize: normalizeFont(15),
 
     color: "#000000",
   },
@@ -452,14 +283,14 @@ const styles = StyleSheet.create({
   },
   notificationTitle: {
     fontFamily: fonts.bold,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
 
     color: "#8E8E93",
     marginBottom: 2,
   },
   notificationMessage: {
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000000b4",
     lineHeight: 20,
   },
@@ -470,7 +301,7 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     fontWeight: "400",
     color: "#8E8E93",
     marginBottom: 4,

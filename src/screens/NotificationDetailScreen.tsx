@@ -21,6 +21,7 @@ import { useNotificationsStore } from "../store/notificationsStore";
 import { AdoptionRequestDetail } from "../components/notificationComponents/AdoptionRequestDetail";
 import { LikeNotificationDetail } from "../components/notificationComponents/LikeNotificationDetail";
 import { SystemNotificationDetail } from "../components/notificationComponents/SystemNotificationDetail";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type NotificationDetailRouteProp = RouteProp<
   RootStackParamList,
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontFamily: fonts.bold,
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     color: "#000000",
   },
   moreButton: {

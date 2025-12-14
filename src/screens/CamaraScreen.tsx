@@ -19,6 +19,7 @@ import {
   validatePhotoMedia,
 } from "../utils/mediaValidation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type CameraScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -293,12 +294,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "white",
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontWeight: "600",
   },
   subtitle: {
     color: "#888",
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     marginTop: 2,
   },
   optionsContainer: {
@@ -322,13 +323,13 @@ const styles = StyleSheet.create({
   },
   optionTitle: {
     color: "white",
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "600",
     marginBottom: 4,
   },
   optionSubtitle: {
     color: "#888",
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     textAlign: "center",
   },
   loadingContainer: {
@@ -339,7 +340,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: "white",
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     marginTop: 12,
   },
 });

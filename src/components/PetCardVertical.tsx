@@ -23,8 +23,7 @@ import { useMute } from "../contexts/MuteContext";
 import { useLike } from "../hooks/useLike";
 import DoubleTapHeart from "./DoubleTapHeart";
 import { useAuthModalContext } from "../contexts/AuthModalContext";
-// import { useConfettiStore } from "../store/useConfettiStore";
-import LottieView from "lottie-react-native";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type Props = {
   pet: PetPost;
@@ -492,24 +491,6 @@ export default function PetCardVertical({
           </View>
         </View>
       </View>
-      {/* {mostrarConfetti && (
-        <LottieView
-          ref={confettiRef}
-          source={require("../../assets/animations/confetti.json")}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
-            pointerEvents: "none",
-            transform: [{ scale: 2 }],
-          }}
-          autoPlay={false}
-          loop={false}
-        />
-      )} */}
     </Pressable>
   );
 }
@@ -548,14 +529,14 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   name: {
-    fontSize: 22,
+    fontSize: normalizeFont(22),
     color: "white",
     textShadowColor: "rgba(0, 0, 0, 0.8)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   description: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "rgba(255, 255, 255, 0.9)",
     marginTop: 2,
     marginBottom: 0,
@@ -584,7 +565,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   moreButton: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "rgba(255, 255, 255, 0.7)",
     textShadowColor: "rgba(0, 0, 0, 0.8)",
     textShadowOffset: { width: 1, height: 1 },
@@ -658,7 +639,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   detalleText: {
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "rgba(255, 255, 255, 0.87)",
     textShadowRadius: 1,
   },
@@ -707,28 +688,7 @@ const styles = StyleSheet.create({
     width: 130,
     height: 40,
   },
-  detailButton: {
-    position: "absolute",
-    top: 20,
-    right: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    borderRadius: 25,
-    padding: 10,
-    zIndex: 10,
-    borderWidth: 1,
-    borderColor: "rgba(102, 126, 234, 0.3)",
-  },
-  text: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    textShadowColor: "rgba(0,0,0,0.6)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  arrow: {
-    fontSize: 16,
-  },
+
   btnScroll: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     width: "50%",
@@ -745,10 +705,6 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#ffffffe7",
     textAlign: "center",
-    fontSize: 15,
-  },
-  linkTextTwo: {
-    color: "#FE2C55",
-    fontSize: 15,
+    fontSize: normalizeFont(15),
   },
 });

@@ -17,6 +17,7 @@ import {
   validatePhotoMedia,
 } from "../utils/mediaValidation";
 import { fonts } from "../theme/fonts";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type MediaItem = {
   uri: string;
@@ -471,7 +472,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
   addMediaText: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     color: "#666",
     marginTop: 4,
   },
@@ -480,7 +481,7 @@ const styles = StyleSheet.create({
     marginTop: 19,
   },
   mediaCounter: {
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#333",
     fontWeight: "500",
     marginBottom: 4,
@@ -495,7 +496,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   mediaLimits: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     color: "#666",
   },
   emptyMediaContainer: {
@@ -514,7 +515,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
   addFirstMediaText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     marginTop: 8,
   },
@@ -541,7 +542,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: "white",
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontWeight: "600",
   },
   modalOptions: {
@@ -556,13 +557,13 @@ const styles = StyleSheet.create({
   },
   modalOptionText: {
     color: "white",
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontWeight: "500",
     marginTop: 8,
   },
   modalOptionSubtext: {
     color: "#888",
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     marginTop: 2,
   },
 });

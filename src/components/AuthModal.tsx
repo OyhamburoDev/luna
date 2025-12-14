@@ -21,6 +21,7 @@ import { fonts } from "../theme/fonts";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ToastModal from "./ToastMessage";
 import * as NavigationBar from "expo-navigation-bar";
+import { normalizeFont } from "../utils/normalizeFont";
 
 export const AuthModal: React.FC = () => {
   const insets = useSafeAreaInsets();
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 30,
+    fontSize: normalizeFont(30),
     color: "black",
     marginBottom: 12,
     textAlign: "center",
@@ -405,6 +406,7 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingVertical: 15,
     fontFamily: fonts.regular,
+    fontSize: normalizeFont(15),
     color: "#000000",
   },
   input: {
@@ -415,6 +417,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     marginBottom: 15,
     fontFamily: fonts.regular,
+    fontSize: normalizeFont(15),
     color: "#000000",
   },
   line: {
@@ -436,7 +439,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: normalizeFont(16),
   },
   link: {
     alignItems: "center",
@@ -458,11 +461,11 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#000000c7",
     textAlign: "center",
-    fontSize: 15,
+    fontSize: normalizeFont(15),
   },
   linkTextTwo: {
     color: "#FE2C55",
-    fontSize: 15,
+    fontSize: normalizeFont(15),
   },
   footerFixed: {
     backgroundColor: "#0000000c",

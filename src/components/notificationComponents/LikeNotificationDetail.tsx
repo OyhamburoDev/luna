@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../../theme/fonts";
 import { AppNotification } from "../../types/notifications";
+import { normalizeFont } from "../../utils/normalizeFont";
 
 type Props = {
   notification: AppNotification;
@@ -79,14 +80,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fonts.bold,
-    fontSize: 24,
+    fontSize: normalizeFont(24),
     color: "#000000",
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontFamily: fonts.regular,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#666666",
     textAlign: "center",
     lineHeight: 24,

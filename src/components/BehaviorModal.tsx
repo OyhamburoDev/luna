@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import PetBehaviorInfo from "./PetBehaviorInfo";
 import { fonts } from "../theme/fonts";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type PetBehaviorData = {
   goodWithKids: string;
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fonts.bold,
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontWeight: "600",
     color: "#000",
   },

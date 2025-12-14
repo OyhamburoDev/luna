@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../theme/fonts";
 import { PetPost } from "../types/petPots";
 import { Pressable } from "react-native";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type HealthModalProps = {
   visible: boolean;
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   title: {
-    fontSize: 18,
+    fontSize: normalizeFont(18),
 
     color: "#2d3436",
   },
@@ -300,17 +301,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionTitle: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "#111827",
   },
   optionSubtitle: {
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#667eea",
     marginTop: 2,
     fontWeight: "500",
   },
   answerText: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "#6B7280",
   },
   separator: {
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   expandedText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#6B7280",
     lineHeight: 22,
   },
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   energyLabel: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#000",
     marginBottom: 12,
   },
@@ -380,7 +381,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#667eea",
   },
   energyOptionText: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     fontWeight: "500",
     color: "#666",
   },

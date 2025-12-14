@@ -9,6 +9,7 @@ import { textStyles } from "../../theme/textStyles";
 import { useUserStore } from "../../store/userStore";
 import { StatusBar } from "expo-status-bar";
 import { useIsFocused } from "@react-navigation/native";
+import { normalizeFont } from "../../utils/normalizeFont";
 
 type Props = {
   onBackPress: () => void;
@@ -321,7 +322,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#000000ff",
     textAlign: "center",
-    fontSize: 20,
+    fontSize: normalizeFont(20),
   },
   headerRight: {
     width: 40, // Para balancear el espacio del botón izquierdo
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
     borderColor: "white",
   },
   userHandle: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#636e72",
     fontWeight: "500",
   },
@@ -382,12 +383,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statNumber: {
-    fontSize: 20,
+    fontSize: normalizeFont(20),
     fontWeight: "800",
     color: "#667eea",
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#636e72",
     fontWeight: "500",
   },
@@ -406,7 +407,7 @@ const styles = StyleSheet.create({
     borderColor: "#667eea",
   },
   titleInput: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "#00000077",
   },
   userInfoSection: {
@@ -436,17 +437,17 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   inputValue: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "#00000077",
     marginRight: 8,
   },
   inputLabelTitle: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     color: "#2d3436",
     marginBottom: 8,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontWeight: "600",
     color: "#2d3436",
     marginBottom: 8,
@@ -457,7 +458,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     backgroundColor: "white",
   },
   bioInput: {
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
   },
   adoptButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontWeight: "700",
   },
   separatorBtn: {

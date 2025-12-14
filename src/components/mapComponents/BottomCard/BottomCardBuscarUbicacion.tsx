@@ -10,6 +10,7 @@ import {
 import { Search } from "lucide-react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../../../theme/fonts";
+import { normalizeFont } from "../../../utils/normalizeFont";
 
 interface SelectedLocation {
   lat: number;
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
   },
   titleCentered: {
     fontFamily: fonts.bold,
-    fontSize: 22,
+    fontSize: normalizeFont(22),
     fontWeight: "700",
     color: "#000",
     textAlign: "center",
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
   },
   selectedAddressCompact: {
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   selectedAddressCompactText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#333",
     fontWeight: "500",
   },
@@ -288,19 +289,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   suggestionText: {
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#000",
     fontFamily: fonts.regular,
   },
   loadingText: {
     textAlign: "center",
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     paddingVertical: 20,
   },
   noResultsText: {
     textAlign: "center",
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     paddingVertical: 20,
   },
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   confirmButtonText: {
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     fontWeight: "700",
     color: "#fff",
   },

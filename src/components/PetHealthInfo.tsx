@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../theme/fonts";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type PetHealthData = {
   isVaccinated: string;
@@ -102,13 +103,13 @@ const styles = StyleSheet.create({
   },
   optionTitle: {
     fontFamily: fonts.semiBold,
-    fontSize: 16,
+    fontSize: normalizeFont(16),
     color: "#000",
     fontWeight: "400",
   },
   optionSubtitle: {
     fontFamily: fonts.regular,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#666",
     marginTop: 2,
   },

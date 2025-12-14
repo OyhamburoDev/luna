@@ -8,6 +8,7 @@ import {
   Linking,
 } from "react-native";
 import { fonts } from "../../../theme/fonts";
+import { normalizeFont } from "../../../utils/normalizeFont";
 
 interface RouteInfo {
   distance: number;
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
   },
   routeMainTitle: {
     fontFamily: fonts.bold,
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontWeight: "700",
     color: "#000",
     marginBottom: 6,
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
   },
   routeAddress: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     color: "#666",
     textAlign: "center",
   },
@@ -155,13 +156,13 @@ const styles = StyleSheet.create({
   },
   routeInfoLabel: {
     fontFamily: fonts.regular,
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#666",
     marginBottom: 8,
   },
   routeInfoValue: {
     fontFamily: fonts.bold,
-    fontSize: 18,
+    fontSize: normalizeFont(18),
     fontWeight: "700",
     color: "#000",
   },
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
   },
   openMapsButtonText: {
     fontFamily: fonts.bold,
-    fontSize: 14,
+    fontSize: normalizeFont(14),
     fontWeight: "600",
     color: "#fff",
   },

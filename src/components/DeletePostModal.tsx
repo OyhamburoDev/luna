@@ -8,6 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { fonts } from "../theme/fonts";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type Props = {
   visible: boolean;
@@ -76,13 +77,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 17,
+    fontSize: normalizeFont(17),
     color: "#2d3436",
     textAlign: "center",
     marginBottom: 6,
   },
   description: {
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     color: "#636e72",
     textAlign: "center",
     marginBottom: 20,
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelText: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "500",
     color: "#636e72",
   },
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   deleteText: {
-    fontSize: 15,
+    fontSize: normalizeFont(15),
     fontWeight: "500",
     color: "#fff",
   },

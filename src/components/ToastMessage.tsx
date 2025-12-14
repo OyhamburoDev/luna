@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Animated, View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fonts } from "../theme/fonts";
+import { normalizeFont } from "../utils/normalizeFont";
 
 type Props = {
   visible: boolean;
@@ -81,6 +82,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: normalizeFont(15),
   },
 });
